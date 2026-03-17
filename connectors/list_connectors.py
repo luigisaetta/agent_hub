@@ -12,7 +12,6 @@ Description:
 """
 
 import oci
-
 from config_private import COMPARTMENT_ID
 
 # ── Config

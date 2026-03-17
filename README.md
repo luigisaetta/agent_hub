@@ -57,6 +57,13 @@ pip install openai pydantic oci oci-openai
 Security note:
 - `config_private.py` contains secrets. Do not commit real keys in public repositories.
 
+## Config Layout
+
+This repository uses shared root config plus compatibility wrappers.
+
+- Main reference: [`README_CONFIG.md`](README_CONFIG.md)
+- Edit in normal usage: [`config.py`](config.py), [`config_private.py`](config_private.py)
+
 ## Run Examples
 
 From the repository root:
