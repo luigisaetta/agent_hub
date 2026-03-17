@@ -28,7 +28,7 @@ def format_expiration(expires_at: int | None) -> str:
 def main() -> None:
     """List all vector stores using explicit page-by-page pagination."""
     client = get_client(region=REGION, is_preproduction=IS_PREPROD)
-    
+
     if IS_PREPROD:
         where = "compartment"
     else:

@@ -8,11 +8,18 @@ Description:
     This one use conversation API. Using conversation API we can use streaming.
 """
 
+from pathlib import Path
+import sys
+
 from openai import OpenAI
+from utils import print_streamed_output
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
-from utils import print_streamed_output
 
 MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0

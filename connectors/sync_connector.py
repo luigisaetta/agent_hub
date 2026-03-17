@@ -1,0 +1,63 @@
+"""
+Author: L. Saetta
+Last modified: 2026-03-16
+License: MIT
+
+Description:
+    Cteate a connector between an OCI Object Storage bucket and a Vector Store.
+    This example is currently working only in preproduction environment,
+    as the connector API is not yet available in production.
+
+    LA (17/03/2026): to run this code we need an update to OCI Python SDK.
+"""
+
+import oci
+
+# ── Config
+PROFILE = "DEFAULT"
+REGION = "eu-frankfurt-1"
+
+# for now we should work in ppe
+SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
+CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
+
+# OCI Object Storage source for the connector
+OS_NAMESPACE = "frpj5kvxryk1"
+OS_BUCKET = "agent_hub_files"
+# entire bucket
+OS_PREFIX = ""
+
+
+def build_client():
+    """
+    Build an OCI Generative AI client using standard API-key profile auth.
+    """
+    config = oci.config.from_file(profile_name=PROFILE)
+
+    # build the client
+    return oci.generative_ai.GenerativeAiClient(
+        config=config,
+        service_endpoint=SERVICE_ENDPOINT,
+    )
+
+
+def main() -> None:
+    """List connectors in compartment."""
+    client = build_client()
+
+    details = oci.generative_ai.models.CreateVectorStoreConnectorFileSyncDetails(
+        vector_store_connector_id=CONNECTOR_ID,
+        display_name="test-file-sync01",
+    )
+
+    response = client.create_vector_store_connector_file_sync(details)
+    file_sync = response.data
+
+    print(f"Created id : {file_sync.id}")
+    print(f" display_name : {file_sync.display_name}")
+    print(f" lifecycle : {file_sync.lifecycle_state}")
+    print(f" trigger_type : {file_sync.trigger_type}")
+
+
+if __name__ == "__main__":
+    main()

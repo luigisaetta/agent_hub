@@ -7,10 +7,17 @@ Description:
     Utility helpers shared by example scripts.
 """
 
+from pathlib import Path
+import sys
+
 from openai import OpenAI
 
 # these are needed in ppe
 from oci_openai import OciOpenAI, OciUserPrincipalAuth
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID, COMPARTMENT_ID
@@ -58,11 +65,11 @@ def get_client(region: str = "eu-frankfurt-1", is_preproduction: bool = False):
     return _client
 
 
-def print_header(type: str, where: str) -> None:
+def print_header(header_type: str, where: str) -> None:
     """
     Print a header for the list of vector stores.
     """
     print("=" * 44)
-    print(f"List of the {type} in the {where}")
+    print(f"List of the {header_type} in the {where}")
     print("=" * 44)
     print("")

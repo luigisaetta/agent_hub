@@ -17,12 +17,12 @@ PAGE_SIZE = 100
 def main() -> None:
     """List all files using explicit page-by-page pagination."""
     client = get_client(region=REGION, is_preproduction=IS_PREPROD)
-    
+
     if IS_PREPROD:
         where = "compartment"
     else:
         where = "project"
-    print_header("files", where)    
+    print_header("files", where)
 
     after = None
     page_num = 1

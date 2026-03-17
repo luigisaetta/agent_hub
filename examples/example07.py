@@ -9,8 +9,13 @@ Description:
 
 import base64
 from pathlib import Path
+import sys
 
 from openai import OpenAI
+
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID

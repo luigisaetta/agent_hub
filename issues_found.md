@@ -13,6 +13,12 @@ see the following doc:
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid where ALL { request.principal.type='generativeaiapikey' }
 ```
 
+## preview of OCI SDK
+To use Agent Hub features in pre-production environment (ppe) we need to install a preview version of OCI Python SDK.
+```
+pip install --trusted-host=artifactory.oci.oraclecorp.com -i https://artifactory.oci.oraclecorp.com/api/pypi/global-dev-pypi/simple -U oci==2.168.1+preview.1.347
+```
+
 ## policy needed
 ```
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid where ALL {request.principal.type='generativeaiapikey'}
@@ -21,5 +27,7 @@ allow any-user to manage generative-ai-file in compartment id ocid1.compartment.
 allow any-user to manage generative-ai-vector-store in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid
 
-allow any user to manage generative-ai-file in compartment <compartment-id> where ALL { target.generativeaiproject.id='ocid1.generativeaiproject.oc1.......'}
+allow any user to manage generative-ai-file in compartment id ocid1.compartment.oc1..your_ocid where ALL { target.generativeaiproject.id='ocid1.generativeaiproject.oc1.......'}
+
+allow any-user to read object-family in compartment id ocid1.compartment.oc1..your_ocid where ALL{request.principal.type='generativeaivectorconnector'}
 ```

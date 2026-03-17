@@ -2,6 +2,7 @@
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
+[![Linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen.svg)](https://github.com/pylint-dev/pylint)
 
 This repository contains practical Python examples that call Oracle Cloud Infrastructure (OCI) Generative AI endpoints through the OpenAI-compatible API.
 
@@ -18,9 +19,15 @@ The examples show how to:
 
 ```text
 agent_hub/
+├── config.py
+├── config_private.py
+├── config_private_template.py
+├── connectors/
+│   ├── create_connector.py
+│   ├── list_connectors.py
+│   ├── get_connector_stats.py
+│   └── sync_connector.py
 ├── examples/
-│   ├── config.py
-│   ├── config_private.py
 │   ├── example01.py
 │   ...
 │   └── example11.py
@@ -42,8 +49,8 @@ pip install openai pydantic oci oci-openai
 
 ## Configuration
 
-1. Update shared endpoint configuration in [`examples/config.py`](examples/config.py).
-2. Add your project ID and API keys in [`examples/config_private.py`](examples/config_private.py).
+1. Update shared endpoint configuration in [`config.py`](config.py).
+2. Add your project ID and API keys in [`config_private.py`](config_private.py).
 
 Security note:
 - `config_private.py` contains secrets. Do not commit real keys in public repositories.
@@ -79,6 +86,15 @@ python examples/exampleXX.py
 | 2 | Delete all files | [`examples/delete_all_files.py`](examples/delete_all_files.py) | Deletes all files in the configured project with per-file error handling. |
 | 3 | List all vector stores | [`examples/list_all_vector_stores.py`](examples/list_all_vector_stores.py) | Lists all vector stores, page by page, with readable expiration time. |
 | 4 | Delete all vector stores | [`examples/delete_all_vs.py`](examples/delete_all_vs.py) | Deletes all vector stores with per-item error handling. |
+
+## Connector Scripts
+
+| # | Connector Utility | File | Description |
+|---|---|---|---|
+| 1 | Create connector | [`connectors/create_connector.py`](connectors/create_connector.py) | Creates an Object Storage connector for a vector store (preproduction endpoint). |
+| 2 | List connectors | [`connectors/list_connectors.py`](connectors/list_connectors.py) | Lists vector store connectors in the configured compartment. |
+| 3 | Connector stats | [`connectors/get_connector_stats.py`](connectors/get_connector_stats.py) | Retrieves synchronization statistics for one connector. |
+| 4 | Trigger sync | [`connectors/sync_connector.py`](connectors/sync_connector.py) | Starts a file sync job for an existing connector. |
 
 ## Known Issue
 
