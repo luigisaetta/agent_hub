@@ -1,0 +1,39 @@
+"""
+Author: L. Saetta
+Last modified: 2026-03-16
+License: MIT
+
+Description:
+    Example script that sends a simple prompt to an OCI-hosted OpenAI-compatible endpoint
+    and prints the response.
+    This example show streaming use.
+"""
+
+from openai import OpenAI
+
+from config import BASE_URL
+from config_private import KEY1, PROJECT_ID
+from utils import print_streamed_output
+
+MODEL_ID = "openai.gpt-5.2"
+TEMPERATURE = 0.0
+MAX_OUTPUT_TOKENS = 8000
+
+client = OpenAI(
+    base_url=BASE_URL,
+    api_key=KEY1,
+    project=PROJECT_ID,
+)
+
+request = "Tell me something about Enrico Fermi?"
+
+response = client.responses.create(
+    model=MODEL_ID,
+    temperature=TEMPERATURE,
+    max_output_tokens=MAX_OUTPUT_TOKENS,
+    input=request,
+    stream=True,
+)
+
+print("Request:", request)
+print_streamed_output(response)

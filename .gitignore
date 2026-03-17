@@ -1,0 +1,35 @@
+# Secrets and local config
+.env
+.env.*
+*.env
+examples/config_private.py
+
+# Python cache/compiled
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Packaging/build artifacts
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# Test/coverage artifacts
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.mypy_cache/
+.ruff_cache/
+
+# Notebook and OS/editor files
+.ipynb_checkpoints/
+.DS_Store
+.vscode/
+.idea/
