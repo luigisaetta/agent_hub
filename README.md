@@ -22,12 +22,7 @@ agent_hub/
 │   ├── config.py
 │   ├── config_private.py
 │   ├── example01.py
-│   ├── example02.py
-│   ├── example03.py
-│   ├── example04.py
-│   ├── example05.py
-│   ├── example06.py
-│   ├── example07.py
+│   ...
 │   └── example11.py
 └── issues_found.md
 └── README.md
@@ -58,12 +53,7 @@ Security note:
 From the repository root:
 
 ```bash
-python examples/example01.py
-python examples/example02.py
-python examples/example03.py
-python examples/example04.py
-python examples/example05.py
-python examples/example11.py
+python examples/exampleXX.py
 ```
 
 ## Detailed Examples
