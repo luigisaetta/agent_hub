@@ -19,7 +19,7 @@ REGION = "eu-frankfurt-1"
 
 # for now we should work in ppe
 SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
-CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
+CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yalmrxkktiz7niij4in5qgdysozfhqc4d3ec2f2ualaokq"
 
 # OCI Object Storage source for the connector
 OS_NAMESPACE = "frpj5kvxryk1"

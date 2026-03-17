@@ -24,6 +24,8 @@ agent_hub/
 ├── config_private_template.py
 ├── connectors/
 │   ├── create_connector.py
+│   ├── update_connector.py
+│   ├── delete_connector.py
 │   ├── list_connectors.py
 │   ├── get_connector_stats.py
 │   └── sync_connector.py
@@ -95,6 +97,8 @@ python examples/exampleXX.py
 | 2 | List connectors | [`connectors/list_connectors.py`](connectors/list_connectors.py) | Lists vector store connectors in the configured compartment. |
 | 3 | Connector stats | [`connectors/get_connector_stats.py`](connectors/get_connector_stats.py) | Retrieves synchronization statistics for one connector. |
 | 4 | Trigger sync | [`connectors/sync_connector.py`](connectors/sync_connector.py) | Starts a file sync job for an existing connector. |
+| 5 | Update connector | [`connectors/update_connector.py`](connectors/update_connector.py) | Updates connector settings such as source configuration and schedule. |
+| 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
 
 ## Known Issue
 

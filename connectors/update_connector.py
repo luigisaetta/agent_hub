@@ -11,8 +11,10 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
+from http import client
 from pathlib import Path
 import sys
+from urllib import response
 
 import oci
 
@@ -22,6 +24,7 @@ if str(ROOT_DIR) not in sys.path:
 
 from oci.generative_ai.models import (
     CreateVectorStoreConnectorDetails,
+    UpdateVectorStoreConnectorDetails,
     ObjectStorageConfig,
     OciObjectStorageConfiguration,
     ScheduleIntervalConfig,
@@ -35,6 +38,7 @@ REGION = "eu-frankfurt-1"
 # for now we should work in ppe
 SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
 VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
+CONNECTOR_ID = "put your ocid"
 
 # OCI Object Storage source for the connector
 OS_NAMESPACE = "frpj5kvxryk1"
@@ -70,20 +74,8 @@ def main() -> None:
     for item in items:
         print(f" - {item.id} [{item.lifecycle_state}] {item.display_name}")
 
-    create_connector_details = CreateVectorStoreConnectorDetails(
-        compartment_id=COMPARTMENT_ID,
-        vector_store_id=VECTOR_STORE_ID,
-        display_name="Product Docs Connector",
-        description="Syncs documentation from Object Storage",
-        configuration=OciObjectStorageConfiguration(
-            storage_config_list=[
-                ObjectStorageConfig(
-                    namespace=OS_NAMESPACE,
-                    bucket_name=OS_BUCKET,
-                    prefix_list=[OS_PREFIX] if OS_PREFIX else [],
-                )
-            ]
-        ),
+    # we're only updating schedule
+    details = UpdateVectorStoreConnectorDetails(
         schedule_config=ScheduleIntervalConfig(
             config_type="INTERVAL",
             frequency="HOURLY",
@@ -91,14 +83,13 @@ def main() -> None:
             state="ENABLED",
         ),
     )
-
-    print("")
-    print("Creating connector...")
-    response = client.create_vector_store_connector(create_connector_details)
+    
+    response = client.update_vector_store_connector(CONNECTOR_ID, details)
+    
     connector = response.data
-    connector_id = connector.id
-    print(f"Connector Created: {connector_id} | State:{connector.lifecycle_state}")
-    print("")
+    print(f"Updated connector : {connector.display_name}")
+    print(f" description : {connector.description}")
+    print(f" lifecycle : {connector.lifecycle_state}")
 
 
 if __name__ == "__main__":
