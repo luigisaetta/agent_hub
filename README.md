@@ -3,6 +3,7 @@
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen.svg)](https://github.com/pylint-dev/pylint)
+[![Tests: pytest](https://img.shields.io/badge/tests-pytest-blue.svg)](https://docs.pytest.org/)
 
 This repository contains practical Python examples that call Oracle Cloud Infrastructure (OCI) Generative AI endpoints through the OpenAI-compatible API.
 
@@ -19,6 +20,8 @@ The examples show how to:
 
 ```text
 agent_hub/
+├── pytest.ini
+├── requirements-dev.txt
 ├── config.py
 ├── config_private.py
 ├── config_private_template.py
@@ -35,6 +38,9 @@ agent_hub/
 │   ├── example01.py
 │   ...
 │   └── example11.py
+├── tests/
+│   ├── conftest.py
+│   └── test_*.py
 └── issues_found.md
 └── README.md
 ```
@@ -49,6 +55,12 @@ Install dependencies:
 
 ```bash
 pip install openai pydantic oci oci-openai
+```
+
+Install test dependencies:
+
+```bash
+pip install -r requirements-dev.txt
 ```
 
 ## Configuration
@@ -81,6 +93,28 @@ From the repository root:
 ```bash
 python -m connectors.script_name
 ```
+
+## Testing
+
+From the repository root:
+
+```bash
+python -m pytest
+```
+
+Run with coverage (requires `pytest-cov`):
+
+```bash
+python -m pytest \
+  --cov=examples.utils \
+  --cov=examples.list_all_files \
+  --cov=examples.list_all_vector_stores \
+  --cov=examples.delete_all_files \
+  --cov=examples.delete_all_vs \
+  --cov-report=term-missing
+```
+
+Tests are under [`tests/`](tests/) and base pytest config is in [`pytest.ini`](pytest.ini).
 
 ## Detailed Examples
 
