@@ -9,7 +9,7 @@ Description:
 """
 
 from openai import OpenAI
-from utils import print_streamed_output
+from examples.utils import print_streamed_output
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID

@@ -23,6 +23,7 @@ agent_hub/
 ├── config_private.py
 ├── config_private_template.py
 ├── connectors/
+│   ├── __init__.py
 │   ├── create_connector.py
 │   ├── update_connector.py
 │   ├── delete_connector.py
@@ -30,6 +31,7 @@ agent_hub/
 │   ├── get_connector_stats.py
 │   └── sync_connector.py
 ├── examples/
+│   ├── __init__.py
 │   ├── example01.py
 │   ...
 │   └── example11.py
@@ -59,17 +61,25 @@ Security note:
 
 ## Config Layout
 
-This repository uses shared root config plus compatibility wrappers.
+This repository uses a single shared config in the repo root.
 
-- Main reference: [`README_CONFIG.md`](README_CONFIG.md)
-- Edit in normal usage: [`config.py`](config.py), [`config_private.py`](config_private.py)
+- Shared files: [`config.py`](config.py), [`config_private.py`](config_private.py)
+- Details: [`README_CONFIG.md`](README_CONFIG.md)
 
 ## Run Examples
 
 From the repository root:
 
 ```bash
-python examples/exampleXX.py
+python -m examples.exampleXX
+```
+
+## Run Connectors
+
+From the repository root:
+
+```bash
+python -m connectors.script_name
 ```
 
 ## Detailed Examples
