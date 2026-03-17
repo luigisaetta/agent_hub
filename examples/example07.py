@@ -40,7 +40,7 @@ def main() -> None:
     )
 
     response = client.responses.create(
-        model="openai.gpt-4.1",
+        model=MODEL_ID,
         store=False,
         input=[
             {

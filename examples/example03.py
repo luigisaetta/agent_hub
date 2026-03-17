@@ -40,13 +40,14 @@ def main() -> None:
         project=PROJECT_ID,
     )
 
+    input_text = "Alice and Bob are going to a science fair on Friday."
     response = client.responses.parse(
-        model="openai.gpt-4.1",
+        model=MODEL_ID,
         input=[
             {"role": "system", "content": "Extract the event information."},
             {
                 "role": "user",
-                "content": "Alice and Bob are going to a science fair on Friday.",
+                "content": input_text,
             },
         ],
         store=False,
@@ -54,6 +55,9 @@ def main() -> None:
     )
 
     event = response.output_parsed
+    print("")
+    print("Input text:", input_text)
+    print("Parsed event object:")
     print(event)
 
 

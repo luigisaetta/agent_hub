@@ -49,7 +49,8 @@ def main() -> None:
     # 3. second turn, chaining to the first turn
     request = "Tell me something about his work on Spin glasses."
     response2 = client.responses.create(
-        model="openai.gpt-4.1",
+        model=MODEL_ID,
+        temperature=TEMPERATURE,
         input=request,
         conversation=conversation.id,
         stream=True,
