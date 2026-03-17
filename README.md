@@ -15,6 +15,7 @@ The examples show how to:
 - keep multi-turn state with the Conversations API,
 - show how to get information about the internal LLM reasoning
 - create a vector store resource.
+- how-to create and manage connectors between vector stores and object storage buckets.
 
 ## Project Structure
 
