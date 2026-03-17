@@ -11,25 +11,12 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
-from http import client
-from pathlib import Path
-import sys
-from urllib import response
-
 import oci
 
-ROOT_DIR = Path(__file__).resolve().parents[1]
-if str(ROOT_DIR) not in sys.path:
-    sys.path.insert(0, str(ROOT_DIR))
-
 from oci.generative_ai.models import (
-    CreateVectorStoreConnectorDetails,
     UpdateVectorStoreConnectorDetails,
-    ObjectStorageConfig,
-    OciObjectStorageConfiguration,
     ScheduleIntervalConfig,
 )
-from config_private import COMPARTMENT_ID
 
 # ── Config
 PROFILE = "DEFAULT"
@@ -37,14 +24,7 @@ REGION = "eu-frankfurt-1"
 
 # for now we should work in ppe
 SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
-VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
 CONNECTOR_ID = "put your ocid"
-
-# OCI Object Storage source for the connector
-OS_NAMESPACE = "frpj5kvxryk1"
-OS_BUCKET = "agent_hub_files"
-# entire bucket
-OS_PREFIX = ""
 
 
 def build_client():
@@ -61,20 +41,9 @@ def build_client():
 
 
 def main() -> None:
-    """Build connector details for an Object Storage to Vector Store connector."""
-    client = build_client()
+    """Update schedule settings for a connector by OCID."""
+    genai_client = build_client()
 
-    response = client.list_vector_store_connectors(COMPARTMENT_ID)
-
-    items = response.data.items
-
-    print("")
-    print(f"Total connectors in compartment: {len(items)}")
-    print("")
-    for item in items:
-        print(f" - {item.id} [{item.lifecycle_state}] {item.display_name}")
-
-    # we're only updating schedule
     details = UpdateVectorStoreConnectorDetails(
         schedule_config=ScheduleIntervalConfig(
             config_type="INTERVAL",
@@ -83,10 +52,10 @@ def main() -> None:
             state="ENABLED",
         ),
     )
-    
-    response = client.update_vector_store_connector(CONNECTOR_ID, details)
-    
-    connector = response.data
+
+    update_response = genai_client.update_vector_store_connector(CONNECTOR_ID, details)
+
+    connector = update_response.data
     print(f"Updated connector : {connector.display_name}")
     print(f" description : {connector.description}")
     print(f" lifecycle : {connector.lifecycle_state}")
