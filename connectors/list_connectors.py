@@ -11,35 +11,8 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
-import oci
+from connectors.common import build_client
 from config_private import COMPARTMENT_ID
-
-# ── Config
-PROFILE = "DEFAULT"
-REGION = "eu-frankfurt-1"
-
-# for now we should work in ppe
-SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
-VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
-
-# OCI Object Storage source for the connector
-OS_NAMESPACE = "frpj5kvxryk1"
-OS_BUCKET = "agent_hub_files"
-# entire bucket
-OS_PREFIX = ""
-
-
-def build_client():
-    """
-    Build an OCI Generative AI client using standard API-key profile auth.
-    """
-    config = oci.config.from_file(profile_name=PROFILE)
-
-    # build the client
-    return oci.generative_ai.GenerativeAiClient(
-        config=config,
-        service_endpoint=SERVICE_ENDPOINT,
-    )
 
 
 def main() -> None:
@@ -55,6 +28,7 @@ def main() -> None:
     print("")
     for item in items:
         print(f" - {item.id} [{item.lifecycle_state}] {item.display_name}")
+        print(item)
 
 
 if __name__ == "__main__":

@@ -11,7 +11,7 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
-import oci
+from datetime import datetime, timedelta, timezone
 
 from oci.generative_ai.models import (
     CreateVectorStoreConnectorDetails,
@@ -19,14 +19,9 @@ from oci.generative_ai.models import (
     OciObjectStorageConfiguration,
     ScheduleIntervalConfig,
 )
+from connectors.common import build_client
 from config_private import COMPARTMENT_ID
 
-# ── Config
-PROFILE = "DEFAULT"
-REGION = "eu-frankfurt-1"
-
-# for now we should work in ppe
-SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
 VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
 
 # OCI Object Storage source for the connector
@@ -36,23 +31,11 @@ OS_BUCKET = "agent_hub_files"
 OS_PREFIX = ""
 
 
-def build_client():
-    """
-    Build an OCI Generative AI client using standard API-key profile auth.
-    """
-    config = oci.config.from_file(profile_name=PROFILE)
-
-    # build the client
-    return oci.generative_ai.GenerativeAiClient(
-        config=config,
-        service_endpoint=SERVICE_ENDPOINT,
-    )
-
-
 def main() -> None:
     """Build connector details for an Object Storage to Vector Store connector."""
     client = build_client()
 
+    # list existing connectors
     response = client.list_vector_store_connectors(COMPARTMENT_ID)
 
     items = response.data.items
@@ -63,6 +46,7 @@ def main() -> None:
     for item in items:
         print(f" - {item.id} [{item.lifecycle_state}] {item.display_name}")
 
+    # create the new connector
     create_connector_details = CreateVectorStoreConnectorDetails(
         compartment_id=COMPARTMENT_ID,
         vector_store_id=VECTOR_STORE_ID,
@@ -82,6 +66,8 @@ def main() -> None:
             frequency="HOURLY",
             interval=1,
             state="ENABLED",
+            # schedule the first run 10 minutes from now
+            time_start=datetime.now(timezone.utc) + timedelta(minutes=10),
         ),
     )
 

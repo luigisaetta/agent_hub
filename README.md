@@ -27,6 +27,7 @@ agent_hub/
 ├── config_private_template.py
 ├── connectors/
 │   ├── __init__.py
+│   ├── common.py
 │   ├── create_connector.py
 │   ├── update_connector.py
 │   ├── delete_connector.py

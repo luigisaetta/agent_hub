@@ -25,6 +25,8 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     openai_mod = types.ModuleType("openai")
 
     class FakeOpenAI:  # pylint: disable=too-few-public-methods
+        """Small stub replacing openai.OpenAI in tests."""
+
         def __init__(self, **kwargs):
             self.kwargs = kwargs
 
@@ -33,9 +35,13 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     oci_openai_mod = types.ModuleType("oci_openai")
 
     class FakeOciUserPrincipalAuth:  # pylint: disable=too-few-public-methods
+        """Small stub replacing OciUserPrincipalAuth in tests."""
+
         pass
 
     class FakeOciOpenAI:  # pylint: disable=too-few-public-methods
+        """Small stub replacing OciOpenAI in tests."""
+
         def __init__(self, **kwargs):
             self.kwargs = kwargs
 
@@ -51,6 +57,7 @@ def reload_module():
     """Reload a module by name to pick up monkeypatches per test."""
 
     def _reload(name: str):
+        """Reload and return a module by dotted name."""
         if name in sys.modules:
             del sys.modules[name]
         return importlib.import_module(name)

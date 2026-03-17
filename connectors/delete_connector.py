@@ -11,28 +11,11 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
-import oci
+from oci.exceptions import ServiceError
 
-# ── Config
-PROFILE = "DEFAULT"
-REGION = "eu-frankfurt-1"
+from connectors.common import build_client
 
-# for now we should work in ppe
-SERVICE_ENDPOINT = f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com"
-CONNECTOR_ID = "put your ocid"
-
-
-def build_client():
-    """
-    Build an OCI Generative AI client using standard API-key profile auth.
-    """
-    config = oci.config.from_file(profile_name=PROFILE)
-
-    # build the client
-    return oci.generative_ai.GenerativeAiClient(
-        config=config,
-        service_endpoint=SERVICE_ENDPOINT,
-    )
+CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yalmrxkktiz7niij4in5qgdysozfhqc4d3ec2f2ualaokq"
 
 
 def main() -> None:
@@ -45,7 +28,7 @@ def main() -> None:
     try:
         get_response = genai_client.get_vector_store_connector(CONNECTOR_ID)
         print(f"Post-delete lifecycle: {get_response.data.lifecycle_state}")
-    except oci.exceptions.ServiceError as exc:
+    except ServiceError as exc:
         if exc.status == 404:
             print("Confirmed: connector no longer found (404)")
         else:

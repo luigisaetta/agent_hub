@@ -1,21 +1,18 @@
+"""Unit tests for utility helpers in examples.utils."""
+
 from __future__ import annotations
 
 from types import SimpleNamespace
 
 
-class _Event:
-    def __init__(self, event_type: str, delta: str = ""):
-        self.type = event_type
-        self.delta = delta
-
-
 def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
+    """Collect only output_text delta events and print concatenated text."""
     utils = reload_module("examples.utils")
 
     stream = [
-        _Event("response.output_text.delta", "Hel"),
-        _Event("response.reasoning.delta", "ignored"),
-        _Event("response.output_text.delta", "lo"),
+        SimpleNamespace(type="response.output_text.delta", delta="Hel"),
+        SimpleNamespace(type="response.reasoning.delta", delta="ignored"),
+        SimpleNamespace(type="response.output_text.delta", delta="lo"),
     ]
 
     result = utils.print_streamed_output(stream)
@@ -26,6 +23,7 @@ def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
 
 
 def test_get_client_production_uses_openai_with_expected_kwargs(reload_module):
+    """Build production client with API key and project settings."""
     utils = reload_module("examples.utils")
 
     client = utils.get_client(region="eu-frankfurt-1", is_preproduction=False)
@@ -36,16 +34,21 @@ def test_get_client_production_uses_openai_with_expected_kwargs(reload_module):
 
 
 def test_get_client_preproduction_uses_oci_client_with_ppe_url(reload_module):
+    """Build preproduction client with user principal auth and PPE endpoint."""
     utils = reload_module("examples.utils")
 
     client = utils.get_client(region="eu-frankfurt-1", is_preproduction=True)
 
-    assert "ppe.generativeai.eu-frankfurt-1.oci.oraclecloud.com" in client.kwargs["base_url"]
+    assert (
+        "ppe.generativeai.eu-frankfurt-1.oci.oraclecloud.com"
+        in client.kwargs["base_url"]
+    )
     assert client.kwargs["compartment_id"] == utils.COMPARTMENT_ID
     assert client.kwargs["auth"].__class__.__name__ == "FakeOciUserPrincipalAuth"
 
 
 def test_print_header_outputs_consistent_banner(reload_module, capsys):
+    """Print header with separators and contextual label."""
     utils = reload_module("examples.utils")
 
     utils.print_header("files", "project")
