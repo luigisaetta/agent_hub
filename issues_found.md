@@ -19,4 +19,7 @@ allow any-user to manage generative-ai-family in compartment id ocid1.compartmen
 allow any-user to manage generative-ai-project in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-file in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-vector-store in compartment id ocid1.compartment.oc1..your_ocid
+allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid
+
+allow any user to manage generative-ai-file in compartment <compartment-id> where ALL { target.generativeaiproject.id='ocid1.generativeaiproject.oc1.......'}
 ```

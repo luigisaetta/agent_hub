@@ -50,11 +50,19 @@ def get_client(region: str = "eu-frankfurt-1", is_preproduction: bool = False):
     else:
         # production
         # using key
-        base_url = BASE_URL
-
         _client = OpenAI(
-            base_url=base_url,
+            base_url=BASE_URL,
             api_key=KEY1,
             project=PROJECT_ID,
         )
     return _client
+
+
+def print_header(type: str, where: str) -> None:
+    """
+    Print a header for the list of vector stores.
+    """
+    print("=" * 44)
+    print(f"List of the {type} in the {where}")
+    print("=" * 44)
+    print("")

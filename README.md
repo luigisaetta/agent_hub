@@ -71,9 +71,20 @@ python examples/exampleXX.py
 | 9 | File upload + list files | [`examples/example12.py`](examples/example12.py) | Uploads a local PDF file, then lists files in the project. | `files.create(...)`, `files.list(...)` | File management workflow for retrieval pipelines. | Reads `pdf/labor_market_impacts_ai.pdf`. |
 | 10 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
+## Utility Scripts
+
+| # | Utility | File | Description |
+|---|---|---|---|
+| 1 | List all files | [`examples/list_all_files.py`](examples/list_all_files.py) | Lists all files in the configured project, page by page. |
+| 2 | Delete all files | [`examples/delete_all_files.py`](examples/delete_all_files.py) | Deletes all files in the configured project with per-file error handling. |
+| 3 | List all vector stores | [`examples/list_all_vector_stores.py`](examples/list_all_vector_stores.py) | Lists all vector stores, page by page, with readable expiration time. |
+| 4 | Delete all vector stores | [`examples/delete_all_vs.py`](examples/delete_all_vs.py) | Deletes all vector stores with per-item error handling. |
+
 ## Known Issue
 
 See [`issues_found.md`](issues_found.md) for a current OCI authorization/policy issue (`404` with authorization failure) and policies snippet reference.
+
+(17/03/2026) for now Vector Stores are available only in the preprod (ppe) environment.
 
 ## Notes
 

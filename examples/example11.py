@@ -12,7 +12,6 @@ Description:
 from utils import get_client
 
 REGION = "eu-frankfurt-1"
-
 IS_PREPROD = True
 
 
@@ -22,7 +21,7 @@ def main() -> None:
     client = get_client(region=REGION, is_preproduction=IS_PREPROD)
 
     vector_store = client.vector_stores.create(
-        name="vector-store-ls01",
+        name="vs-lsa01",
         description="vector store",
         expires_after={"anchor": "last_active_at", "days": 120},
         metadata={"topic": "oci"},

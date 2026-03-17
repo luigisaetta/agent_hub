@@ -3,6 +3,7 @@
 .env.*
 *.env
 examples/config_private.py
+my_notes.md
 
 # Python cache/compiled
 __pycache__/

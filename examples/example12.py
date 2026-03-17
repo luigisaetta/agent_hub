@@ -13,7 +13,6 @@ from pathlib import Path
 from utils import get_client
 
 REGION = "eu-frankfurt-1"
-
 IS_PREPROD = False
 
 
@@ -27,6 +26,7 @@ def main() -> None:
     root_dir = Path(__file__).resolve().parents[1]
     file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"
 
+    print("Uploading file...")
     with open(file_path, "rb") as f:
         # warning: repeating means you're uploading a new version of the same file
         # and it will create a new file each time. In production,
@@ -35,6 +35,7 @@ def main() -> None:
         print(file)
 
     # list files
+    print("Listing files in the project/compartment...")
     files_list = client.files.list(order="asc")
     print("")
 
