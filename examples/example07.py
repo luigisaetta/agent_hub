@@ -8,6 +8,8 @@ Description:
 """
 
 import base64
+from pathlib import Path
+
 from openai import OpenAI
 
 from config import BASE_URL
@@ -17,7 +19,7 @@ MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 
 
-def encode_image(image_path):
+def encode_image(image_path: Path) -> str:
     """
     This function reads an image file and encodes it in base64 format.
     """
@@ -25,33 +27,41 @@ def encode_image(image_path):
         return base64.b64encode(image_file.read()).decode("utf-8")
 
 
-base64_image = encode_image("../images/page0009.png")
+def main() -> None:
+    """Encode an image and ask the model to extract and summarize its text."""
+    root_dir = Path(__file__).resolve().parents[1]
+    image_path = root_dir / "images" / "page0009.png"
+    base64_image = encode_image(image_path)
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
+    client = OpenAI(
+        base_url=BASE_URL,
+        api_key=KEY1,
+        project=PROJECT_ID,
+    )
 
-response = client.responses.create(
-    model="openai.gpt-4.1",
-    store=False,
-    input=[
-        {
-            "role": "user",
-            "content": [
-                {
-                    "type": "input_text",
-                    "text": "Extract and summarize all the text contained in the image",
-                },
-                {
-                    "type": "input_image",
-                    "image_url": f"data:image/png;base64,{base64_image}",
-                    "detail": "high",
-                },
-            ],
-        }
-    ],
-)
+    response = client.responses.create(
+        model="openai.gpt-4.1",
+        store=False,
+        input=[
+            {
+                "role": "user",
+                "content": [
+                    {
+                        "type": "input_text",
+                        "text": "Extract and summarize all the text contained in the image",
+                    },
+                    {
+                        "type": "input_image",
+                        "image_url": f"data:image/png;base64,{base64_image}",
+                        "detail": "high",
+                    },
+                ],
+            }
+        ],
+    )
 
-print(response.output_text)
+    print(response.output_text)
+
+
+if __name__ == "__main__":
+    main()

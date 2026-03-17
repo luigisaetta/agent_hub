@@ -17,39 +17,47 @@ from utils import print_streamed_output
 MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
 
-# 1. create a conversation
-conversation = client.conversations.create(metadata={"topic": "demo"})
-print("Conversation ID: ", conversation.id)
-print("")
+def main() -> None:
+    """Create a conversation and stream two context-linked turns."""
+    client = OpenAI(
+        base_url=BASE_URL,
+        api_key=KEY1,
+        project=PROJECT_ID,
+    )
 
-request = "Tell me something about Giorgio Parisi?"
+    # 1. create a conversation
+    conversation = client.conversations.create(metadata={"topic": "demo"})
+    print("Conversation ID: ", conversation.id)
+    print("")
 
-# 2. first request
-response1 = client.responses.create(
-    model=MODEL_ID,
-    temperature=TEMPERATURE,
-    input=request,
-    # link to the conversation
-    conversation=conversation.id,
-    stream=True,
-)
-print("Request:", request)
-print_streamed_output(response1)
-print("")
+    request = "Tell me something about Giorgio Parisi?"
 
-# 3. second turn, chaining to the first turn
-request = "Tell me something about his work on Spin glasses."
-response2 = client.responses.create(
-    model="openai.gpt-4.1",
-    input=request,
-    conversation=conversation.id,
-    stream=True,
-)
-print("\nRequest:", request)
-print_streamed_output(response2)
+    # 2. first request
+    response1 = client.responses.create(
+        model=MODEL_ID,
+        temperature=TEMPERATURE,
+        input=request,
+        # link to the conversation
+        conversation=conversation.id,
+        stream=True,
+    )
+    print("Request:", request)
+    print_streamed_output(response1)
+    print("")
+
+    # 3. second turn, chaining to the first turn
+    request = "Tell me something about his work on Spin glasses."
+    response2 = client.responses.create(
+        model="openai.gpt-4.1",
+        input=request,
+        conversation=conversation.id,
+        stream=True,
+    )
+    print("\nRequest:", request)
+    print_streamed_output(response2)
+    print("")
+
+
+if __name__ == "__main__":
+    main()

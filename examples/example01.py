@@ -16,22 +16,28 @@ from config_private import KEY1, PROJECT_ID
 MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
 
-request = "What is 2x2?"
+def main() -> None:
+    """Run a basic Responses API request and print the result."""
+    client = OpenAI(
+        base_url=BASE_URL,
+        api_key=KEY1,
+        project=PROJECT_ID,
+    )
 
-response = client.responses.create(
-    model=MODEL_ID,
-    temperature=TEMPERATURE,
-    input=request,
-)
+    request = "What is 2x2?"
 
-print("Request:", request)
-print(response.output_text)
+    response = client.responses.create(
+        model=MODEL_ID,
+        temperature=TEMPERATURE,
+        input=request,
+    )
 
-print("")
-print("Full response:", response)
+    print("Request:", request)
+    print(response.output_text)
+    print("")
+    print("Full response:", response)
+
+
+if __name__ == "__main__":
+    main()

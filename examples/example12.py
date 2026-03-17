@@ -4,42 +4,43 @@ Last modified: 2026-03-16
 License: MIT
 
 Description:
-    Example script that show ho to generate an image using the image generation tool.
-    This is NOT yet working
+    This example shows how-to upload a file
+    and how-to get the list of all the files in the project.
 """
 
-import base64
-from openai import OpenAI
+from pathlib import Path
 
-from config import BASE_URL
-from config_private import KEY1, PROJECT_ID
+from utils import get_client
 
-MODEL_ID = "openai.gpt-5.2"
-TEMPERATURE = 0.0
+REGION = "eu-frankfurt-1"
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
+IS_PREPROD = False
 
-response = client.responses.create(
-    model="openai.gpt-5.2",
-    input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
-    tools=[{"type": "image_generation"}],
-    store=False,
-    stream=False,
-)
 
-# Save the image to a file
-image_data = [
-    output.result
-    for output in response.output
-    if output.type == "image_generation_call"
-]
+# this function is used to wrap switch from LA to GA
+# default: production environment, but you can switch to preproduction
+# by setting is_preproduction to True.
+def main() -> None:
+    """Upload a file and print the list of project files."""
+    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
 
-if image_data:
-    image_base64 = image_data[0]
+    root_dir = Path(__file__).resolve().parents[1]
+    file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"
 
-    with open("otter.png", "wb") as f:
-        f.write(base64.b64decode(image_base64))
+    with open(file_path, "rb") as f:
+        # warning: repeating means you're uploading a new version of the same file
+        # and it will create a new file each time. In production,
+        # you should store the file ID and reuse it.
+        file = client.files.create(file=f, purpose="user_data")
+        print(file)
+
+    # list files
+    files_list = client.files.list(order="asc")
+    print("")
+
+    for _file in files_list:
+        print(_file)
+
+
+if __name__ == "__main__":
+    main()

@@ -17,22 +17,28 @@ MODEL_ID = "openai.gpt-oss-120b"
 TEMPERATURE = 0.0
 MAX_OUTPUT_TOKENS = 8000
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
 
-request = "Create for me a complete report about Luigi Saetta, from Oracle"
+def main() -> None:
+    """Run a request with the built-in web search tool enabled."""
+    client = OpenAI(
+        base_url=BASE_URL,
+        api_key=KEY1,
+        project=PROJECT_ID,
+    )
 
-response = client.responses.create(
-    model=MODEL_ID,
-    temperature=TEMPERATURE,
-    max_output_tokens=MAX_OUTPUT_TOKENS,
-    input=request,
-    tools=[{"type": "web_search"}],
-)
+    request = "Create for me a complete report about Luigi Saetta, from Oracle"
 
-print("Request:", request)
+    response = client.responses.create(
+        model=MODEL_ID,
+        temperature=TEMPERATURE,
+        max_output_tokens=MAX_OUTPUT_TOKENS,
+        input=request,
+        tools=[{"type": "web_search"}],
+    )
 
-print(response.output_text)
+    print("Request:", request)
+    print(response.output_text)
+
+
+if __name__ == "__main__":
+    main()
