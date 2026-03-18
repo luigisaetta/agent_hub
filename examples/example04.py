@@ -10,6 +10,7 @@ Description:
 
 from openai import OpenAI
 
+from common import print_example_summary, print_runtime_config
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
 
@@ -20,14 +21,20 @@ MAX_OUTPUT_TOKENS = 8000
 
 def main() -> None:
     """Run a request with the built-in web search tool enabled."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Use web_search tool for retrieval-augmented response.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,
         project=PROJECT_ID,
     )
 
-    request = """Create for me a complete report about Luigi Saetta, from Oracle. Find accurate and up-to-date information about him, 
-    and use it to write a report about his career, achievements, and current position. 
+    request = """Create for me a complete report about Luigi Saetta, from Oracle.
+    Find accurate and up-to-date information about him, and use it 
+    to write a report about his career, achievements, and current position. 
     Use the web search tool to find the most recent information about him."""
 
     response = client.responses.create(
@@ -40,6 +47,7 @@ def main() -> None:
 
     print("Request:", request)
     print(response.output_text)
+    print("")
 
 
 if __name__ == "__main__":

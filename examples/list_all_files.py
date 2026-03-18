@@ -8,15 +8,16 @@ Description:
 """
 
 from common import get_client, print_header
+from config import IS_PREPROD
 
-REGION = "eu-frankfurt-1"
-IS_PREPROD = False
+from config_private import PROJECT_ID
+
 PAGE_SIZE = 100
 
 
 def main() -> None:
     """List all files using explicit page-by-page pagination."""
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    client = get_client(is_preproduction=IS_PREPROD)
 
     if IS_PREPROD:
         where = "compartment"
@@ -30,7 +31,11 @@ def main() -> None:
 
     while True:
         if after is None:
-            page = client.files.list(limit=PAGE_SIZE, order="desc")
+            page = client.files.list(
+                limit=PAGE_SIZE,
+                order="desc",
+                extra_headers={"OpenAI-Project": PROJECT_ID},
+            )
         else:
             page = client.files.list(
                 limit=PAGE_SIZE,

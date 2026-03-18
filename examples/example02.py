@@ -10,7 +10,7 @@ Description:
 """
 
 from openai import OpenAI
-from common import print_streamed_output
+from common import print_example_summary, print_runtime_config, print_streamed_output
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
@@ -22,6 +22,11 @@ MAX_OUTPUT_TOKENS = 8000
 
 def main() -> None:
     """Run a streamed Responses API request and print tokens as they arrive."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Stream token-by-token output from the model.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,

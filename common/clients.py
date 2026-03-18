@@ -8,22 +8,24 @@ import oci
 from openai import OpenAI
 from oci_openai import OciOpenAI, OciUserPrincipalAuth
 
-from config import BASE_URL
+from config import BASE_URL, IS_PREPROD, REGION
 from config_private import COMPARTMENT_ID, KEY1, PROJECT_ID
 
 PROFILE = "DEFAULT"
-REGION = "eu-frankfurt-1"
-USE_PREPROD = True
 
 
-def get_client(region: str = REGION, is_preproduction: bool = False):
+def get_client(region: str = REGION, is_preproduction: bool = IS_PREPROD):
     """
     Get an OpenAI-compatible client for production or OCI preproduction.
     """
     if is_preproduction:
         base_url = (
-            f"https://ppe.generativeai.{region}.oci.oraclecloud.com/20231130/openai/v1"
+            # control plane
+            # f"https://ppe.generativeai.{region}.oci.oraclecloud.com/20231130/openai/v1"
+            f"https://ppe.inference.generativeai.{region}.oci.oraclecloud.com/20231130/openai/v1"
         )
+        print("Preprod: base_url:", base_url)
+
         return OciOpenAI(
             base_url=base_url,
             auth=OciUserPrincipalAuth(),
@@ -38,7 +40,7 @@ def get_client(region: str = REGION, is_preproduction: bool = False):
 
 
 def get_oci_genai_service_endpoint(
-    region: str = REGION, use_preprod: bool = USE_PREPROD
+    region: str = REGION, use_preprod: bool = IS_PREPROD
 ) -> str:
     """Return OCI Generative AI service endpoint for selected environment."""
     if use_preprod:
@@ -49,7 +51,7 @@ def get_oci_genai_service_endpoint(
 def build_oci_genai_client(
     profile: str = PROFILE,
     region: str = REGION,
-    use_preprod: bool = USE_PREPROD,
+    use_preprod: bool = IS_PREPROD,
 ):
     """Build an OCI Generative AI client using profile auth."""
 

@@ -11,6 +11,7 @@ import json
 
 from openai import OpenAI
 
+from common import print_example_summary, print_runtime_config
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
 
@@ -20,6 +21,11 @@ TEMPERATURE = 0.0
 
 def main() -> None:
     """Request a response with reasoning enabled and print structured output."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Request reasoning summary and print output JSON.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,

@@ -12,6 +12,7 @@ from pathlib import Path
 
 from openai import OpenAI
 
+from common import print_example_summary, print_runtime_config
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
 
@@ -29,6 +30,11 @@ def encode_image(image_path: Path) -> str:
 
 def main() -> None:
     """Encode an image and ask the model to extract and summarize its text."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Analyze an image and extract/summarize text.")
+    print("")
+
     root_dir = Path(__file__).resolve().parents[1]
     image_path = root_dir / "images" / "page0009.png"
     base64_image = encode_image(image_path)
@@ -61,6 +67,7 @@ def main() -> None:
     )
 
     print(response.output_text)
+    print("")
 
 
 if __name__ == "__main__":

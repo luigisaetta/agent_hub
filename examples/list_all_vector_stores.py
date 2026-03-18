@@ -10,9 +10,8 @@ Description:
 from datetime import datetime, timezone
 
 from common import get_client, print_header
+from config import IS_PREPROD
 
-REGION = "eu-frankfurt-1"
-IS_PREPROD = True
 PAGE_SIZE = 100
 
 
@@ -27,7 +26,7 @@ def format_expiration(expires_at: int | None) -> str:
 
 def main() -> None:
     """List all vector stores using explicit page-by-page pagination."""
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    client = get_client(is_preproduction=IS_PREPROD)
 
     if IS_PREPROD:
         where = "compartment"

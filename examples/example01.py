@@ -10,6 +10,7 @@ Description:
 
 from openai import OpenAI
 
+from common import print_example_summary, print_runtime_config
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
 
@@ -19,6 +20,11 @@ TEMPERATURE = 0.0
 
 def main() -> None:
     """Run a basic Responses API request and print the result."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Basic text completion with Responses API.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,
@@ -37,6 +43,7 @@ def main() -> None:
     print(response.output_text)
     print("")
     print("Full response:", response)
+    print("")
 
 
 if __name__ == "__main__":

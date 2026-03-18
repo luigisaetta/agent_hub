@@ -10,10 +10,9 @@ Description:
 
 from pathlib import Path
 
-from common import get_client
-
-REGION = "eu-frankfurt-1"
-IS_PREPROD = False
+from common import get_client, print_example_summary, print_runtime_config
+from config import IS_PREPROD
+from config_private import PROJECT_ID
 
 
 # this function is used to wrap switch from LA to GA
@@ -21,7 +20,12 @@ IS_PREPROD = False
 # by setting is_preproduction to True.
 def main() -> None:
     """Upload a file and print the list of project files."""
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    print_runtime_config()
+    print("")
+    print_example_summary("Upload a PDF file and list project files.")
+    print("")
+
+    client = get_client(is_preproduction=IS_PREPROD)
 
     root_dir = Path(__file__).resolve().parents[1]
     file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"
@@ -31,12 +35,19 @@ def main() -> None:
         # warning: repeating means you're uploading a new version of the same file
         # and it will create a new file each time. In production,
         # you should store the file ID and reuse it.
-        file = client.files.create(file=f, purpose="user_data")
+        file = client.files.create(
+            file=f,
+            purpose="user_data",
+            extra_headers={"OpenAI-Project": PROJECT_ID},
+        )
         print(file)
 
     # list files
     print("Listing files in the project/compartment...")
-    files_list = client.files.list(order="asc")
+    files_list = client.files.list(
+        order="asc",
+        extra_headers={"OpenAI-Project": PROJECT_ID},
+    )
     print("")
 
     for _file in files_list:

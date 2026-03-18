@@ -40,7 +40,7 @@ def test_get_client_preproduction_uses_oci_client_with_ppe_url(reload_module):
     client = clients.get_client(region="eu-frankfurt-1", is_preproduction=True)
 
     assert (
-        "ppe.generativeai.eu-frankfurt-1.oci.oraclecloud.com"
+        "ppe.inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com"
         in client.kwargs["base_url"]
     )
     assert client.kwargs["compartment_id"] == clients.COMPARTMENT_ID

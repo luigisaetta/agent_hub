@@ -10,10 +10,9 @@ Description:
 
 from pathlib import Path
 
-from common import get_client
+from common import get_client, print_example_summary, print_runtime_config
+from config import IS_PREPROD
 
-REGION = "us-chicago-1"
-IS_PREPROD = True
 VECTOR_STORE_ID = "vs_ord_8rbth2q8lgxawdn7za4exue8l0qcdbwohkgscy7lkkl9wqeg"
 
 
@@ -22,7 +21,12 @@ VECTOR_STORE_ID = "vs_ord_8rbth2q8lgxawdn7za4exue8l0qcdbwohkgscy7lkkl9wqeg"
 # by setting is_preproduction to True.
 def main() -> None:
     """Upload a file and store it in the vector store."""
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    print_runtime_config()
+    print("")
+    print_example_summary("Upload to vector store and poll batch processing.")
+    print("")
+
+    client = get_client(is_preproduction=IS_PREPROD)
 
     root_dir = Path(__file__).resolve().parents[1]
     file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"

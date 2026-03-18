@@ -10,16 +10,15 @@ Description:
 """
 
 from common import get_client
+from config import IS_PREPROD
 
-REGION = "eu-frankfurt-1"
-IS_PREPROD = True
 PAGE_SIZE = 100
 
 
 def main() -> None:
     """Delete all vector stores using explicit page-by-page pagination."""
     # this function is used to wrap switch from LA to GA
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    client = get_client(is_preproduction=IS_PREPROD)
     print("\nDeleting all vector stores in the compartment")
     print("=" * 46)
 

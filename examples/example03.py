@@ -14,6 +14,7 @@ from pydantic import BaseModel
 
 from openai import OpenAI
 
+from common import print_example_summary, print_runtime_config
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
 
@@ -34,6 +35,11 @@ class CalendarEvent(BaseModel):
 
 def main() -> None:
     """Parse unstructured text into a typed calendar event object."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Parse text into a typed Pydantic object.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,
@@ -59,6 +65,7 @@ def main() -> None:
     print("Input text:", input_text)
     print("Parsed event object:")
     print(event)
+    print("")
 
 
 if __name__ == "__main__":

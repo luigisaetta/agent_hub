@@ -9,7 +9,7 @@ Description:
 """
 
 from openai import OpenAI
-from common import print_streamed_output
+from common import print_example_summary, print_runtime_config, print_streamed_output
 
 from config import BASE_URL
 from config_private import KEY1, PROJECT_ID
@@ -20,6 +20,11 @@ TEMPERATURE = 0.0
 
 def main() -> None:
     """Create a conversation and stream two context-linked turns."""
+    print_runtime_config()
+    print("")
+    print_example_summary("Create a conversation and stream two linked turns.")
+    print("")
+
     client = OpenAI(
         base_url=BASE_URL,
         api_key=KEY1,

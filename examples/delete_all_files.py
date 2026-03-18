@@ -8,15 +8,14 @@ Description:
 """
 
 from common import get_client
+from config import IS_PREPROD
 
-REGION = "eu-frankfurt-1"
-IS_PREPROD = False
 PAGE_SIZE = 100
 
 
 def main() -> None:
     """Delete all files using explicit page-by-page pagination."""
-    client = get_client(region=REGION, is_preproduction=IS_PREPROD)
+    client = get_client(is_preproduction=IS_PREPROD)
     print("\nDeleting all files in the project")
     print("=" * 34)
 
