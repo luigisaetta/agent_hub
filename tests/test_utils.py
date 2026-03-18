@@ -26,7 +26,7 @@ def test_get_client_production_uses_openai_with_expected_kwargs(reload_module):
     """Build production client with API key and project settings."""
     clients = reload_module("common.clients")
 
-    client = clients.get_client(region="eu-frankfurt-1", is_preproduction=False)
+    client = clients.get_client(is_preproduction=False)
 
     assert client.kwargs["base_url"] == clients.BASE_URL
     assert client.kwargs["api_key"] == clients.KEY1
@@ -37,7 +37,7 @@ def test_get_client_preproduction_uses_oci_client_with_ppe_url(reload_module):
     """Build preproduction client with user principal auth and PPE endpoint."""
     clients = reload_module("common.clients")
 
-    client = clients.get_client(region="eu-frankfurt-1", is_preproduction=True)
+    client = clients.get_client(is_preproduction=True)
 
     assert (
         "ppe.inference.generativeai.eu-frankfurt-1.oci.oraclecloud.com"

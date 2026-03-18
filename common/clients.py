@@ -8,32 +8,34 @@ import oci
 from openai import OpenAI
 from oci_openai import OciOpenAI, OciUserPrincipalAuth
 
-from config import BASE_URL, IS_PREPROD, REGION
+from config import BASE_URL, CP_BASE_URL, IS_PREPROD, REGION
 from config_private import COMPARTMENT_ID, KEY1, PROJECT_ID
 
 PROFILE = "DEFAULT"
 
 
-def get_client(region: str = REGION, is_preproduction: bool = IS_PREPROD):
+def get_client(
+    is_preproduction: bool = IS_PREPROD,
+    is_control_plane: bool = False,
+):
     """
     Get an OpenAI-compatible client for production or OCI preproduction.
     """
-    if is_preproduction:
-        base_url = (
-            # control plane
-            # f"https://ppe.generativeai.{region}.oci.oraclecloud.com/20231130/openai/v1"
-            f"https://ppe.inference.generativeai.{region}.oci.oraclecloud.com/20231130/openai/v1"
-        )
-        print("Preprod: base_url:", base_url)
+    if is_control_plane:
+        url = CP_BASE_URL
+    else:
+        url = BASE_URL
 
+    # we need also to use a different client
+    if is_preproduction:
         return OciOpenAI(
-            base_url=base_url,
+            base_url=url,
             auth=OciUserPrincipalAuth(),
             compartment_id=COMPARTMENT_ID,
         )
 
     return OpenAI(
-        base_url=BASE_URL,
+        base_url=url,
         api_key=KEY1,
         project=PROJECT_ID,
     )

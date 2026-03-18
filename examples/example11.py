@@ -21,10 +21,11 @@ def main() -> None:
     print("")
 
     # this function is used to wrap switch from LA to GA
-    client = get_client(is_preproduction=IS_PREPROD)
+    # this operations requires control plane
+    client = get_client(is_preproduction=IS_PREPROD, is_control_plane=True)
 
     vector_store = client.vector_stores.create(
-        name="vs-lsa02",
+        name="vs-lsa03",
         description="vector store",
         expires_after={"anchor": "last_active_at", "days": 120},
         metadata={"topic": "oci"},

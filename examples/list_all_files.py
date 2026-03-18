@@ -7,9 +7,8 @@ Description:
     List all files in the configured project/compartment.
 """
 
-from common import get_client, print_header
+from common import get_client, print_header, print_runtime_config
 from config import IS_PREPROD
-
 from config_private import PROJECT_ID
 
 PAGE_SIZE = 100
@@ -17,6 +16,9 @@ PAGE_SIZE = 100
 
 def main() -> None:
     """List all files using explicit page-by-page pagination."""
+    print_runtime_config()
+    print("")
+
     client = get_client(is_preproduction=IS_PREPROD)
 
     if IS_PREPROD:
@@ -60,6 +62,7 @@ def main() -> None:
         page_num += 1
 
     print(f"\nDone. Total files listed: {total}")
+    print("")
 
 
 if __name__ == "__main__":

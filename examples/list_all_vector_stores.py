@@ -9,7 +9,7 @@ Description:
 
 from datetime import datetime, timezone
 
-from common import get_client, print_header
+from common import get_client, print_header, print_runtime_config
 from config import IS_PREPROD
 
 PAGE_SIZE = 100
@@ -26,7 +26,10 @@ def format_expiration(expires_at: int | None) -> str:
 
 def main() -> None:
     """List all vector stores using explicit page-by-page pagination."""
-    client = get_client(is_preproduction=IS_PREPROD)
+    print_runtime_config()
+    print("")
+
+    client = get_client(is_preproduction=IS_PREPROD, is_control_plane=True)
 
     if IS_PREPROD:
         where = "compartment"
@@ -68,6 +71,7 @@ def main() -> None:
         page_num += 1
 
     print(f"\nDone. Total vector stores listed: {total}")
+    print("")
 
 
 if __name__ == "__main__":
