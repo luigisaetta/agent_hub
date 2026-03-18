@@ -9,9 +9,9 @@ Description:
     LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from examples.utils import get_client
+from common import get_client
 
-REGION = "eu-frankfurt-1"
+REGION = "us-chicago-1"
 IS_PREPROD = True
 
 
@@ -21,7 +21,7 @@ def main() -> None:
     client = get_client(region=REGION, is_preproduction=IS_PREPROD)
 
     vector_store = client.vector_stores.create(
-        name="vs-lsa01",
+        name="vs-lsa02",
         description="vector store",
         expires_after={"anchor": "last_active_at", "days": 120},
         metadata={"topic": "oci"},

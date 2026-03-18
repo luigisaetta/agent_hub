@@ -37,8 +37,6 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
     class FakeOciUserPrincipalAuth:  # pylint: disable=too-few-public-methods
         """Small stub replacing OciUserPrincipalAuth in tests."""
 
-        pass
-
     class FakeOciOpenAI:  # pylint: disable=too-few-public-methods
         """Small stub replacing OciOpenAI in tests."""
 

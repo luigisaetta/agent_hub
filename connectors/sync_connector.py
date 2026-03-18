@@ -12,14 +12,14 @@ Description:
 """
 
 from oci.generative_ai.models import CreateVectorStoreConnectorFileSyncDetails
-from connectors.common import build_client
+from common.clients import build_oci_genai_client
 
 CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
 
 
 def main() -> None:
     """List connectors in compartment."""
-    client = build_client()
+    client = build_oci_genai_client()
 
     details = CreateVectorStoreConnectorFileSyncDetails(
         vector_store_connector_id=CONNECTOR_ID,

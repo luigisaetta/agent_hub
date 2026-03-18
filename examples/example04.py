@@ -26,7 +26,9 @@ def main() -> None:
         project=PROJECT_ID,
     )
 
-    request = "Create for me a complete report about Luigi Saetta, from Oracle"
+    request = """Create for me a complete report about Luigi Saetta, from Oracle. Find accurate and up-to-date information about him, 
+    and use it to write a report about his career, achievements, and current position. 
+    Use the web search tool to find the most recent information about him."""
 
     response = client.responses.create(
         model=MODEL_ID,

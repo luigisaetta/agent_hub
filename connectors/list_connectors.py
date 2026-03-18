@@ -11,13 +11,13 @@ Description:
     LA (17/03/2026): to run this code we need an update to OCI Python SDK.
 """
 
-from connectors.common import build_client
+from common.clients import build_oci_genai_client
 from config_private import COMPARTMENT_ID
 
 
 def main() -> None:
     """List connectors in compartment."""
-    client = build_client()
+    client = build_oci_genai_client()
 
     response = client.list_vector_store_connectors(COMPARTMENT_ID)
 

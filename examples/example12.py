@@ -10,7 +10,7 @@ Description:
 
 from pathlib import Path
 
-from examples.utils import get_client
+from common import get_client
 
 REGION = "eu-frankfurt-1"
 IS_PREPROD = False

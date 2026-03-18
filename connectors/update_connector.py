@@ -15,14 +15,14 @@ from oci.generative_ai.models import (
     UpdateVectorStoreConnectorDetails,
     ScheduleIntervalConfig,
 )
-from connectors.common import build_client
+from common.clients import build_oci_genai_client
 
 CONNECTOR_ID = "put your ocid"
 
 
 def main() -> None:
     """Update schedule settings for a connector by OCID."""
-    genai_client = build_client()
+    genai_client = build_oci_genai_client()
 
     details = UpdateVectorStoreConnectorDetails(
         schedule_config=ScheduleIntervalConfig(

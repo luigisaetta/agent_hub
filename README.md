@@ -21,30 +21,39 @@ The examples show how to:
 
 ```text
 agent_hub/
+├── README.md
+├── README_CONFIG.md
+├── issues_found.md
+├── LICENSE
 ├── pytest.ini
+├── requirements.txt
 ├── requirements-dev.txt
 ├── config.py
 ├── config_private.py
 ├── config_private_template.py
+├── common/
+│   ├── __init__.py
+│   ├── clients.py
+│   └── output.py
 ├── connectors/
 │   ├── __init__.py
-│   ├── common.py
 │   ├── create_connector.py
-│   ├── update_connector.py
 │   ├── delete_connector.py
-│   ├── list_connectors.py
+│   ├── get_connector_logs.py
 │   ├── get_connector_stats.py
-│   └── sync_connector.py
+│   ├── list_connectors.py
+│   ├── sync_connector.py
+│   └── update_connector.py
 ├── examples/
 │   ├── __init__.py
 │   ├── example01.py
 │   ...
-│   └── example11.py
+│   └── example21.py
 ├── tests/
 │   ├── conftest.py
 │   └── test_*.py
-└── issues_found.md
-└── README.md
+├── images/
+└── pdf/
 ```
 
 ## Prerequisites
@@ -108,7 +117,7 @@ Run with coverage (requires `pytest-cov`):
 
 ```bash
 python -m pytest \
-  --cov=examples.utils \
+  --cov=common \
   --cov=examples.list_all_files \
   --cov=examples.list_all_vector_stores \
   --cov=examples.delete_all_files \
@@ -131,7 +140,8 @@ Tests are under [`tests/`](tests/) and base pytest config is in [`pytest.ini`](p
 | 7 | Vision input (image analysis) | [`examples/example07.py`](examples/example07.py) | Encodes a local image and asks the model to extract and summarize text. | `input_image` content in `responses.create(...)` | OCR-like extraction and vision prompts. | Reads `images/page0009.png`. |
 | 8 | Vector store creation | [`examples/example11.py`](examples/example11.py) | Creates a vector store with metadata and expiration. | `vector_stores.create(...)` | Vector store setup flow. | (LA): working in preprod env. |
 | 9 | File upload + list files | [`examples/example12.py`](examples/example12.py) | Uploads a local PDF file, then lists files in the project. | `files.create(...)`, `files.list(...)` | File management workflow for retrieval pipelines. | Reads `pdf/labor_market_impacts_ai.pdf`. |
-| 10 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
+| 10 | Vector store file batch upload | [`examples/example15.py`](examples/example15.py) | Uploads a local PDF directly to a vector store and waits for processing. | `vector_stores.file_batches.upload_and_poll(...)` | End-to-end ingest into vector store. | Reads `pdf/labor_market_impacts_ai.pdf`. |
+| 11 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
 ## Utility Scripts
 

@@ -9,7 +9,7 @@ Description:
     LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from examples.utils import get_client
+from common import get_client
 
 REGION = "eu-frankfurt-1"
 

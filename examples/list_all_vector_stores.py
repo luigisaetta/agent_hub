@@ -9,7 +9,7 @@ Description:
 
 from datetime import datetime, timezone
 
-from examples.utils import get_client, print_header
+from common import get_client, print_header
 
 REGION = "eu-frankfurt-1"
 IS_PREPROD = True
