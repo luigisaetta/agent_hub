@@ -4,11 +4,10 @@ Last modified: 2026-03-16
 License: MIT
 
 Description:
-    This example shows how-to add a file to a Vector Store.
+    This example shows how-to get the list of all the files loaded in a vector store.
 
     LA (17/03/2026): for now it is working only in preprod env.
 """
-
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
 from config_private import PROJECT_ID
@@ -18,40 +17,31 @@ from config_private import PROJECT_ID
 
 # preprod
 VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
-FILE_ID = "file-fra-1596879d-f1ca-4831-9502-bd44770a4664"
 
 
 def main() -> None:
-    """Add a file to an existing Vector Store."""
+    """List all the files in a given vector store."""
     print_runtime_config()
     print("")
-    print_example_summary("Add an existing file to a vector store.")
+    print_example_summary("List all the files in a given vector store.")
     print("")
 
     # this function is used to wrap switch from LA to GA
     client = get_client(is_preproduction=IS_PREPROD)
 
     # first we get info on the file
-    print("File info:")
-    _file = client.files.retrieve(
-        file_id=FILE_ID, extra_headers={"OpenAI-Project": PROJECT_ID}
+    _files = client.vector_stores.files.list(
+        vector_store_id=VECTOR_STORE_ID, extra_headers={"OpenAI-Project": PROJECT_ID}
     )
 
-    print("File info:")
-    print(_file)
-    print("")
+    print("\nFiles in vector store:\n")
 
-    print("Uploading file in vector store...")
-    create_result = client.vector_stores.files.create(
-        vector_store_id=VECTOR_STORE_ID,
-        file_id=FILE_ID,
-        attributes={"category": "ai_research"},
-    )
-
-    print("")
-    print("File added to vector store. Result:")
-    print(create_result)
-    print("")
+    for f in _files.data:
+        print(f"File ID: {f.id}")
+        print(f"Status: {f.status}")
+        print(f"Created at: {f.created_at}")
+        print(f"Usage bytes: {f.usage_bytes}")
+        print("")
 
 
 if __name__ == "__main__":

@@ -4,10 +4,12 @@ Last modified: 2026-03-16
 License: MIT
 
 Description:
-    This example shows how-to add a file to a Vector Store.
+    This example shows how-to query a Vector Store.
 
     LA (17/03/2026): for now it is working only in preprod env.
 """
+
+from urllib import response
 
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
@@ -18,40 +20,30 @@ from config_private import PROJECT_ID
 
 # preprod
 VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
-FILE_ID = "file-fra-1596879d-f1ca-4831-9502-bd44770a4664"
-
 
 def main() -> None:
-    """Add a file to an existing Vector Store."""
+    """Query a Vector Store."""
     print_runtime_config()
     print("")
-    print_example_summary("Add an existing file to a vector store.")
+    print_example_summary("Query a vector store.")
     print("")
 
     # this function is used to wrap switch from LA to GA
     client = get_client(is_preproduction=IS_PREPROD)
 
-    # first we get info on the file
-    print("File info:")
-    _file = client.files.retrieve(
-        file_id=FILE_ID, extra_headers={"OpenAI-Project": PROJECT_ID}
-    )
+    # Search Vector Store
+    query = "What are the main impacts of AI on labor market?"
 
-    print("File info:")
-    print(_file)
-    print("")
-
-    print("Uploading file in vector store...")
-    create_result = client.vector_stores.files.create(
+    search_results = client.vector_stores.search(
         vector_store_id=VECTOR_STORE_ID,
-        file_id=FILE_ID,
-        attributes={"category": "ai_research"},
+        query=query,
+        max_num_results=5,
+        extra_headers={"OpenAI-Project": PROJECT_ID},
+        timeout=60
     )
-
-    print("")
-    print("File added to vector store. Result:")
-    print(create_result)
-    print("")
+    
+    print(search_results)
+    
 
 
 if __name__ == "__main__":

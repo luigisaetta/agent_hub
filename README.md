@@ -30,8 +30,11 @@ The examples show how to:
 | 7 | Vision input (image analysis) | [`examples/example07.py`](examples/example07.py) | Encodes a local image and asks the model to extract and summarize text. | `input_image` content in `responses.create(...)` | OCR-like extraction and vision prompts. | Reads `images/page0009.png`. |
 | 8 | Vector store creation | [`examples/example11.py`](examples/example11.py) | Creates a vector store with metadata and expiration. | `vector_stores.create(...)` | Vector store setup flow. | (LA): working in preprod env. |
 | 9 | File upload + list files | [`examples/example12.py`](examples/example12.py) | Uploads a local PDF file, then lists files in the project. | `files.create(...)`, `files.list(...)` | File management workflow for retrieval pipelines. | Reads `pdf/labor_market_impacts_ai.pdf`. |
-| 10 | Vector store file batch upload | [`examples/example15.py`](examples/example15.py) | Uploads a local PDF directly to a vector store and waits for processing. | `vector_stores.file_batches.upload_and_poll(...)` | End-to-end ingest into vector store. | Reads `pdf/labor_market_impacts_ai.pdf`. |
-| 11 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
+| 10 | List files in vector store | [`examples/example13.py`](examples/example13.py) | Lists files already attached to a specific vector store. | `vector_stores.files.list(...)` | Inspecting ingest status/content in a vector store. | Uses a fixed `VECTOR_STORE_ID`. |
+| 11 | Attach existing file to vector store | [`examples/example14.py`](examples/example14.py) | Retrieves a file by ID and attaches it to a vector store with attributes. | `files.retrieve(...)`, `vector_stores.files.create(...)` | Incremental ingest from existing uploaded files. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`. |
+| 12 | Vector store file batch upload | [`examples/example15.py`](examples/example15.py) | Uploads a local PDF directly to a vector store and waits for processing. | `vector_stores.file_batches.upload_and_poll(...)` | End-to-end ingest into vector store. | Reads `pdf/labor_market_impacts_ai.pdf`. |
+| 13 | Vector store semantic search | [`examples/example16.py`](examples/example16.py) | Executes a semantic query against a vector store and prints results. | `vector_stores.search(...)` | Basic retrieval/query workflow over indexed files. | Uses a fixed `VECTOR_STORE_ID`. |
+| 14 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
 ## Utility Scripts
 
@@ -52,6 +55,7 @@ The examples show how to:
 | 4 | Trigger sync | [`connectors/sync_connector.py`](connectors/sync_connector.py) | Starts a file sync job for an existing connector. |
 | 5 | Update connector | [`connectors/update_connector.py`](connectors/update_connector.py) | Updates connector settings such as source configuration and schedule. |
 | 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
+| 7 | Connector logs | [`connectors/get_connector_logs.py`](connectors/get_connector_logs.py) | Retrieves and prints recent logs for one connector. |
 
 ## Prerequisites
 
