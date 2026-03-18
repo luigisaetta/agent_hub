@@ -31,3 +31,28 @@ allow any user to manage generative-ai-file in compartment id ocid1.compartment.
 
 allow any-user to read object-family in compartment id ocid1.compartment.oc1..your_ocid where ALL{request.principal.type='generativeaivectorconnector'}
 ```
+
+## Test matrix (examples + utility)
+
+Symbols to copy/paste: `✅` `❌`
+
+| file | preprod | prod |
+|---|---|---|
+| example01.py | ✅ | ✅ |
+| example02.py | ✅ | ✅ |
+| example03.py | ✅ | ✅ |
+| example04.py | ❌ | ✅ |
+| example05.py | ✅ | ✅ |
+| example06.py | ✅ | ✅ |
+| example07.py | ✅ | ✅ |
+| example11.py | ✅ | ❌ |
+| example12.py | ✅ | ✅ |
+| example13.py | ✅ | ⬜ |
+| example14.py | ✅ | ⬜ |
+| example15.py | ⬜ | ⬜ |
+| example16.py | ❌ | ⬜ |
+| example21.py | ❌ | ❌ |
+| list_all_files.py | ✅ | ⬜ |
+| delete_all_files.py | ⬜ | ⬜ |
+| list_all_vector_stores.py | ✅ | ⬜ |
+| delete_all_vs.py | ⬜ | ⬜ |
