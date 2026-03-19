@@ -17,6 +17,12 @@ The examples show how to:
 - create a vector store resource,
 - create and manage connectors between vector stores and object storage buckets.
 
+## Documentation
+
+- Configuration: [`docs/configurations.md`](docs/configurations.md)
+- Testing: [`docs/testing.md`](docs/testing.md)
+- Architecture: [`docs/architecture.md`](docs/architecture.md)
+
 ## Detailed Examples
 
 | # | Example | File | Purpose | Key API usage | Good for | Notes |
@@ -77,20 +83,7 @@ Install test dependencies:
 pip install -r requirements-dev.txt
 ```
 
-## Configuration
-
-1. Update shared endpoint configuration in [`config.py`](config.py).
-2. Add your project ID and API keys in [`config_private.py`](config_private.py).
-
-Security note:
-- `config_private.py` contains secrets. Do not commit real keys in public repositories.
-
-## Config Layout
-
-This repository uses a single shared config in the repo root.
-
-- Shared files: [`config.py`](config.py), [`config_private.py`](config_private.py)
-- Details: [`README_CONFIG.md`](README_CONFIG.md)
+Configuration details are documented in [`docs/configurations.md`](docs/configurations.md).
 
 ## Run Examples
 
@@ -108,34 +101,17 @@ From the repository root:
 python -m connectors.script_name
 ```
 
-## Testing
-
-From the repository root:
-
-```bash
-python -m pytest
-```
-
-Run with coverage (requires `pytest-cov`):
-
-```bash
-python -m pytest \
-  --cov=common \
-  --cov=examples.list_all_files \
-  --cov=examples.list_all_vector_stores \
-  --cov=examples.delete_all_files \
-  --cov=examples.delete_all_vs \
-  --cov-report=term-missing
-```
-
-Tests are under [`tests/`](tests/) and base pytest config is in [`pytest.ini`](pytest.ini).
+Testing details are documented in [`docs/testing.md`](docs/testing.md).
 
 ## Project Structure
 
 ```text
 agent_hub/
 ├── README.md
-├── README_CONFIG.md
+├── docs/
+│   ├── architecture.md
+│   ├── configurations.md
+│   └── testing.md
 ├── issues_found.md
 ├── LICENSE
 ├── pytest.ini
@@ -147,7 +123,9 @@ agent_hub/
 ├── common/
 │   ├── __init__.py
 │   ├── clients.py
-│   └── output.py
+│   ├── models.py
+│   ├── output.py
+│   └── retrieval.py
 ├── connectors/
 │   ├── __init__.py
 │   ├── create_connector.py
@@ -168,6 +146,8 @@ agent_hub/
 ├── images/
 └── pdf/
 ```
+
+Architecture details are documented in [`docs/architecture.md`](docs/architecture.md).
 
 ## Known Issue
 
