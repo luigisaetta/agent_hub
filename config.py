@@ -7,7 +7,8 @@ Description:
     Shared endpoint configuration values used by example scripts.
 """
 
-REGION = "eu-frankfurt-1"
+# REGION = "eu-frankfurt-1"
+REGION = "us-chicago-1"
 
 # this switch is here to decide if you want to try in preprod
 # or in production environment.

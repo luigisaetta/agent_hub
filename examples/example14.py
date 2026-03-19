@@ -17,8 +17,8 @@ from config_private import PROJECT_ID
 # files are working in production but vector stores are working only in ppe for now
 
 # preprod
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
-FILE_ID = "file-fra-1596879d-f1ca-4831-9502-bd44770a4664"
+VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
+FILE_ID = "file-ord-f3c2b7a8-f0ae-4561-b5b7-cbe7feed3700"
 
 
 def main() -> None:

@@ -8,6 +8,7 @@ Description:
 
     LA (17/03/2026): for now it is working only in preprod env.
 """
+
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
 from config_private import PROJECT_ID
@@ -16,7 +17,7 @@ from config_private import PROJECT_ID
 # files are working in production but vector stores are working only in ppe for now
 
 # preprod
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
+VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
 
 
 def main() -> None:

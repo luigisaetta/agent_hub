@@ -25,7 +25,7 @@ def main() -> None:
     client = get_client(is_preproduction=IS_PREPROD, is_control_plane=True)
 
     vector_store = client.vector_stores.create(
-        name="vs-lsa03",
+        name="vs-lsa04-ord",
         description="vector store",
         expires_after={"anchor": "last_active_at", "days": 120},
         metadata={"topic": "oci"},

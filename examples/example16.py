@@ -9,8 +9,6 @@ Description:
     LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from urllib import response
-
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
 from config_private import PROJECT_ID
@@ -19,13 +17,14 @@ from config_private import PROJECT_ID
 # files are working in production but vector stores are working only in ppe for now
 
 # preprod
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
+VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
+
 
 def main() -> None:
     """Query a Vector Store."""
     print_runtime_config()
     print("")
-    print_example_summary("Query a vector store.")
+    print_example_summary("Query a vector store and return chunks.")
     print("")
 
     # this function is used to wrap switch from LA to GA
@@ -37,13 +36,13 @@ def main() -> None:
     search_results = client.vector_stores.search(
         vector_store_id=VECTOR_STORE_ID,
         query=query,
-        max_num_results=5,
+        max_num_results=10,
         extra_headers={"OpenAI-Project": PROJECT_ID},
-        timeout=60
     )
-    
-    print(search_results)
-    
+
+    for _page in search_results.data:
+        print(_page)
+        print("")
 
 
 if __name__ == "__main__":

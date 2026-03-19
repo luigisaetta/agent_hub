@@ -50,7 +50,9 @@ Symbols to copy/paste: `✅` `❌`
 | [example13.py](examples/example13.py) | ✅ | ⬜ |
 | [example14.py](examples/example14.py) | ✅ | ⬜ |
 | [example15.py](examples/example15.py) | ⬜ | ⬜ |
-| [example16.py](examples/example16.py) | ❌ | ⬜ |
+| [example16.py](examples/example16.py) | ✅ | ❌ |
+| [example17.py](examples/example17.py) | ✅ | ❌ |
+| [example18.py](examples/example18.py) | ✅ | ❌ |
 | [example21.py](examples/example21.py) | ❌ | ❌ |
 | [list_all_files.py](examples/list_all_files.py) | ✅ | ⬜ |
 | [delete_all_files.py](examples/delete_all_files.py) | ⬜ | ⬜ |
