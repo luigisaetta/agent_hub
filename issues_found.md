@@ -1,42 +1,66 @@
-# Issues found
+# Issues Found
 
-## openai.NotFoundError: Error code: 404 - 
+## 1) Authorization Error (`404`)
 
+Error seen:
+
+```text
+openai.NotFoundError: Error code: 404
 {'code': '404', 'message': 'Authorization failed or requested resource not found.'}
-
-We need to set up a policy to use API key in the chosen compartment
-
-see the following doc:
-[policy for API keys](https://docs.oracle.com/en-us/iaas/Content/generative-ai/add-api-permission.htm)
-
 ```
+
+Likely cause:
+- Missing IAM policy for API key usage in the target compartment.
+
+Reference:
+- [OCI policy for API keys](https://docs.oracle.com/en-us/iaas/Content/generative-ai/add-api-permission.htm)
+
+Minimum example policy:
+
+```text
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid where ALL { request.principal.type='generativeaiapikey' }
 ```
 
-## preview of OCI SDK
-To use Agent Hub features in pre-production environment (ppe) we need to install a preview version of OCI Python SDK.
+## 2) Vector Store Header Requirement (LA)
+
+As of March 19, 2026 (LA), all Vector Store-related calls must include the project header:
+
+```text
+OpenAI-Project: <PROJECT_ID>
 ```
+
+Without this header, Vector Store operations may fail even when authentication is valid.
+
+## 3) OCI SDK Preview Requirement (PPE)
+
+To use Agent Hub features in the pre-production environment (PPE), install the preview OCI Python SDK:
+
+```bash
 pip install --trusted-host=artifactory.oci.oraclecorp.com -i https://artifactory.oci.oraclecorp.com/api/pypi/global-dev-pypi/simple -U oci==2.168.1+preview.1.347
 ```
 
-## policy needed
-```
+## 4) Additional IAM Policies Often Needed
+
+```text
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid where ALL {request.principal.type='generativeaiapikey'}
 allow any-user to manage generative-ai-project in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-file in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-vector-store in compartment id ocid1.compartment.oc1..your_ocid
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid
 
-allow any user to manage generative-ai-file in compartment id ocid1.compartment.oc1..your_ocid where ALL { target.generativeaiproject.id='ocid1.generativeaiproject.oc1.......'}
+allow any-user to manage generative-ai-file in compartment id ocid1.compartment.oc1..your_ocid where ALL { target.generativeaiproject.id='ocid1.generativeaiproject.oc1.......' }
 
-allow any-user to read object-family in compartment id ocid1.compartment.oc1..your_ocid where ALL{request.principal.type='generativeaivectorconnector'}
+allow any-user to read object-family in compartment id ocid1.compartment.oc1..your_ocid where ALL { request.principal.type='generativeaivectorconnector' }
 ```
 
-## Test matrix (examples + utility)
+## 5) Test Matrix (Examples + Utilities)
 
-Symbols to copy/paste: `✅` `❌`
+Legend:
+- `✅` working
+- `❌` not working
+- `⬜` not verified yet
 
-| file | preprod | prod |
+| File | Preprod | Prod |
 |---|---|---|
 | [example01.py](examples/example01.py) | ✅ | ✅ |
 | [example02.py](examples/example02.py) | ✅ | ✅ |
@@ -54,7 +78,7 @@ Symbols to copy/paste: `✅` `❌`
 | [example17.py](examples/example17.py) | ✅ | ❌ |
 | [example18.py](examples/example18.py) | ✅ | ❌ |
 | [example21.py](examples/example21.py) | ❌ | ❌ |
-| [list_all_files.py](examples/list_all_files.py) | ✅ | ⬜ |
+| [list_all_files.py](examples/list_all_files.py) | ✅ | ✅ |
 | [delete_all_files.py](examples/delete_all_files.py) | ⬜ | ⬜ |
 | [list_all_vector_stores.py](examples/list_all_vector_stores.py) | ✅ | ⬜ |
 | [delete_all_vs.py](examples/delete_all_vs.py) | ⬜ | ⬜ |

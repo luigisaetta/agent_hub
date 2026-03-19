@@ -7,14 +7,14 @@ Description:
     Shared endpoint configuration values used by example scripts.
 """
 
-# REGION = "eu-frankfurt-1"
-REGION = "us-chicago-1"
+REGION = "eu-frankfurt-1"
+# REGION = "us-chicago-1"
 
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
 # (17/03/2026)Note that some features are only available in preprod for now,
 # so you might want to switch to preprod to try them out.
-IS_PREPROD = True
+IS_PREPROD = False
 
 if IS_PREPROD:
     # this is the URL for inference (data plane)

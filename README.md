@@ -44,6 +44,12 @@ The examples show how to:
 | 15 | Vector store query with file search | [`examples/example18.py`](examples/example18.py) | Queries a vector store through Responses API and prints inline references. | `responses.create(...)` + `tools=[{"type":"file_search"}]` | Retrieval-augmented QA over indexed project documents. | Uses fixed `VECTOR_STORE_ID`; currently preprod-oriented. |
 | 16 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
+## Detailed Demos
+
+| # | Demo | Folder | Purpose | Key API usage | Good for | Notes |
+|---|---|---|---|---|---|---|
+| 1 | Responses chatbot + web search | [`demos/demo1`](demos/demo1) | Streamlit chatbot with multi-turn context and built-in web search. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)` | End-to-end chat UX demo using Responses API tools. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
+
 ## Utility Scripts
 
 | # | Utility | File | Description |
@@ -101,6 +107,15 @@ From the repository root:
 python -m connectors.script_name
 ```
 
+## Run Demos
+
+From the repository root:
+
+```bash
+pip install -r demos/demo1/requirements.txt
+streamlit run demos/demo1/app.py
+```
+
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
 
 ## Project Structure
@@ -135,6 +150,13 @@ agent_hub/
 │   ├── list_connectors.py
 │   ├── sync_connector.py
 │   └── update_connector.py
+├── demos/
+│   └── demo1/
+│       ├── app.py
+│       ├── backend.py
+│       ├── README.md
+│       ├── requirements.txt
+│       └── state.py
 ├── examples/
 │   ├── __init__.py
 │   ├── example01.py
