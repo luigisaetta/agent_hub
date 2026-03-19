@@ -55,3 +55,26 @@ def test_print_header_outputs_consistent_banner(reload_module, capsys):
 
     assert "List of the files in the project" in captured.out
     assert captured.out.count("=") >= 40
+
+
+def test_extract_provider_name_returns_prefix_before_first_dot(reload_module):
+    """Extract provider from model id using dotted provider.model convention."""
+    models = reload_module("common.models")
+
+    provider = models.extract_provider_name("google.gemini-2.5-pro")
+
+    assert provider == "google"
+
+
+def test_extract_provider_name_rejects_invalid_or_empty_model_id(reload_module):
+    """Invalid model identifiers should raise a ValueError."""
+    models = reload_module("common.models")
+
+    for invalid_model_id in ("", "   ", "gpt-5.2", ".gpt-5.2"):
+        try:
+            models.extract_provider_name(invalid_model_id)
+            raised = False
+        except ValueError:
+            raised = True
+
+        assert raised is True

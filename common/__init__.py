@@ -14,6 +14,7 @@ from common.output import (
     print_runtime_config,
     print_streamed_output,
 )
+from common.models import extract_provider_name
 from common.retrieval import extract_text_and_refs
 
 __all__ = [
@@ -27,5 +28,6 @@ __all__ = [
     "print_header",
     "print_runtime_config",
     "print_streamed_output",
+    "extract_provider_name",
     "extract_text_and_refs",
 ]
