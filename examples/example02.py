@@ -16,7 +16,7 @@ from config import BASE_URL, MODEL_ID
 from config_private import KEY1, PROJECT_ID
 
 TEMPERATURE = 0.0
-MAX_OUTPUT_TOKENS = 8000
+MAX_OUTPUT_TOKENS = 12000
 
 
 def main() -> None:
@@ -32,7 +32,7 @@ def main() -> None:
         project=PROJECT_ID,
     )
 
-    request = "Tell me something about Enrico Fermi?"
+    request = "Create a complete report about Enrico Fermi, his life and his contribution to Physics?"
 
     response = client.responses.create(
         model=MODEL_ID,
