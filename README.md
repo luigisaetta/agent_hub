@@ -42,7 +42,8 @@ The examples show how to:
 | 13 | Vector store semantic search | [`examples/example16.py`](examples/example16.py) | Executes a semantic query against a vector store and prints results. | `vector_stores.search(...)` | Basic retrieval/query workflow over indexed files. | Uses a fixed `VECTOR_STORE_ID`. |
 | 14 | Vector store file status | [`examples/example17.py`](examples/example17.py) | Retrieves ingestion status for a specific file attached to a vector store. | `vector_stores.files.retrieve(...)` | Monitoring file ingest lifecycle and troubleshooting indexing state. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`; currently preprod-oriented. |
 | 15 | Vector store query with file search | [`examples/example18.py`](examples/example18.py) | Queries a vector store through Responses API and prints inline references. | `responses.create(...)` + `tools=[{"type":"file_search"}]` | Retrieval-augmented QA over indexed project documents. | Uses fixed `VECTOR_STORE_ID`; currently preprod-oriented. |
-| 16 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
+| 16 | Langfuse integration | [`examples/example19.py`](examples/example19.py) | Sends a non-streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(...)`, `langfuse.flush()` | Observability/tracing of LLM calls. | Requires Langfuse keys/host; currently preprod-oriented. |
+| 17 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
 ## Detailed Demos
 
