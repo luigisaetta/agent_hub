@@ -11,10 +11,10 @@ Description:
 REGION = "us-chicago-1"
 
 # Shared default model used by examples.
-# MODEL_ID = "openai.gpt-5.2"
+MODEL_ID = "openai.gpt-5.2"
 # MODEL_ID = "openai.gpt-5.4"
 # MODEL_ID = "google.gemini-2.5-pro"
-MODEL_ID = "openai.gpt-oss-120b"
+# MODEL_ID = "openai.gpt-oss-120b"
 
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
@@ -36,4 +36,6 @@ else:
     )
 
 # to test integration with langfuse
-LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
+# LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
+# this is langfuse hosted on OCI
+LANGFUSE_BASE_URL = "http://130.61.176.103:3000"

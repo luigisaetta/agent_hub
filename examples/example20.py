@@ -5,6 +5,7 @@ License: MIT
 
 Description:
     This example shows how-to integrate with Langfuse to track the request.
+    In this case response is streamed.
 
     LA (17/03/2026): for now it is working only in preprod env.
 """
@@ -17,6 +18,7 @@ from langfuse import get_client
 from common import (
     print_example_summary,
     print_runtime_config,
+    print_streamed_output
 )
 from config import MODEL_ID, LANGFUSE_BASE_URL, BASE_URL
 from config_private import PROJECT_ID, LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, KEY1
@@ -26,16 +28,15 @@ os.environ["LANGFUSE_SECRET_KEY"] = LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_PUBLIC_KEY"] = LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_HOST"] = LANGFUSE_BASE_URL
 
-# preprod
-# VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
+TEMPERATURE = 0.0
+MAX_OUTPUT_TOKENS = 4192
 
 
 def main() -> None:
     """Simple LLM call with Langfuse integration."""
     print_runtime_config()
     print("")
-    print_example_summary("Simple non-streaming call with integration with Langfuse.")
+    print_example_summary("Streaming call with integration with Langfuse.")
     print("")
 
     client = openai.OpenAI(
@@ -44,17 +45,20 @@ def main() -> None:
         project=PROJECT_ID,
     )
 
-    request = "Tell me about G. Parisi and his work on Spin Glasses?"
+    request = "Create a complete report about Enrico Fermi, his life and his contribution to Physics?"
 
     response = client.responses.create(
         model=MODEL_ID,
-        temperature=0.0,
+        temperature=TEMPERATURE,
+        max_output_tokens=MAX_OUTPUT_TOKENS,
         input=request,
+        stream=True,
     )
 
-    print("Request:", request)
-    print(response.output_text)
     print("")
+    print("Request:", request)
+    print_streamed_output(response)
+    print("\n\n")
 
     # Flush via global LangFuse client
     langfuse = get_client()
