@@ -12,10 +12,9 @@ Description:
 from openai import OpenAI
 from common import print_example_summary, print_runtime_config, print_streamed_output
 
-from config import BASE_URL
+from config import BASE_URL, MODEL_ID
 from config_private import KEY1, PROJECT_ID
 
-MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 MAX_OUTPUT_TOKENS = 8000
 

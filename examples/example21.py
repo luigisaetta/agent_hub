@@ -13,10 +13,9 @@ import base64
 from openai import OpenAI
 
 from common import print_example_summary, print_runtime_config
-from config import BASE_URL
+from config import BASE_URL, MODEL_ID
 from config_private import KEY1, PROJECT_ID
 
-MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 
 print_runtime_config()
@@ -31,7 +30,7 @@ client = OpenAI(
 )
 
 response = client.responses.create(
-    model="openai.gpt-5.2",
+    model=MODEL_ID,
     input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
     tools=[{"type": "image_generation"}],
     store=False,

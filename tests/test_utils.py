@@ -28,7 +28,7 @@ def test_get_client_production_uses_openai_with_expected_kwargs(reload_module):
 
     client = clients.get_client(is_preproduction=False)
 
-    assert client.kwargs["base_url"] == clients.BASE_URL
+    assert client.kwargs["base_url"] == clients.get_openai_base_url(use_preprod=False)
     assert client.kwargs["api_key"] == clients.KEY1
     assert client.kwargs["project"] == clients.PROJECT_ID
 
@@ -39,7 +39,7 @@ def test_get_client_preproduction_uses_oci_client_with_ppe_url(reload_module):
 
     client = clients.get_client(is_preproduction=True)
 
-    assert client.kwargs["base_url"] == clients.BASE_URL
+    assert client.kwargs["base_url"] == clients.get_openai_base_url(use_preprod=True)
     assert "ppe.inference.generativeai." in client.kwargs["base_url"]
     assert f".{clients.REGION}.oci.oraclecloud.com" in client.kwargs["base_url"]
     assert client.kwargs["compartment_id"] == clients.COMPARTMENT_ID

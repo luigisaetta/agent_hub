@@ -14,7 +14,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from demos.demo1.backend import DEFAULT_MODEL, create_client, create_conversation, stream_response_text
+from demos.demo1.backend import (
+    DEFAULT_MODEL,
+    create_client,
+    create_conversation,
+    stream_response_text,
+)
 from demos.demo1.state import (
     append_message,
     clear_messages,

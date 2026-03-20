@@ -10,6 +10,11 @@ Description:
 REGION = "eu-frankfurt-1"
 # REGION = "us-chicago-1"
 
+# Shared default model used by examples.
+MODEL_ID = "openai.gpt-5.2"
+# MODEL_ID = "openai.gpt-5.4"
+# MODEL_ID = "google.gemini-2.5-pro"
+
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
 # (17/03/2026)Note that some features are only available in preprod for now,

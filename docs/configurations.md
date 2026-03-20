@@ -4,7 +4,7 @@ This project uses a shared configuration at repository root and imports it from 
 
 ## Files
 
-- `config.py`: non-secret runtime settings (region, endpoint mode, base URLs).
+- `config.py`: non-secret runtime settings (region, endpoint mode, base URLs, default model id).
 - `config_private.py`: secret/runtime identifiers (project id, api keys, compartment id).
 - `config_private_template.py`: template to create your own `config_private.py`.
 
@@ -13,6 +13,7 @@ This project uses a shared configuration at repository root and imports it from 
 1. Edit `config.py`:
 - `REGION`: OCI region (for example `us-chicago-1` or `eu-frankfurt-1`).
 - `IS_PREPROD`: set `True` for PPE endpoints, `False` for production endpoints.
+- `MODEL_ID`: default model used by examples/demos (for example `openai.gpt-5.2`).
 
 2. Create/update `config_private.py` from `config_private_template.py`:
 - `PROJECT_ID`: OCI Generative AI project OCID.

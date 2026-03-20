@@ -15,10 +15,9 @@ from pydantic import BaseModel
 from openai import OpenAI
 
 from common import print_example_summary, print_runtime_config
-from config import BASE_URL
+from config import BASE_URL, MODEL_ID
 from config_private import KEY1, PROJECT_ID
 
-MODEL_ID = "openai.gpt-5.2"
 TEMPERATURE = 0.0
 
 

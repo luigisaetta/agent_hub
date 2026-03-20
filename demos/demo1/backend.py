@@ -7,8 +7,9 @@ from __future__ import annotations
 from collections.abc import Iterator
 
 from common import get_client
+from config import MODEL_ID
 
-DEFAULT_MODEL = "openai.gpt-5.2"
+DEFAULT_MODEL = MODEL_ID
 DEFAULT_TEMPERATURE = 0.0
 DEFAULT_MAX_OUTPUT_TOKENS = 4000
 DEFAULT_ASSISTANT_INSTRUCTIONS = (
