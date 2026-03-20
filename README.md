@@ -83,6 +83,11 @@ Install dependencies:
 pip install openai pydantic oci oci-openai
 ```
 
+If you want to use Langfuse integration
+```bash
+pip install langfuse
+```
+
 Install test dependencies:
 
 ```bash

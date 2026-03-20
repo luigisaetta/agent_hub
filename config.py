@@ -14,12 +14,13 @@ REGION = "eu-frankfurt-1"
 MODEL_ID = "openai.gpt-5.2"
 # MODEL_ID = "openai.gpt-5.4"
 # MODEL_ID = "google.gemini-2.5-pro"
+# MODEL_ID = "openai.gpt-oss-120b"
 
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
 # (17/03/2026)Note that some features are only available in preprod for now,
 # so you might want to switch to preprod to try them out.
-IS_PREPROD = False
+IS_PREPROD = True
 
 if IS_PREPROD:
     # this is the URL for inference (data plane)
@@ -33,3 +34,6 @@ else:
     CP_BASE_URL = (
         f"https://generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
     )
+
+# to test integration with langfuse
+LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
