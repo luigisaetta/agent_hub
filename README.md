@@ -105,13 +105,21 @@ Secrets are loaded from environment profile files:
 - `.env.preprod-frankfurt`
 - `.env.prod-frankfurt`
 
+`REGION` and `IS_PREPROD` remain defined in `config.py`.
+When you run `source ./set_env.sh <profile>`, the script exports:
+- `AGENT_HUB_REGION`
+- `AGENT_HUB_IS_PREPROD`
+- `AGENT_HUB_ENV_FILE`
+
+These environment variables override `config.py` defaults for the current shell session.
+
 Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
 `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `LF_PWD`, `VECTOR_STORE_ID`.
 
 Set the active profile from repository root:
 
 ```bash
-source ./set_env.sh preprod-chicago
+source ./set_env.sh preprod-frankfurt
 ./show_current_env.sh
 ```
 

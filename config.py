@@ -1,14 +1,30 @@
 """
 Author: L. Saetta
-Last modified: 2026-03-16
+Last modified: 2026-03-21
 License: MIT
 
 Description:
     Shared endpoint configuration values used by example scripts.
 """
 
-# REGION = "eu-frankfurt-1"
-REGION = "us-chicago-1"
+import os
+
+
+def _env_bool(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value is None:
+        return default
+    normalized = value.strip().lower()
+    if normalized in {"1", "true", "yes", "y", "on"}:
+        return True
+    if normalized in {"0", "false", "no", "n", "off"}:
+        return False
+    raise ValueError(f"Invalid boolean value for {name}: {value!r}")
+
+
+# Defaults can be overridden by AGENT_HUB_REGION / AGENT_HUB_IS_PREPROD.
+DEFAULT_REGION = "us-chicago-1"
+REGION = os.getenv("AGENT_HUB_REGION", DEFAULT_REGION)
 
 # Shared default model used by examples.
 MODEL_ID = "openai.gpt-5.2"
@@ -20,7 +36,7 @@ MODEL_ID = "openai.gpt-5.2"
 # or in production environment.
 # (17/03/2026) Note that some features are only available in preprod for now,
 # so you might want to switch to preprod to try them out.
-IS_PREPROD = True
+IS_PREPROD = _env_bool("AGENT_HUB_IS_PREPROD", True)
 
 # Production endpoints are the source of truth.
 PROD_BASE_URL = (
