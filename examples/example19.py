@@ -26,6 +26,7 @@ os.environ["LANGFUSE_SECRET_KEY"] = LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_PUBLIC_KEY"] = LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_HOST"] = LANGFUSE_BASE_URL
 
+
 def main() -> None:
     """Simple LLM call with Langfuse integration."""
     print_runtime_config()

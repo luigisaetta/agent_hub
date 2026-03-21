@@ -16,6 +16,7 @@ from config_private import PROJECT_ID, VECTOR_STORE_ID
 # here we have a problem
 # files are working in production but vector stores are working only in ppe for now
 
+
 def main() -> None:
     """List all the files in a given vector store."""
     print_runtime_config()
