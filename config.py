@@ -18,7 +18,7 @@ MODEL_ID = "openai.gpt-5.2"
 
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
-# (17/03/2026)Note that some features are only available in preprod for now,
+# (17/03/2026) Note that some features are only available in preprod for now,
 # so you might want to switch to preprod to try them out.
 IS_PREPROD = True
 

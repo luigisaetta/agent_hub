@@ -82,7 +82,7 @@ The examples show how to:
 Install dependencies:
 
 ```bash
-pip install openai pydantic oci oci-openai
+pip install -r requirements.txt
 ```
 
 If you want to use Langfuse integration
@@ -97,6 +97,28 @@ pip install -r requirements-dev.txt
 ```
 
 Configuration details are documented in [`docs/configurations.md`](docs/configurations.md).
+
+## Secret Profiles
+
+Secrets are loaded from environment profile files:
+- `.env.preprod-chicago`
+- `.env.preprod-frankfurt`
+- `.env.prod-frankfurt`
+
+Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
+`LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `LF_PWD`, `VECTOR_STORE_ID`.
+
+Set the active profile from repository root:
+
+```bash
+source ./set_env.sh preprod-chicago
+./show_current_env.sh
+```
+
+Profiles currently available:
+- `preprod-chicago`
+- `preprod-frankfurt`
+- `prod-frankfurt`
 
 ## Run Examples
 
@@ -142,6 +164,8 @@ agent_hub/
 ├── config.py
 ├── config_private.py
 ├── config_private_template.py
+├── set_env.sh
+├── show_current_env.sh
 ├── common/
 │   ├── __init__.py
 │   ├── clients.py

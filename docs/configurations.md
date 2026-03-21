@@ -5,8 +5,11 @@ This project uses a shared configuration at repository root and imports it from 
 ## Files
 
 - `config.py`: non-secret runtime settings (region, endpoint mode, base URLs, default model id).
-- `config_private.py`: secret/runtime identifiers (project id, api keys, compartment id).
-- `config_private_template.py`: template to create your own `config_private.py`.
+- `config_private.py`: loads secret/runtime identifiers from the active `.env` profile.
+- `config_private_template.py`: reference for required secret keys.
+- `.env.preprod-chicago`, `.env.preprod-frankfurt`, `.env.prod-frankfurt`: secret profiles (gitignored).
+- `set_env.sh`: selects active secret profile.
+- `show_current_env.sh`: shows currently active secret profile.
 
 ## What to edit
 
@@ -15,10 +18,19 @@ This project uses a shared configuration at repository root and imports it from 
 - `IS_PREPROD`: set `True` for PPE endpoints, `False` for production endpoints.
 - `MODEL_ID`: default model used by examples/demos (for example `openai.gpt-5.2`).
 
-2. Create/update `config_private.py` from `config_private_template.py`:
+2. Set active secret profile:
+
+```bash
+source ./set_env.sh preprod-chicago
+./show_current_env.sh
+```
+
+3. Fill/update the `.env.*` profile files with your values:
 - `PROJECT_ID`: OCI Generative AI project OCID.
 - `KEY1` / `KEY2`: API keys.
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
+- `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LF_PWD` for Langfuse examples.
+- `VECTOR_STORE_ID`: vector store OCID for retrieval examples (can be empty in environments where vector stores are unavailable, e.g. current prod).
 
 ## Endpoint behavior
 
@@ -31,8 +43,8 @@ When `IS_PREPROD=True`, URLs use `ppe.*`. Otherwise they use production domains.
 
 ## Security notes
 
-- Never commit real secrets in `config_private.py`.
-- Keep `config_private_template.py` as placeholder values only.
+- Never commit real secrets in tracked files.
+- Keep secret values only in `.env.*` files (already gitignored).
 - Rotate keys if they were accidentally exposed.
 
 ## Running scripts correctly

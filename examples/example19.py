@@ -26,11 +26,6 @@ os.environ["LANGFUSE_SECRET_KEY"] = LANGFUSE_SECRET_KEY
 os.environ["LANGFUSE_PUBLIC_KEY"] = LANGFUSE_PUBLIC_KEY
 os.environ["LANGFUSE_HOST"] = LANGFUSE_BASE_URL
 
-# preprod
-# VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
-
-
 def main() -> None:
     """Simple LLM call with Langfuse integration."""
     print_runtime_config()

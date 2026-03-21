@@ -11,15 +11,10 @@ Description:
 
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
-from config_private import PROJECT_ID
+from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 # here we have a problem
 # files are working in production but vector stores are working only in ppe for now
-
-# preprod
-# VECTOR_STORE_ID = "vs_ord_tt8bz118czgpej8gjk70jnrg75p8eolansr5sy6jg3xgyrna"
-VECTOR_STORE_ID = "vs_fra_k2kuewsdtfc7sohca4dc97gh5qp6a7wukhpb427vt7vd70il"
-
 
 def main() -> None:
     """Query a Vector Store."""
@@ -27,6 +22,11 @@ def main() -> None:
     print("")
     print_example_summary("Query a vector store and return chunks.")
     print("")
+
+    if not VECTOR_STORE_ID:
+        print("VECTOR_STORE_ID is empty for the active profile.")
+        print("Set VECTOR_STORE_ID in the selected .env profile.")
+        return
 
     # this function is used to wrap switch from LA to GA
     client = get_client(is_preproduction=IS_PREPROD)

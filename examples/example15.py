@@ -12,8 +12,7 @@ from pathlib import Path
 
 from common import get_client, print_example_summary, print_runtime_config
 from config import IS_PREPROD
-
-VECTOR_STORE_ID = "vs_ord_8rbth2q8lgxawdn7za4exue8l0qcdbwohkgscy7lkkl9wqeg"
+from config_private import VECTOR_STORE_ID
 
 
 # this function is used to wrap switch from LA to GA
@@ -25,6 +24,11 @@ def main() -> None:
     print("")
     print_example_summary("Upload to vector store and poll batch processing.")
     print("")
+
+    if not VECTOR_STORE_ID:
+        print("VECTOR_STORE_ID is empty for the active profile.")
+        print("Set VECTOR_STORE_ID in the selected .env profile.")
+        return
 
     client = get_client(is_preproduction=IS_PREPROD)
 
