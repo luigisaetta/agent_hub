@@ -163,7 +163,6 @@ agent_hub/
 ├── requirements-dev.txt
 ├── config.py
 ├── config_private.py
-├── config_private_template.py
 ├── set_env.sh
 ├── show_current_env.sh
 ├── common/
