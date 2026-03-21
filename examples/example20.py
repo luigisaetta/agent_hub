@@ -15,11 +15,7 @@ import os
 from langfuse.openai import openai
 from langfuse import get_client
 
-from common import (
-    print_example_summary,
-    print_runtime_config,
-    print_streamed_output
-)
+from common import print_example_summary, print_runtime_config, print_streamed_output
 from config import MODEL_ID, LANGFUSE_BASE_URL, BASE_URL
 from config_private import PROJECT_ID, LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, KEY1
 

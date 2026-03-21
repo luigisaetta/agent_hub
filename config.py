@@ -22,18 +22,21 @@ MODEL_ID = "openai.gpt-5.2"
 # so you might want to switch to preprod to try them out.
 IS_PREPROD = True
 
+# Production endpoints are the source of truth.
+PROD_BASE_URL = (
+    f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
+)
+PROD_CP_BASE_URL = (
+    f"https://generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
+)
+
 if IS_PREPROD:
-    # this is the URL for inference (data plane)
-    BASE_URL = f"https://ppe.inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
-    # this is the URL for control plane (CP) operations (e.g. vector store management)
-    CP_BASE_URL = (
-        f"https://ppe.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
-    )
+    # Preprod endpoints are derived from prod by prefixing the hostname with "ppe.".
+    BASE_URL = PROD_BASE_URL.replace("https://", "https://ppe.", 1)
+    CP_BASE_URL = PROD_CP_BASE_URL.replace("https://", "https://ppe.", 1)
 else:
-    BASE_URL = f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
-    CP_BASE_URL = (
-        f"https://generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
-    )
+    BASE_URL = PROD_BASE_URL
+    CP_BASE_URL = PROD_CP_BASE_URL
 
 # to test integration with langfuse
 # LANGFUSE_BASE_URL = "https://cloud.langfuse.com"
