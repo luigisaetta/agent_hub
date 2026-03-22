@@ -52,6 +52,7 @@ The examples show how to:
 | # | Demo | Folder | Purpose | Key API usage | Good for | Notes |
 |---|---|---|---|---|---|---|
 | 1 | Responses chatbot + web search | [`demos/demo1`](demos/demo1) | Streamlit chatbot with multi-turn context and built-in web search. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)` | End-to-end chat UX demo using Responses API tools. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
+| 2 | Responses chatbot + web search + Langfuse | [`demos/demo2`](demos/demo2) | Streamlit chatbot with multi-turn context, built-in web search, and Langfuse traces on LLM calls. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)`, `langfuse.openai` instrumentation | End-to-end chat UX demo with observability/tracing. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
 
 ## Utility Scripts
 
@@ -152,6 +153,9 @@ From the repository root:
 ```bash
 pip install -r demos/demo1/requirements.txt
 streamlit run demos/demo1/app.py
+
+pip install -r demos/demo2/requirements.txt
+streamlit run demos/demo2/app.py
 ```
 
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
@@ -190,7 +194,13 @@ agent_hub/
 │   ├── sync_connector.py
 │   └── update_connector.py
 ├── demos/
-│   └── demo1/
+│   ├── demo1/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   └── demo2/
 │       ├── app.py
 │       ├── backend.py
 │       ├── README.md
