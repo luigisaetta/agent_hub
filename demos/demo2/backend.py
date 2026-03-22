@@ -68,6 +68,7 @@ def stream_response_text(
 
     emitted_delta = False
     try:
+        # backend streams output to UI
         for event in stream:
             if event.type == "response.output_text.delta":
                 emitted_delta = True

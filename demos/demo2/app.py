@@ -8,6 +8,8 @@ Description:
     with Langfuse tracing.
 """
 
+# pylint: disable=wrong-import-position
+
 from __future__ import annotations
 
 import sys

@@ -2,6 +2,8 @@
 Demo 1 - Streamlit chatbot using Responses API + web search tool.
 """
 
+# pylint: disable=wrong-import-position
+
 from __future__ import annotations
 
 import sys
