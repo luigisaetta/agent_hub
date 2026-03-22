@@ -23,6 +23,7 @@ def _env_bool(name: str, default: bool) -> bool:
 
 
 # Defaults can be overridden by AGENT_HUB_REGION / AGENT_HUB_IS_PREPROD.
+# set when running source ./setenv...
 DEFAULT_REGION = "us-chicago-1"
 REGION = os.getenv("AGENT_HUB_REGION", DEFAULT_REGION)
 
