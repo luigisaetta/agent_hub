@@ -1,4 +1,4 @@
-# OCI Enterprise AI Agents Examples for OCI OpenAI-Compatible API
+# OCI Enterprise AI Agents Examples
 
 [![Python](https://img.shields.io/badge/python-3.11%2B-blue.svg)](https://www.python.org/)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
