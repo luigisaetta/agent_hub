@@ -16,7 +16,8 @@ The examples show how to:
 - keep multi-turn state with the Conversations API,
 - show how to get information about the internal LLM reasoning,
 - create a vector store resource,
-- create and manage connectors between vector stores and object storage buckets.
+- create and manage connectors between vector stores and object storage buckets,
+- run Streamlit demos, including Langfuse-integrated observability/tracing in [`demos/demo2`](demos/demo2).
 
 ## Documentation
 
