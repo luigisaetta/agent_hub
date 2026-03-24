@@ -20,7 +20,7 @@ TEMPERATURE = 0.0
 
 print_runtime_config()
 print("")
-print_example_summary("Generate an image and save it as otter.png.")
+print_example_summary("Generate an image and save it as result.png.")
 print("")
 
 client = OpenAI(
@@ -29,9 +29,12 @@ client = OpenAI(
     project=PROJECT_ID,
 )
 
+# INPUT = "Generate an image of gray tabby cat hugging an otter with an orange scarf"
+INPUT = "Generate an image that represent the importance of Observability for AI agents"
+
 response = client.responses.create(
     model=MODEL_ID,
-    input="Generate an image of gray tabby cat hugging an otter with an orange scarf",
+    input=INPUT,
     tools=[{"type": "image_generation"}],
     store=False,
     stream=False,
@@ -47,5 +50,5 @@ image_data = [
 if image_data:
     image_base64 = image_data[0]
 
-    with open("otter.png", "wb") as f:
+    with open("result.png", "wb") as f:
         f.write(base64.b64decode(image_base64))

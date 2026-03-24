@@ -33,6 +33,7 @@ MODEL_ID = "openai.gpt-5.2"
 # MODEL_ID = "google.gemini-2.5-pro"
 # MODEL_ID = "openai.gpt-oss-120b"
 
+
 # this switch is here to decide if you want to try in preprod
 # or in production environment.
 # (17/03/2026) Note that some features are only available in preprod for now,

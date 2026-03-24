@@ -1,0 +1,99 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "ProceduraVendita",
+  "type": "object",
+  "required": [
+    "tribunale",
+    "numero_procedura",
+    "tipo_vendita",
+    "modalita_vendita",
+    "termine_offerta",
+    "professionista_delegato",
+    "posta_certificata_professionista",
+    "iban_cauzione",
+    "indirizzo_trasmissione_offerta",
+    "lotti"
+  ],
+  "properties": {
+    "tribunale": { "type": "string" },
+    "numero_procedura": { "type": "string" },
+    "tipo_vendita": { "type": "string" },
+    "modalita_vendita": { "type": "string" },
+    "termine_offerta": {
+      "type": "string",
+      "anyOf": [
+        {
+          "pattern": "^\\d{1,2}\\.\\d{1,2}\\.\\d{4} h\\. \\d{2}:\\d{2}$"
+        },
+        {
+          "pattern": "^\\d{1,2}\\.\\d{1,2}\\.\\d{4} \\d{2}:\\d{2}$"
+        },
+        {
+          "pattern": "^\\d{1,2}\\.\\d{1,2}\\.\\d{4}$"
+        }
+      ]
+    },
+    "professionista_delegato": { "type": "string" },
+    "posta_certificata_professionista": {
+      "type": ["string", "null"],
+      "format": "email"
+    },
+    "iban_cauzione": {
+      "type": "string"
+    },
+    "indirizzo_trasmissione_offerta": { "type": "string" },
+    "lotti": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": [
+          "lotto",
+          "oggetti_vendita",
+          "valore_asta",
+          "offerta_minima",
+          "offerta_minima_in_aumento"
+        ],
+        "properties": {
+          "lotto": { "type": "string" },
+          "oggetti_vendita": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "oggetto_vendita",
+                "descrizione_dettagliata",
+                "stato"
+              ],
+              "properties": {
+                "oggetto_vendita": { "type": "string" },
+                "descrizione_dettagliata": { "type": "string" },
+                "indirizzo_oggetto": { "type": ["string", "null"] },
+                "dati_catastali": {
+                  "type": ["array", "null"],
+                  "items": {
+                    "type": "object",
+                    "required": ["dato_catastale"],
+                    "properties": {
+                      "dato_catastale": { "type": ["string", "null"] }
+                    }
+                  }
+                },
+                "stato": {
+                  "type": ["string", "null"],
+                  "enum": ["libero", "occupato", "non specificato", ""]
+                },
+                "note": { "type": ["string", "null"] }
+              },
+              "additionalProperties": false
+            }
+          },
+          "valore_asta": { "type": "string" },
+          "offerta_minima": { "type": ["string", "null"] },
+          "offerta_minima_in_aumento": { "type": ["string", "null"] }
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "additionalProperties": false
+}

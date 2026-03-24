@@ -54,6 +54,7 @@ The examples show how to:
 |---|---|---|---|---|---|---|
 | 1 | Responses chatbot + web search | [`demos/demo1`](demos/demo1) | Streamlit chatbot with multi-turn context and built-in web search. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)` | End-to-end chat UX demo using Responses API tools. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
 | 2 | Responses chatbot + web search + Langfuse | [`demos/demo2`](demos/demo2) | Streamlit chatbot with multi-turn context, built-in web search, and Langfuse traces on LLM calls. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)`, `langfuse.openai` instrumentation | End-to-end chat UX demo with observability/tracing. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
+| 3 | Structured extraction from legal PDFs | [`demos/demo3`](demos/demo3) | Streamlit app that previews one uploaded PDF, extracts raw text, and produces structured JSON output. | `files.create(...)`, `responses.create(...)` for PDF-to-text, `responses.parse(..., text_format=ProceduraVendita)` | End-to-end document extraction pipeline with typed schema output. | Uses hybrid models: Gemini for text extraction + GPT-5.2 for structured parsing. |
 
 ## Utility Scripts
 
@@ -157,6 +158,9 @@ streamlit run demos/demo1/app.py
 
 pip install -r demos/demo2/requirements.txt
 streamlit run demos/demo2/app.py
+
+pip install -r demos/demo3/requirements.txt
+streamlit run demos/demo3/app.py
 ```
 
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
@@ -201,12 +205,19 @@ agent_hub/
 │   │   ├── README.md
 │   │   ├── requirements.txt
 │   │   └── state.py
-│   └── demo2/
+│   ├── demo2/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   └── demo3/
 │       ├── app.py
 │       ├── backend.py
+│       ├── llm_schema_models.py
+│       ├── proc_vendita.json
 │       ├── README.md
-│       ├── requirements.txt
-│       └── state.py
+│       └── requirements.txt
 ├── examples/
 │   ├── __init__.py
 │   ├── example01.py
