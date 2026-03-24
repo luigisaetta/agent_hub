@@ -51,7 +51,8 @@ STRUCTURED_EXTRACTION_PROMPT = (
     "- For amount-like fields that are typed as string, always return strings.\n"
     "- In each lot, extract one separate item for each distinct asset in oggetti_vendita.\n"
     "- Do not collapse multiple assets into one object.\n"
-    "- If assets are listed in a single sentence separated by semicolons, split them into separate objects.\n"
+    "- If assets are listed in a single sentence separated by semicolons,"
+    " split them into separate objects.\n"
     "- Return only structured data matching the schema."
 )
 
@@ -209,8 +210,13 @@ def extract_structured_data_from_text(extracted_text: str) -> tuple[dict, dict]:
         raise ValueError("Extracted text is empty. Cannot run structured parsing.")
 
     LOGGER.info("[STEP 2] Structured JSON extraction started")
+
     client = create_client()
+
+    # create n example to pass to the model
+    # to improve accuracy of structured extraction
     runtime_example = _build_runtime_example_from_model()
+
     response = client.responses.parse(
         model=STRUCTURED_MODEL_ID,
         temperature=TEMPERATURE,
@@ -239,6 +245,7 @@ def extract_structured_data_from_text(extracted_text: str) -> tuple[dict, dict]:
 
     data = parsed.model_dump(mode="json")
     usage = _extract_usage(response)
+
     LOGGER.info(
         "[STEP 2] Structured JSON extraction completed | keys=%s | tokens in/out/total=%d/%d/%d",
         list(data.keys()),

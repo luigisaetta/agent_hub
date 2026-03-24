@@ -39,17 +39,6 @@ if not logging.getLogger().handlers:
     )
 
 
-def _parse_version(value: str) -> tuple[int, int, int]:
-    """Parse semantic-ish version string into numeric tuple."""
-    parts = value.split(".")
-    padded = (parts + ["0", "0", "0"])[:3]
-    numbers: list[int] = []
-    for part in padded:
-        digits = "".join(char for char in part if char.isdigit())
-        numbers.append(int(digits) if digits else 0)
-    return numbers[0], numbers[1], numbers[2]
-
-
 def _validate_pdf_bytes(pdf_bytes: bytes) -> None:
     """Validate input bytes before rendering preview."""
     if not pdf_bytes:
@@ -75,25 +64,6 @@ def _render_pdf_preview_html(pdf_bytes: bytes, *, height: int = 520) -> None:
     st.sidebar.markdown(html, unsafe_allow_html=True)
 
 
-def _diagnose_preview_issue(pdf_bytes: bytes) -> list[str]:
-    """Return likely reasons when inline preview appears blank."""
-    hints: list[str] = []
-    if _parse_version(st.__version__) < (1, 35, 0):
-        hints.append(f"Streamlit {st.__version__} is older than demo target 1.35.0.")
-    if len(pdf_bytes) > 15_000_000:
-        hints.append(
-            "Large PDF may hit browser memory/performance limits in data URI mode."
-        )
-    hints.extend(
-        [
-            "Browser may not support inline PDF viewer in embedded frames.",
-            "Security policies/extensions may block data URI PDF rendering.",
-            "Corporate browser settings may disable built-in PDF plugin.",
-        ]
-    )
-    return hints
-
-
 def main() -> None:
     """Render demo3 UI."""
     st.set_page_config(
@@ -117,18 +87,6 @@ def main() -> None:
                 LOGGER.exception(
                     "PDF preview rendering failed for file=%s", uploaded_pdf.name
                 )
-                hints = _diagnose_preview_issue(pdf_bytes)
-                LOGGER.warning(
-                    "Preview diagnostic for file=%s, size=%d, streamlit=%s: %s",
-                    uploaded_pdf.name,
-                    len(pdf_bytes),
-                    st.__version__,
-                    " | ".join(hints),
-                )
-                with st.expander("Preview diagnostics"):
-                    st.write("Likely causes:")
-                    for hint in hints:
-                        st.write(f"- {hint}")
 
             process_clicked = st.button("Process PDF", type="primary")
         else:
