@@ -17,9 +17,9 @@ def _make_annotation(index, file_id, filename, pages):
 
 def _make_response(text, annotations):
     """Create a minimal response object compatible with extract_text_and_refs."""
-    text_obj = SimpleNamespace(text=text, annotations=annotations)
-    output_item = SimpleNamespace(content=[text_obj])
-    return SimpleNamespace(output=[None, output_item])
+    text_obj = SimpleNamespace(type="output_text", text=text, annotations=annotations)
+    output_item = SimpleNamespace(type="message", content=[text_obj])
+    return SimpleNamespace(output=[SimpleNamespace(type="reasoning"), output_item])
 
 
 def test_extract_text_and_refs_handles_empty_annotations(reload_module):
@@ -64,3 +64,59 @@ def test_extract_text_and_refs_sorts_by_index_before_inserting_markers(reload_mo
         {"n": 1, "filename": "a.pdf", "pages": [1, 2]},
         {"n": 2, "filename": "b.pdf", "pages": [3]},
     ]
+
+
+def test_extract_text_and_refs_finds_message_and_output_text_by_type(reload_module):
+    """Should locate output_text in message item without relying on fixed indices."""
+    retrieval = reload_module("common.retrieval")
+    text_obj = SimpleNamespace(
+        type="output_text",
+        text="hello",
+        annotations=[
+            _make_annotation(index=0, file_id="f1", filename="doc.pdf", pages=[2])
+        ],
+    )
+    response = SimpleNamespace(
+        output=[
+            SimpleNamespace(type="file_search_call", content=[]),
+            SimpleNamespace(
+                type="message",
+                content=[SimpleNamespace(type="output_image"), text_obj],
+            ),
+        ]
+    )
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] hello"
+    assert refs == [{"n": 1, "filename": "doc.pdf", "pages": [2]}]
+
+
+def test_extract_text_and_refs_handles_missing_optional_fields(reload_module):
+    """Should tolerate missing annotations and additional_properties fields."""
+    retrieval = reload_module("common.retrieval")
+    response = SimpleNamespace(
+        output=[
+            SimpleNamespace(
+                type="message",
+                content=[SimpleNamespace(type="output_text", text="No refs")],
+            )
+        ]
+    )
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "No refs"
+    assert refs == []
+
+
+def test_extract_text_and_refs_handles_missing_additional_properties(reload_module):
+    """Missing additional_properties should not break reference extraction."""
+    retrieval = reload_module("common.retrieval")
+    annotation = SimpleNamespace(index=0, file_id="f1", filename="doc.pdf")
+    response = _make_response("hello", [annotation])
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] hello"
+    assert refs == [{"n": 1, "filename": "doc.pdf", "pages": None}]

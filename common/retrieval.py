@@ -9,10 +9,29 @@ def extract_text_and_refs(response):
     """
     Extract response text and inline file references from file-search annotations.
     """
-    text_obj = response.output[1].content[0]
+    text_obj = None
 
-    text = text_obj.text
-    annotations = sorted(text_obj.annotations, key=lambda ann: ann.index)
+    for item in getattr(response, "output", []) or []:
+        if getattr(item, "type", None) != "message":
+            continue
+
+        for content in getattr(item, "content", []) or []:
+            if getattr(content, "type", None) == "output_text":
+                text_obj = content
+                break
+
+        if text_obj is not None:
+            break
+
+    if text_obj is None:
+        return "", []
+
+    text = getattr(text_obj, "text", "") or ""
+    raw_annotations = getattr(text_obj, "annotations", []) or []
+    annotations = sorted(
+        [ann for ann in raw_annotations if hasattr(ann, "index")],
+        key=lambda ann: ann.index,
+    )
 
     refs_by_file_id = {}
     ref_list = []
@@ -20,15 +39,21 @@ def extract_text_and_refs(response):
     offset = 0
 
     for ann in annotations:
-        file_id = ann.file_id
+        file_id = getattr(ann, "file_id", None)
+        if not file_id:
+            continue
 
         if file_id not in refs_by_file_id:
             refs_by_file_id[file_id] = counter
+            additional_properties = getattr(ann, "additional_properties", {}) or {}
+            if not isinstance(additional_properties, dict):
+                additional_properties = {}
+
             ref_list.append(
                 {
                     "n": counter,
-                    "filename": ann.filename,
-                    "pages": ann.additional_properties.get("page_numbers"),
+                    "filename": getattr(ann, "filename", None),
+                    "pages": additional_properties.get("page_numbers"),
                 }
             )
             counter += 1

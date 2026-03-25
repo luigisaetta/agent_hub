@@ -18,6 +18,7 @@ from common import (
 from config import MODEL_ID
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
+TEMPERATURE = 0.0
 
 def main() -> None:
     """Query a Vector Store."""
@@ -42,17 +43,24 @@ def main() -> None:
     else:
         role_instructions = "system"
 
-    query = "Create a complete report on the impact of AI adoption on the labor market?"
+    query = (
+        "Summarize the retrieved documents about the impact of AI adoption "
+        "on the labor market, focusing on employment, unemployment, wages, "
+        "hiring, and which occupations appear most exposed."
+    )
 
     response = client.responses.create(
         model=MODEL_ID,
+        temperature=TEMPERATURE,
         input=[
             {
                 # cannot use system if provider is google
                 "role": role_instructions,
                 "content": (
-                    "Answer ONLY using the retrieved documents. "
-                    "If the answer is not found, say: "
+                    "Answer using only information from the retrieved documents. "
+                    "You may summarize or synthesize information that is explicitly supported by the retrieved text. "
+                    "Do not use outside knowledge. "
+                    "If the retrieved documents do not contain enough information to answer, say exactly: "
                     "'I don't have sufficient information in the documents.'"
                 ),
             },
@@ -66,9 +74,15 @@ def main() -> None:
             }
         ],
         extra_headers={"OpenAI-Project": PROJECT_ID},
+        tool_choice="required",
+        include=["file_search_call.results"],
     )
 
     text, refs = extract_text_and_refs(response)
+
+    print("")
+    print("Query: ", query)
+    print("")
 
     print(text)
     print("")
@@ -76,6 +90,17 @@ def main() -> None:
     for r in refs:
         print(f"[{r['n']}] {r['filename']} (pages={r['pages']})")
     print("")
+
+    # debug information
+    if "don't have sufficient information" in text:
+        print("Debug info: ")
+        for i, item in enumerate(response.output):
+            print(f"\n--- item {i} ---")
+            print("type:", getattr(item, "type", None))
+            try:
+                print(item.model_dump_json(indent=2))
+            except Exception:
+                print(item)
 
 
 if __name__ == "__main__":
