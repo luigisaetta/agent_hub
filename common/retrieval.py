@@ -1,5 +1,10 @@
 """
-Shared retrieval-related helpers.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Shared retrieval helpers for extracting text and citations from responses.
 """
 
 from __future__ import annotations

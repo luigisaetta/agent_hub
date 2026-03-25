@@ -1,6 +1,6 @@
 ---
 Author: L. Saetta
-Last modified: 2026-03-22
+Last modified: 2026-03-25
 License: MIT
 Description: Operational rules and quality standards for AI agents contributing to agent_hub.
 ---
@@ -47,13 +47,14 @@ Responsible for:
 - Keep scripts runnable from repository root (`python -m ...`).
 - Every new Python file must include the standard project header at the top, conforming to the agreed template.
 - Run `pylint` on changed Python files and resolve all warnings before considering a change ready.
+- Run `pytest` and `pylint` using Conda environment `agent_hub` (for example: `conda run -n agent_hub python -m pytest` and `conda run -n agent_hub pylint ...`).
 - Preserve backward compatibility of existing examples unless explicitly requested otherwise.
 
 ## Standard Workflow
 1. Understand the task and identify impacted files.
 2. Implement the minimum required change.
 3. Update or add tests in `tests/` when behavior changes.
-4. Run essential local checks.
+4. Run essential local checks (at minimum: `conda run -n agent_hub python -m pytest` on impacted tests, `conda run -n agent_hub python -m pylint` on changed Python files, and `conda run -n agent_hub python -m black` when code was edited).
 5. Update documentation when needed.
 
 ## Quality Checklist (Definition of Done)
@@ -81,10 +82,10 @@ pip install -r requirements-dev.txt
 python -m examples.example01
 
 # Tests
-pytest -q
+conda run -n agent_hub python -m pytest -q
 
 # Lint (changed files)
-pylint path/to/changed_file.py
+conda run -n agent_hub pylint path/to/changed_file.py
 ```
 
 ## Security and Configuration

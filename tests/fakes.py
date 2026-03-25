@@ -1,4 +1,11 @@
-"""Shared fake API helpers for pagination and delete flow tests."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Shared fake API helpers for pagination and delete flow tests.
+"""
 
 from __future__ import annotations
 

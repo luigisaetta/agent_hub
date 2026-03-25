@@ -1,4 +1,11 @@
-"""Unit tests for shared connector utilities."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Unit tests for shared connector and OCI client utilities.
+"""
 
 from __future__ import annotations
 

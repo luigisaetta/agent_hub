@@ -1,4 +1,11 @@
-"""Test fixtures and lightweight dependency stubs."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Test fixtures and lightweight dependency stubs shared across test modules.
+"""
 
 from __future__ import annotations
 

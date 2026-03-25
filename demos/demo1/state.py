@@ -1,5 +1,10 @@
 """
-Session-state utilities for Demo1 UI.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Session-state utilities for Demo 1 Streamlit UI.
 """
 
 from __future__ import annotations

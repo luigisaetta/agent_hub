@@ -1,4 +1,11 @@
-"""Regression tests for vector store listing and deletion utility scripts."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Regression tests for vector store listing and deletion utility scripts.
+"""
 
 # pylint: disable=import-error
 

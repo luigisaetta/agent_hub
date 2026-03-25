@@ -1,5 +1,10 @@
 """
-Shared client builders used across examples and connector scripts.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Shared client builders used across examples and connector scripts.
 """
 
 from __future__ import annotations

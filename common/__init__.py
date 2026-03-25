@@ -1,4 +1,11 @@
-"""Shared helpers package."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Package exports for shared helpers used across examples and connectors.
+"""
 
 from common.clients import (
     PROFILE,

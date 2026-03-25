@@ -11,14 +11,14 @@ pip install -r requirements-dev.txt
 ## Run all tests
 
 ```bash
-python -m pytest
+conda run -n agent_hub python -m pytest
 ```
 
 ## Run specific test files
 
 ```bash
-python -m pytest tests/test_utils.py
-python -m pytest tests/test_retrieval.py
+conda run -n agent_hub python -m pytest tests/test_utils.py
+conda run -n agent_hub python -m pytest tests/test_retrieval.py
 ```
 
 ## Coverage
@@ -26,7 +26,7 @@ python -m pytest tests/test_retrieval.py
 Example coverage command used in this repo:
 
 ```bash
-python -m pytest \
+conda run -n agent_hub python -m pytest \
   --cov=common \
   --cov=examples.list_all_files \
   --cov=examples.list_all_vector_stores \

@@ -1,5 +1,10 @@
 """
-Demo 1 - Streamlit chatbot using Responses API + web search tool.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Demo 1 Streamlit chatbot using Responses API with web search tool.
 """
 
 # pylint: disable=wrong-import-position

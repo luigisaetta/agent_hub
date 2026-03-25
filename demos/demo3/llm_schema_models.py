@@ -1,8 +1,11 @@
 """
-Pydantic models mirroring the JSON schemas used in LLM extraction prompts.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
 
-Note:
-- This module mirrors `proc_vendita.json` and is used at runtime.
+Description:
+    Pydantic models mirroring the JSON schemas used in LLM extraction prompts.
+    This module mirrors `proc_vendita.json` and is used at runtime.
 """
 
 from typing import List, Literal, Optional

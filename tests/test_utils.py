@@ -1,4 +1,11 @@
-"""Unit tests for utility helpers in common package."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Unit tests for utility helpers in the common package.
+"""
 
 from __future__ import annotations
 

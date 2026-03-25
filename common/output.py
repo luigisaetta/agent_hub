@@ -1,5 +1,10 @@
 """
-Shared output helpers.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Shared output and formatting helpers for examples.
 """
 
 from __future__ import annotations

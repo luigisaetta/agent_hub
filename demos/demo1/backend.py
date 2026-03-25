@@ -1,5 +1,10 @@
 """
-Backend logic for Demo1 chatbot.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Backend logic for Demo 1 chatbot interactions and streaming responses.
 """
 
 from __future__ import annotations

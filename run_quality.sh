@@ -4,13 +4,18 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
-if ! command -v black >/dev/null 2>&1; then
-  echo "Error: black is not installed or not in PATH."
+if ! command -v conda >/dev/null 2>&1; then
+  echo "Error: conda is not installed or not in PATH."
   exit 1
 fi
 
-if ! command -v pylint >/dev/null 2>&1; then
-  echo "Error: pylint is not installed or not in PATH."
+if ! conda run -n agent_hub python -m black --version >/dev/null 2>&1; then
+  echo "Error: black is not available in conda environment 'agent_hub'."
+  exit 1
+fi
+
+if ! conda run -n agent_hub python -m pylint --version >/dev/null 2>&1; then
+  echo "Error: pylint is not available in conda environment 'agent_hub'."
   exit 1
 fi
 
@@ -30,9 +35,9 @@ if [ ${#PY_FILES[@]} -eq 0 ]; then
 fi
 
 echo "Running black on ${#PY_FILES[@]} Python files..."
-black "${PY_FILES[@]}"
+conda run -n agent_hub python -m black "${PY_FILES[@]}"
 
 echo "Running pylint on ${#PY_FILES[@]} Python files..."
-pylint "${PY_FILES[@]}"
+conda run -n agent_hub python -m pylint "${PY_FILES[@]}"
 
 echo "Quality checks completed."

@@ -1,4 +1,11 @@
-"""Additional regression tests to improve branch coverage."""
+"""
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Additional regression tests to improve branch coverage.
+"""
 
 # pylint: disable=import-error
 

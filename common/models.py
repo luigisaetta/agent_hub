@@ -1,5 +1,10 @@
 """
-Shared model-id helpers.
+Author: L. Saetta
+Last modified: 2026-03-25
+License: MIT
+
+Description:
+    Shared helpers for model-id parsing and provider extraction.
 """
 
 from __future__ import annotations
