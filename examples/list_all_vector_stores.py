@@ -5,12 +5,18 @@ License: MIT
 
 Description:
     List all vector stores in the configured project/compartment.
-"""
 
+    All CRUD operations for Vector Stores require CP_BASE_URL
+    (control plane)
+"""
+import httpx
 from datetime import datetime, timezone
 
-from common import get_client, print_header, print_runtime_config
-from config import IS_PREPROD
+from openai import OpenAI
+from oci_openai import OciSessionAuth
+from common import print_header, print_runtime_config
+from config import PROD_CP_BASE_URL
+from config_private import COMPARTMENT_ID
 
 PAGE_SIZE = 100
 
@@ -29,13 +35,20 @@ def main() -> None:
     print_runtime_config()
     print("")
 
-    client = get_client(is_preproduction=IS_PREPROD, is_control_plane=True)
+    # GA production path: OCI session auth + compartment scope.
+    # Force PROD control-plane endpoint in this script.
+    cp_client = OpenAI(
+        base_url=PROD_CP_BASE_URL,
+        api_key="unused",
+        http_client=httpx.Client(
+            auth=OciSessionAuth(profile_name="DEFAULT"),
+            headers={
+               "opc-compartment-id": COMPARTMENT_ID,
+            },
+        )
+    )
 
-    if IS_PREPROD:
-        where = "compartment"
-    else:
-        where = "project"
-    print_header("vector stores", where)
+    print_header("vector stores", where="compartment")
 
     after = None
     page_num = 1
@@ -43,9 +56,9 @@ def main() -> None:
 
     while True:
         if after is None:
-            page = client.vector_stores.list(limit=PAGE_SIZE, order="desc")
+            page = cp_client.vector_stores.list(limit=PAGE_SIZE, order="desc")
         else:
-            page = client.vector_stores.list(
+            page = cp_client.vector_stores.list(
                 limit=PAGE_SIZE,
                 order="desc",
                 after=after,

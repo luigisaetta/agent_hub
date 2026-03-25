@@ -123,14 +123,28 @@ Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
 Set the active profile from repository root:
 
 ```bash
-source ./set_env.sh preprod-frankfurt
+source ./set_env.sh prod-chicago
 ./show_current_env.sh
 ```
 
 Profiles currently available:
+- `prod-chicago`
 - `preprod-chicago`
 - `preprod-frankfurt`
 - `prod-frankfurt`
+
+## Authentication Troubleshooting
+
+If a script returns `401 NotAuthenticated` while using OCI session authentication:
+
+1. Ensure you selected the profile in the same shell session:
+```bash
+source ./set_env.sh prod-chicago
+```
+2. Refresh the OCI session token for your local OCI profile:
+```bash
+oci session authenticate --profile-name DEFAULT
+```
 
 ## Run Examples
 
