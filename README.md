@@ -8,16 +8,15 @@
 
 This repository contains practical Python examples that call Oracle Cloud Infrastructure (OCI) Generative AI endpoints through the OpenAI-compatible API.
 
-The examples show how to:
-- send a basic text request,
-- stream model output token-by-token,
-- parse responses into structured objects,
-- call a model with integrated web search tooling,
-- keep multi-turn state with the Conversations API,
-- show how to get information about the internal LLM reasoning,
-- create a vector store resource,
-- create and manage connectors between vector stores and object storage buckets,
-- run Streamlit demos, including Langfuse-integrated observability/tracing in [`demos/demo2`](demos/demo2).
+Highlights from the most useful examples and demos:
+- [`examples/example01.py`](examples/example01.py): minimal text request, ideal as first connectivity smoke test.
+- [`examples/example02.py`](examples/example02.py): streaming output token-by-token for chat/CLI-style incremental UX.
+- [`examples/example03.py`](examples/example03.py): structured parsing into typed objects (Pydantic), useful for automation flows.
+- [`examples/example05.py`](examples/example05.py): multi-turn state with the Conversations API plus streaming responses.
+- [`examples/example06.py`](examples/example06.py): reasoning summary output for debugging and response explainability.
+- [`examples/example18.py`](examples/example18.py): file-search over vector stores with inline citations in final answers.
+- [`connectors/create_connector.py`](connectors/create_connector.py) + related scripts in [`connectors/`](connectors): create/sync/manage vector-store connectors to Object Storage.
+- [`demos/demo2`](demos/demo2): Streamlit chatbot with web search and Langfuse-integrated observability/tracing.
 
 ## Documentation
 
