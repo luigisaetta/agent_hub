@@ -13,10 +13,8 @@ import logging
 import json
 from io import BytesIO
 
-from openai import OpenAI
-
-from config import BASE_URL
-from config_private import KEY1, PROJECT_ID
+from common import get_inference_client
+from config_private import PROJECT_ID
 from demos.demo3.llm_schema_models import ProceduraVendita
 
 LOGGER = logging.getLogger("demo3.pdf_processing")
@@ -57,13 +55,9 @@ STRUCTURED_EXTRACTION_PROMPT = (
 )
 
 
-def create_client() -> OpenAI:
+def create_client():
     """Create OpenAI-compatible client for OCI Generative AI."""
-    return OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    return get_inference_client()
 
 
 def _extract_output_text(response) -> str:

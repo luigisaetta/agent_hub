@@ -6,18 +6,16 @@ License: MIT
 Description:
     This example shows how-to query a Vector Store
     using responses API.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
 
 from common import (
     extract_provider_name,
     extract_text_and_refs,
-    get_client,
+    get_inference_client,
     print_example_summary,
     print_runtime_config,
 )
-from config import IS_PREPROD, MODEL_ID
+from config import MODEL_ID
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 
@@ -33,8 +31,7 @@ def main() -> None:
         print("Set VECTOR_STORE_ID in the selected .env profile.")
         return
 
-    # this function is used to wrap switch from LA to GA
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_inference_client()
 
     # tho handle the issue with Gemini-2.5-pro that does not allow
     # to use system role, we need to set the role of the instructions based on the provider

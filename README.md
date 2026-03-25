@@ -36,16 +36,16 @@ The examples show how to:
 | 5 | Conversation state + stream | [`examples/example05.py`](examples/example05.py) | Creates a conversation and runs two streamed turns with shared context. | `conversations.create(...)`, `conversation=...` | Stateful assistants. |  |
 | 6 | Reasoning summary output | [`examples/example06.py`](examples/example06.py) | Requests a response with reasoning summary and prints structured output JSON. | `reasoning={"summary":"auto"}` in `responses.create(...)` | Inspecting model reasoning summaries. |  |
 | 7 | Vision input (image analysis) | [`examples/example07.py`](examples/example07.py) | Encodes a local image and asks the model to extract and summarize text. | `input_image` content in `responses.create(...)` | OCR-like extraction and vision prompts. | Reads `images/page0009.png`. |
-| 8 | Vector store creation | [`examples/example11.py`](examples/example11.py) | Creates a vector store with metadata and expiration. | `vector_stores.create(...)` | Vector store setup flow. | (LA): working in preprod env. |
+| 8 | Vector store creation | [`examples/example11.py`](examples/example11.py) | Creates a vector store with metadata and expiration. | `vector_stores.create(...)` | Vector store setup flow. |  |
 | 9 | File upload + list files | [`examples/example12.py`](examples/example12.py) | Uploads a local PDF file, then lists files in the project. | `files.create(...)`, `files.list(...)` | File management workflow for retrieval pipelines. | Reads `pdf/labor_market_impacts_ai.pdf`. |
 | 10 | List files in vector store | [`examples/example13.py`](examples/example13.py) | Lists files already attached to a specific vector store. | `vector_stores.files.list(...)` | Inspecting ingest status/content in a vector store. | Uses a fixed `VECTOR_STORE_ID`. |
 | 11 | Attach existing file to vector store | [`examples/example14.py`](examples/example14.py) | Retrieves a file by ID and attaches it to a vector store with attributes. | `files.retrieve(...)`, `vector_stores.files.create(...)` | Incremental ingest from existing uploaded files. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`. |
 | 12 | Vector store file batch upload | [`examples/example15.py`](examples/example15.py) | Uploads a local PDF directly to a vector store and waits for processing. | `vector_stores.file_batches.upload_and_poll(...)` | End-to-end ingest into vector store. | Reads `pdf/labor_market_impacts_ai.pdf`. |
 | 13 | Vector store semantic search | [`examples/example16.py`](examples/example16.py) | Executes a semantic query against a vector store and prints results. | `vector_stores.search(...)` | Basic retrieval/query workflow over indexed files. | Uses a fixed `VECTOR_STORE_ID`. |
-| 14 | Vector store file status | [`examples/example17.py`](examples/example17.py) | Retrieves ingestion status for a specific file attached to a vector store. | `vector_stores.files.retrieve(...)` | Monitoring file ingest lifecycle and troubleshooting indexing state. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`; currently preprod-oriented. |
-| 15 | Vector store query with file search | [`examples/example18.py`](examples/example18.py) | Queries a vector store through Responses API and prints inline references. | `responses.create(...)` + `tools=[{"type":"file_search"}]` | Retrieval-augmented QA over indexed project documents. | Uses fixed `VECTOR_STORE_ID`; currently preprod-oriented. |
-| 16 | Langfuse integration | [`examples/example19.py`](examples/example19.py) | Sends a non-streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(...)`, `langfuse.flush()` | Observability/tracing of LLM calls. | Requires Langfuse keys/host; currently preprod-oriented. |
-| 17 | Langfuse integration (streaming) | [`examples/example20.py`](examples/example20.py) | Sends a streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(..., stream=True)`, `langfuse.flush()` | Observability/tracing with token-by-token output. | Requires Langfuse keys/host; currently preprod-oriented. |
+| 14 | Vector store file status | [`examples/example17.py`](examples/example17.py) | Retrieves ingestion status for a specific file attached to a vector store. | `vector_stores.files.retrieve(...)` | Monitoring file ingest lifecycle and troubleshooting indexing state. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`. |
+| 15 | Vector store query with file search | [`examples/example18.py`](examples/example18.py) | Queries a vector store through Responses API and prints inline references. | `responses.create(...)` + `tools=[{"type":"file_search"}]` | Retrieval-augmented QA over indexed project documents. | Uses fixed `VECTOR_STORE_ID`. |
+| 16 | Langfuse integration | [`examples/example19.py`](examples/example19.py) | Sends a non-streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(...)`, `langfuse.flush()` | Observability/tracing of LLM calls. | Requires Langfuse keys/host. |
+| 17 | Langfuse integration (streaming) | [`examples/example20.py`](examples/example20.py) | Sends a streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(..., stream=True)`, `langfuse.flush()` | Observability/tracing with token-by-token output. | Requires Langfuse keys/host. |
 | 18 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 
 ## Detailed Demos
@@ -69,7 +69,7 @@ The examples show how to:
 
 | # | Connector Utility | File | Description |
 |---|---|---|---|
-| 1 | Create connector | [`connectors/create_connector.py`](connectors/create_connector.py) | Creates an Object Storage connector for a vector store (preproduction endpoint). |
+| 1 | Create connector | [`connectors/create_connector.py`](connectors/create_connector.py) | Creates an Object Storage connector for a vector store. |
 | 2 | List connectors | [`connectors/list_connectors.py`](connectors/list_connectors.py) | Lists vector store connectors in the configured compartment. |
 | 3 | Connector stats | [`connectors/get_connector_stats.py`](connectors/get_connector_stats.py) | Retrieves synchronization statistics for one connector. |
 | 4 | Trigger sync | [`connectors/sync_connector.py`](connectors/sync_connector.py) | Starts a file sync job for an existing connector. |
@@ -105,14 +105,12 @@ Configuration details are documented in [`docs/configurations.md`](docs/configur
 ## Secret Profiles
 
 Secrets are loaded from environment profile files:
-- `.env.preprod-chicago`
-- `.env.preprod-frankfurt`
+- `.env.prod-chicago`
 - `.env.prod-frankfurt`
 
-`REGION` and `IS_PREPROD` remain defined in `config.py`.
+`REGION` remains defined in `config.py`.
 When you run `source ./set_env.sh <profile>`, the script exports:
 - `AGENT_HUB_REGION`
-- `AGENT_HUB_IS_PREPROD`
 - `AGENT_HUB_ENV_FILE`
 
 These environment variables override `config.py` defaults for the current shell session.
@@ -129,8 +127,6 @@ source ./set_env.sh prod-chicago
 
 Profiles currently available:
 - `prod-chicago`
-- `preprod-chicago`
-- `preprod-frankfurt`
 - `prod-frankfurt`
 
 ## Authentication Troubleshooting
@@ -249,8 +245,6 @@ Architecture details are documented in [`docs/architecture.md`](docs/architectur
 ## Known Issue
 
 See [`issues_found.md`](issues_found.md) for a current OCI authorization/policy issue (`404` with authorization failure) and policies snippet reference.
-
-(17/03/2026) for now Vector Stores are available only in the preprod (ppe) environment.
 
 ## Notes
 

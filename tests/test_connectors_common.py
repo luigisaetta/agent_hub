@@ -7,8 +7,8 @@ import types
 from typing import Any
 
 
-def test_get_oci_genai_service_endpoint_preprod_and_prod(reload_module, monkeypatch):
-    """Service endpoint helper should switch correctly by environment."""
+def test_get_oci_genai_service_endpoint_returns_prod_url(reload_module, monkeypatch):
+    """Service endpoint helper should return the production endpoint."""
 
     def from_file(*, profile_name):
         """Return minimal config payload for a given profile."""
@@ -25,10 +25,7 @@ def test_get_oci_genai_service_endpoint_preprod_and_prod(reload_module, monkeypa
 
     module = reload_module("common.clients")
 
-    assert module.get_oci_genai_service_endpoint("eu-frankfurt-1", True).startswith(
-        "https://ppe."
-    )
-    assert module.get_oci_genai_service_endpoint("eu-frankfurt-1", False).startswith(
+    assert module.get_oci_genai_service_endpoint("eu-frankfurt-1").startswith(
         "https://generativeai."
     )
 
@@ -36,7 +33,7 @@ def test_get_oci_genai_service_endpoint_preprod_and_prod(reload_module, monkeypa
 def test_build_oci_genai_client_uses_profile_and_computed_endpoint(
     reload_module, monkeypatch
 ):
-    """build_oci_genai_client should feed config and selected endpoint into OCI client."""
+    """build_oci_genai_client should feed config and endpoint into OCI client."""
     captured_profile: dict[str, str | None] = {"value": None}
     captured_kwargs: dict[str, Any] = {}
 
@@ -58,14 +55,12 @@ def test_build_oci_genai_client_uses_profile_and_computed_endpoint(
     monkeypatch.setitem(sys.modules, "oci", oci_stub)
     module = reload_module("common.clients")
 
-    client = module.build_oci_genai_client(
-        profile="CUSTOM", region="eu-frankfurt-1", use_preprod=True
-    )
+    client = module.build_oci_genai_client(profile="CUSTOM", region="eu-frankfurt-1")
 
     assert captured_profile["value"] == "CUSTOM"
     assert captured_kwargs["config"] == {"profile": "CUSTOM"}
     assert (
-        "ppe.generativeai.eu-frankfurt-1.oci.oraclecloud.com"
+        "generativeai.eu-frankfurt-1.oci.oraclecloud.com"
         in captured_kwargs["service_endpoint"]
     )
     assert client.service_endpoint == captured_kwargs["service_endpoint"]

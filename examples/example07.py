@@ -10,11 +10,9 @@ Description:
 import base64
 from pathlib import Path
 
-from openai import OpenAI
 
-from common import print_example_summary, print_runtime_config
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from common import get_inference_client, print_example_summary, print_runtime_config
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 
@@ -38,11 +36,7 @@ def main() -> None:
     image_path = root_dir / "images" / "page0009.png"
     base64_image = encode_image(image_path)
 
-    client = OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    client = get_inference_client()
 
     response = client.responses.create(
         model=MODEL_ID,

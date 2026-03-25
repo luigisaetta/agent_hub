@@ -5,18 +5,12 @@ License: MIT
 
 Description:
     This example shows how-to retrieve the status of a file ingested into a Vector Store.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from common import get_client, print_example_summary, print_runtime_config
-from config import IS_PREPROD
+from common import get_inference_client, print_example_summary, print_runtime_config
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
-# here we have a problem
-# files are working in production but vector stores are working only in ppe for now
-
-FILE_ID = "file-fra-1596879d-f1ca-4831-9502-bd44770a4664"
+FILE_ID = "file-ord-38d78c44-aea4-40ff-aa34-b50e3409ef12"
 
 
 def main() -> None:
@@ -31,8 +25,7 @@ def main() -> None:
         print("Set VECTOR_STORE_ID in the selected .env profile.")
         return
 
-    # this function is used to wrap switch from LA to GA
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_inference_client()
 
     file_status = client.vector_stores.files.retrieve(
         vector_store_id=VECTOR_STORE_ID,

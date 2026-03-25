@@ -21,8 +21,9 @@ from langfuse import get_client
 from langfuse import propagate_attributes
 from langfuse.openai import openai
 
-from config import BASE_URL, LANGFUSE_BASE_URL, MODEL_ID
-from config_private import KEY1, LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY, PROJECT_ID
+from common import get_inference_client
+from config import LANGFUSE_BASE_URL, MODEL_ID
+from config_private import LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
 
 DEFAULT_MODEL = MODEL_ID
 DEFAULT_TEMPERATURE = 0.0
@@ -71,11 +72,7 @@ def create_client():
     os.environ["LANGFUSE_PUBLIC_KEY"] = LANGFUSE_PUBLIC_KEY
     os.environ["LANGFUSE_HOST"] = LANGFUSE_BASE_URL
 
-    return openai.OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    return get_inference_client(client_class=openai.OpenAI)
 
 
 def create_conversation(client) -> str:

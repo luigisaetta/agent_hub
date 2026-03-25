@@ -5,18 +5,11 @@ License: MIT
 
 Description:
     List all vector stores in the configured project/compartment.
-
-    All CRUD operations for Vector Stores require CP_BASE_URL
-    (control plane)
 """
-import httpx
+
 from datetime import datetime, timezone
 
-from openai import OpenAI
-from oci_openai import OciSessionAuth
-from common import print_header, print_runtime_config
-from config import PROD_CP_BASE_URL
-from config_private import COMPARTMENT_ID
+from common import get_control_plane_client, print_header, print_runtime_config
 
 PAGE_SIZE = 100
 
@@ -35,18 +28,7 @@ def main() -> None:
     print_runtime_config()
     print("")
 
-    # GA production path: OCI session auth + compartment scope.
-    # Force PROD control-plane endpoint in this script.
-    cp_client = OpenAI(
-        base_url=PROD_CP_BASE_URL,
-        api_key="unused",
-        http_client=httpx.Client(
-            auth=OciSessionAuth(profile_name="DEFAULT"),
-            headers={
-               "opc-compartment-id": COMPARTMENT_ID,
-            },
-        )
-    )
+    cp_client = get_control_plane_client()
 
     print_header("vector stores", where="compartment")
 

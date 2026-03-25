@@ -4,7 +4,7 @@ Shared output helpers.
 
 from __future__ import annotations
 
-from config import BASE_URL, CP_BASE_URL, IS_PREPROD, MODEL_ID, REGION
+from config import BASE_URL, CP_BASE_URL, MODEL_ID, REGION
 
 
 def print_streamed_output(stream) -> str:
@@ -34,7 +34,6 @@ def print_runtime_config() -> None:
     print("=" * COLS)
     print("Runtime Configuration")
     print("=" * COLS)
-    print(f"IS_PREPROD: {IS_PREPROD}")
     print(f"REGION:     {REGION}")
     print(f"MODEL_ID:   {MODEL_ID}")
     print(f"BASE_URL:   {BASE_URL}")

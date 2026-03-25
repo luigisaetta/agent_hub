@@ -7,6 +7,7 @@ import sys
 import types
 from pathlib import Path
 
+import httpx
 import pytest
 
 
@@ -34,6 +35,15 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
 
     oci_openai_mod = types.ModuleType("oci_openai")
 
+    class FakeOciSessionAuth(httpx.Auth):  # pylint: disable=too-few-public-methods
+        """Small stub replacing OciSessionAuth in tests."""
+
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+
+        def auth_flow(self, request):
+            yield request
+
     class FakeOciUserPrincipalAuth:  # pylint: disable=too-few-public-methods
         """Small stub replacing OciUserPrincipalAuth in tests."""
 
@@ -44,6 +54,7 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
             self.kwargs = kwargs
 
     oci_openai_mod.OciOpenAI = FakeOciOpenAI
+    oci_openai_mod.OciSessionAuth = FakeOciSessionAuth
     oci_openai_mod.OciUserPrincipalAuth = FakeOciUserPrincipalAuth
 
     monkeypatch.setitem(sys.modules, "openai", openai_mod)

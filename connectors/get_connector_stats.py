@@ -4,16 +4,15 @@ Last modified: 2026-03-16
 License: MIT
 
 Description:
-    Cteate a connector between an OCI Object Storage bucket and a Vector Store.
-    This example is currently working only in preproduction environment,
-    as the connector API is not yet available in production.
-
-    LA (17/03/2026): to run this code we need an update to OCI Python SDK.
+    Retrieve connector synchronization statistics.
 """
 
 from common.clients import build_oci_genai_client
 
-CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yahtzwclcsmcvayhtpow52ws2ddhk7l5xbg5rnzolm63qq"
+CONNECTOR_ID = (
+    "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
+    "amaaaaaa2xxap7yahtzwclcsmcvayhtpow52ws2ddhk7l5xbg5rnzolm63qq"
+)
 
 
 def main() -> None:
@@ -35,7 +34,8 @@ def main() -> None:
         f"Unsupported: {stats.unsupported.total_files_synced if stats.unsupported else 0}"
     )
     print(
-        f"Metadata Updated: {stats.metadata_updated.total_files_synced if stats.metadata_updated else 0}"
+        "Metadata Updated: "
+        f"{stats.metadata_updated.total_files_synced if stats.metadata_updated else 0}"
     )
 
 

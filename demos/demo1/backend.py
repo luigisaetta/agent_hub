@@ -6,7 +6,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from common import get_client
+from common import get_inference_client
 from config import MODEL_ID
 
 DEFAULT_MODEL = MODEL_ID
@@ -21,7 +21,7 @@ WEB_SEARCH_TOOL = [{"type": "web_search"}]
 
 def create_client():
     """Create the configured OpenAI-compatible client."""
-    return get_client()
+    return get_inference_client()
 
 
 def create_conversation(client) -> str:

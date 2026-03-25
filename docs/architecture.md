@@ -30,7 +30,7 @@ Core idea:
 ## Runtime configuration flow
 
 1. Scripts import settings from `config.py` and secrets/identifiers from `config_private.py`.
-2. `common.clients.get_client()` selects production or preproduction endpoint behavior.
+2. `common.clients.get_inference_client()` and `common.clients.get_control_plane_client()` provide the two OpenAI-compatible clients used by examples.
 3. Scripts execute API calls and reuse common output/retrieval helpers for consistency.
 
 ## High-level structure

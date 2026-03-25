@@ -1,5 +1,7 @@
 """Regression tests for vector store listing and deletion utility scripts."""
 
+# pylint: disable=import-error
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -40,7 +42,7 @@ def test_list_all_vector_stores_paginates_and_prints(
     fake_vs = FakePagedDeleteApi([page1, page2], delete_arg_name="vector_store_id")
     fake_client = SimpleNamespace(vector_stores=fake_vs)
 
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_control_plane_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -71,7 +73,7 @@ def test_delete_all_vs_continues_on_single_error(monkeypatch, reload_module, cap
     )
     fake_client = SimpleNamespace(vector_stores=fake_vs)
 
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_control_plane_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out

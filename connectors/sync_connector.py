@@ -4,17 +4,16 @@ Last modified: 2026-03-16
 License: MIT
 
 Description:
-    Cteate a connector between an OCI Object Storage bucket and a Vector Store.
-    This example is currently working only in preproduction environment,
-    as the connector API is not yet available in production.
-
-    LA (17/03/2026): to run this code we need an update to OCI Python SDK.
+    Trigger a manual synchronization for an existing connector.
 """
 
 from oci.generative_ai.models import CreateVectorStoreConnectorFileSyncDetails
 from common.clients import build_oci_genai_client
 
-CONNECTOR_ID = "ocid1.generativeaivectorconnectorppe.oc1.eu-frankfurt-1.amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
+CONNECTOR_ID = (
+    "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
+    "amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
+)
 
 
 def main() -> None:

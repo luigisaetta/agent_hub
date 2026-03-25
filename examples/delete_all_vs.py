@@ -5,20 +5,16 @@ License: MIT
 
 Description:
     Delete all vector stores in the configured project/compartment.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from common import get_client
-from config import IS_PREPROD
+from common import get_control_plane_client
 
 PAGE_SIZE = 100
 
 
 def main() -> None:
     """Delete all vector stores using explicit page-by-page pagination."""
-    # this function is used to wrap switch from LA to GA
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_control_plane_client()
     print("\nDeleting all vector stores in the compartment")
     print("=" * 46)
 

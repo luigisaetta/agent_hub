@@ -10,14 +10,10 @@ Description:
 
 from pathlib import Path
 
-from common import get_client, print_example_summary, print_runtime_config
-from config import IS_PREPROD
+from common import get_inference_client, print_example_summary, print_runtime_config
 from config_private import PROJECT_ID
 
 
-# this function is used to wrap switch from LA to GA
-# default: production environment, but you can switch to preproduction
-# by setting is_preproduction to True.
 def main() -> None:
     """Upload a file and print the list of project files."""
     print_runtime_config()
@@ -25,7 +21,7 @@ def main() -> None:
     print_example_summary("Upload a PDF file and list project files.")
     print("")
 
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_inference_client()
 
     root_dir = Path(__file__).resolve().parents[1]
     file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"

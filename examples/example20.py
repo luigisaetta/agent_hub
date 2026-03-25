@@ -6,18 +6,21 @@ License: MIT
 Description:
     This example shows how-to integrate with Langfuse to track the request.
     In this case response is streamed.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
 
 import os
 
-from langfuse.openai import openai
+from langfuse.openai import openai as langfuse_openai
 from langfuse import get_client
 
-from common import print_example_summary, print_runtime_config, print_streamed_output
-from config import MODEL_ID, LANGFUSE_BASE_URL, BASE_URL
-from config_private import PROJECT_ID, LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY, KEY1
+from common import (
+    get_inference_client,
+    print_example_summary,
+    print_runtime_config,
+    print_streamed_output,
+)
+from config import MODEL_ID, LANGFUSE_BASE_URL
+from config_private import LANGFUSE_SECRET_KEY, LANGFUSE_PUBLIC_KEY
 
 # integration with langfuse
 os.environ["LANGFUSE_SECRET_KEY"] = LANGFUSE_SECRET_KEY
@@ -35,13 +38,13 @@ def main() -> None:
     print_example_summary("Streaming call with integration with Langfuse.")
     print("")
 
-    client = openai.OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    # Use Langfuse OpenAI wrapper so requests are instrumented and traced.
+    client = get_inference_client(client_class=langfuse_openai.OpenAI)
 
-    request = "Create a complete report about Enrico Fermi, his life and his contribution to Physics?"
+    request = (
+        "Create a complete report about Enrico Fermi, "
+        "his life and his contribution to Physics?"
+    )
 
     response = client.responses.create(
         model=MODEL_ID,

@@ -9,11 +9,14 @@ Description:
     This example show streaming use.
 """
 
-from openai import OpenAI
-from common import print_example_summary, print_runtime_config, print_streamed_output
+from common import (
+    get_inference_client,
+    print_example_summary,
+    print_runtime_config,
+    print_streamed_output,
+)
 
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 MAX_OUTPUT_TOKENS = 12000
@@ -26,13 +29,12 @@ def main() -> None:
     print_example_summary("Stream token-by-token output from the model.")
     print("")
 
-    client = OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    client = get_inference_client()
 
-    request = "Create a complete report about Enrico Fermi, his life and his contribution to Physics?"
+    request = (
+        "Create a complete report about Enrico Fermi, "
+        "his life and his contribution to Physics?"
+    )
 
     response = client.responses.create(
         model=MODEL_ID,

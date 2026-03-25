@@ -10,14 +10,10 @@ Description:
 
 from pathlib import Path
 
-from common import get_client, print_example_summary, print_runtime_config
-from config import IS_PREPROD
+from common import get_control_plane_client, print_example_summary, print_runtime_config
 from config_private import VECTOR_STORE_ID
 
 
-# this function is used to wrap switch from LA to GA
-# default: production environment, but you can switch to preproduction
-# by setting is_preproduction to True.
 def main() -> None:
     """Upload a file and store it in the vector store."""
     print_runtime_config()
@@ -30,7 +26,7 @@ def main() -> None:
         print("Set VECTOR_STORE_ID in the selected .env profile.")
         return
 
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_control_plane_client()
 
     root_dir = Path(__file__).resolve().parents[1]
     file_path = root_dir / "pdf" / "labor_market_impacts_ai.pdf"

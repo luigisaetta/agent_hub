@@ -22,28 +22,31 @@ def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
     assert captured.out == "Hello"
 
 
-def test_get_client_production_uses_openai_with_expected_kwargs(reload_module):
-    """Build production client with API key and project settings."""
+def test_get_inference_client_uses_openai_with_expected_kwargs(reload_module):
+    """Build inference client with API key and project settings."""
     clients = reload_module("common.clients")
 
-    client = clients.get_client(is_preproduction=False)
+    client = clients.get_inference_client()
 
-    assert client.kwargs["base_url"] == clients.get_openai_base_url(use_preprod=False)
+    assert client.kwargs["base_url"] == clients.BASE_URL
     assert client.kwargs["api_key"] == clients.KEY1
     assert client.kwargs["project"] == clients.PROJECT_ID
 
 
-def test_get_client_preproduction_uses_oci_client_with_ppe_url(reload_module):
-    """Build preproduction client with user principal auth and PPE endpoint."""
+def test_get_control_plane_client_uses_signed_http_client(reload_module):
+    """Build control-plane client with session-auth and compartment headers."""
     clients = reload_module("common.clients")
 
-    client = clients.get_client(is_preproduction=True)
+    client = clients.get_control_plane_client()
 
-    assert client.kwargs["base_url"] == clients.get_openai_base_url(use_preprod=True)
-    assert "ppe.inference.generativeai." in client.kwargs["base_url"]
-    assert f".{clients.REGION}.oci.oraclecloud.com" in client.kwargs["base_url"]
-    assert client.kwargs["compartment_id"] == clients.COMPARTMENT_ID
-    assert client.kwargs["auth"].__class__.__name__ == "FakeOciUserPrincipalAuth"
+    assert client.kwargs["base_url"] == clients.CP_BASE_URL
+    assert client.kwargs["api_key"] == "unused"
+    assert "default_headers" not in client.kwargs
+    assert (
+        client.kwargs["http_client"].headers["opc-compartment-id"]
+        == clients.COMPARTMENT_ID
+    )
+    assert client.kwargs["http_client"].auth.__class__.__name__ == "FakeOciSessionAuth"
 
 
 def test_print_header_outputs_consistent_banner(reload_module, capsys):

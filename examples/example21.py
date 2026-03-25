@@ -10,11 +10,9 @@ Description:
 
 import base64
 
-from openai import OpenAI
 
-from common import print_example_summary, print_runtime_config
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from common import get_inference_client, print_example_summary, print_runtime_config
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 
@@ -23,11 +21,7 @@ print("")
 print_example_summary("Generate an image and save it as result.png.")
 print("")
 
-client = OpenAI(
-    base_url=BASE_URL,
-    api_key=KEY1,
-    project=PROJECT_ID,
-)
+client = get_inference_client()
 
 # INPUT = "Generate an image of gray tabby cat hugging an otter with an orange scarf"
 INPUT = "Generate an image that represent the importance of Observability for AI agents"

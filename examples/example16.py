@@ -5,16 +5,10 @@ License: MIT
 
 Description:
     This example shows how-to query a Vector Store.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
 
-from common import get_client, print_example_summary, print_runtime_config
-from config import IS_PREPROD
+from common import get_inference_client, print_example_summary, print_runtime_config
 from config_private import PROJECT_ID, VECTOR_STORE_ID
-
-# here we have a problem
-# files are working in production but vector stores are working only in ppe for now
 
 
 def main() -> None:
@@ -29,8 +23,7 @@ def main() -> None:
         print("Set VECTOR_STORE_ID in the selected .env profile.")
         return
 
-    # this function is used to wrap switch from LA to GA
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_inference_client()
 
     # Search Vector Store
     query = "What are the main impacts of AI on labor market?"

@@ -5,16 +5,9 @@ License: MIT
 
 Description:
     This example shows how-to create a Vector Store.
-
-    LA (17/03/2026): for now it is working only in preprod env.
 """
-import httpx
-from openai import OpenAI
-from oci_openai import OciSessionAuth
 
-from common import print_example_summary, print_runtime_config
-from config import PROD_CP_BASE_URL
-from config_private import COMPARTMENT_ID
+from common import get_control_plane_client, print_example_summary, print_runtime_config
 
 
 def main() -> None:
@@ -24,18 +17,7 @@ def main() -> None:
     print_example_summary("Create a vector store with metadata and expiration.")
     print("")
 
-    # this function is used to wrap switch from LA to GA
-    # this operations requires control plane
-    cp_client = OpenAI(
-        base_url=PROD_CP_BASE_URL,
-        api_key="unused",
-        http_client=httpx.Client(
-            auth=OciSessionAuth(profile_name="DEFAULT"),
-            headers={
-               "opc-compartment-id": COMPARTMENT_ID,
-            },
-        )
-    )
+    cp_client = get_control_plane_client()
 
     vector_store = cp_client.vector_stores.create(
         name="vs-lsa-ord-prod01",

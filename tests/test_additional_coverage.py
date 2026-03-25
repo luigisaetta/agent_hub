@@ -1,5 +1,7 @@
 """Additional regression tests to improve branch coverage."""
 
+# pylint: disable=import-error
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -14,7 +16,7 @@ def test_list_all_files_handles_empty_first_page(monkeypatch, reload_module, cap
     empty_page = SimpleNamespace(data=[], has_more=False)
     fake_files = FakePagedDeleteApi([empty_page], delete_arg_name="file_id")
     fake_client = SimpleNamespace(files=fake_files)
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_inference_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -29,7 +31,7 @@ def test_delete_all_files_handles_empty_project(monkeypatch, reload_module, caps
     empty_page = SimpleNamespace(data=[], has_more=False)
     fake_files = FakePagedDeleteApi([empty_page], delete_arg_name="file_id")
     fake_client = SimpleNamespace(files=fake_files)
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_inference_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -46,7 +48,7 @@ def test_list_all_vector_stores_handles_empty_first_page(
     empty_page = SimpleNamespace(data=[], has_more=False)
     fake_vs = FakePagedDeleteApi([empty_page], delete_arg_name="vector_store_id")
     fake_client = SimpleNamespace(vector_stores=fake_vs)
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_control_plane_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -61,7 +63,7 @@ def test_delete_all_vs_handles_empty_compartment(monkeypatch, reload_module, cap
     empty_page = SimpleNamespace(data=[], has_more=False)
     fake_vs = FakePagedDeleteApi([empty_page], delete_arg_name="vector_store_id")
     fake_client = SimpleNamespace(vector_stores=fake_vs)
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_control_plane_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -87,7 +89,7 @@ def test_example15_uploads_with_expected_vector_store_and_closes_file(
     fake_vector_stores = SimpleNamespace(file_batches=fake_file_batches)
     fake_client = SimpleNamespace(vector_stores=fake_vector_stores)
 
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_control_plane_client", lambda: fake_client)
 
     module.main()
 

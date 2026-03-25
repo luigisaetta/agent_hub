@@ -8,11 +8,14 @@ Description:
     This one use conversation API. Using conversation API we can use streaming.
 """
 
-from openai import OpenAI
-from common import print_example_summary, print_runtime_config, print_streamed_output
+from common import (
+    get_inference_client,
+    print_example_summary,
+    print_runtime_config,
+    print_streamed_output,
+)
 
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 
@@ -24,11 +27,7 @@ def main() -> None:
     print_example_summary("Create a conversation and stream two linked turns.")
     print("")
 
-    client = OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    client = get_inference_client()
 
     # 1. create a conversation
     conversation = client.conversations.create(metadata={"topic": "demo"})

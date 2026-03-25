@@ -8,11 +8,8 @@ Description:
     which allows the model to perform web searches and use the results in its response.
 """
 
-from openai import OpenAI
-
-from common import print_example_summary, print_runtime_config
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from common import get_inference_client, print_example_summary, print_runtime_config
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 MAX_OUTPUT_TOKENS = 8000
@@ -25,11 +22,7 @@ def main() -> None:
     print_example_summary("Use web_search tool for retrieval-augmented response.")
     print("")
 
-    client = OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    client = get_inference_client()
 
     request = """Create for me a complete report about Luigi Saetta, from Oracle.
     Find accurate and up-to-date information about him, and use it 

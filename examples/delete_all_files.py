@@ -7,15 +7,14 @@ Description:
     Delete all files in the configured project/compartment.
 """
 
-from common import get_client
-from config import IS_PREPROD
+from common import get_inference_client
 
 PAGE_SIZE = 100
 
 
 def main() -> None:
     """Delete all files using explicit page-by-page pagination."""
-    client = get_client(is_preproduction=IS_PREPROD)
+    client = get_inference_client()
     print("\nDeleting all files in the project")
     print("=" * 34)
 

@@ -1,5 +1,7 @@
 """Regression tests for file listing and deletion utility scripts."""
 
+# pylint: disable=import-error
+
 from __future__ import annotations
 
 from types import SimpleNamespace
@@ -31,7 +33,7 @@ def test_list_all_files_paginates_and_prints_total(monkeypatch, reload_module, c
     fake_files = FakePagedDeleteApi([page1, page2], delete_arg_name="file_id")
     fake_client = SimpleNamespace(files=fake_files)
 
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_inference_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out
@@ -59,7 +61,7 @@ def test_delete_all_files_continues_on_single_error(monkeypatch, reload_module, 
     fake_files = FakePagedDeleteApi([page1], delete_arg_name="file_id", fail_ids={"f2"})
     fake_client = SimpleNamespace(files=fake_files)
 
-    monkeypatch.setattr(module, "get_client", lambda **_: fake_client)
+    monkeypatch.setattr(module, "get_inference_client", lambda: fake_client)
 
     module.main()
     out = capsys.readouterr().out

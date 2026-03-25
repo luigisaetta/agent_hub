@@ -12,11 +12,9 @@ Description:
 
 from pydantic import BaseModel
 
-from openai import OpenAI
 
-from common import print_example_summary, print_runtime_config
-from config import BASE_URL, MODEL_ID
-from config_private import KEY1, PROJECT_ID
+from common import get_inference_client, print_example_summary, print_runtime_config
+from config import MODEL_ID
 
 TEMPERATURE = 0.0
 
@@ -39,11 +37,7 @@ def main() -> None:
     print_example_summary("Parse text into a typed Pydantic object.")
     print("")
 
-    client = OpenAI(
-        base_url=BASE_URL,
-        api_key=KEY1,
-        project=PROJECT_ID,
-    )
+    client = get_inference_client()
 
     input_text = "Alice and Bob are going to a science fair on Friday."
     response = client.responses.parse(
