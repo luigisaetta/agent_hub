@@ -119,4 +119,114 @@ def test_extract_text_and_refs_handles_missing_additional_properties(reload_modu
     text, refs = retrieval.extract_text_and_refs(response)
 
     assert text == "[1] hello"
-    assert refs == [{"n": 1, "filename": "doc.pdf", "pages": None}]
+    assert refs == [{"n": 1, "filename": "doc.pdf", "pages": []}]
+
+
+def test_extract_text_and_refs_uses_last_output_text(reload_module):
+    """If multiple output_text blocks exist, the last one should be selected."""
+    retrieval = reload_module("common.retrieval")
+    response = SimpleNamespace(
+        output=[
+            SimpleNamespace(
+                type="message",
+                content=[
+                    SimpleNamespace(type="output_text", text="old", annotations=[])
+                ],
+            ),
+            SimpleNamespace(
+                type="message",
+                content=[
+                    SimpleNamespace(type="output_text", text="new", annotations=[])
+                ],
+            ),
+        ]
+    )
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "new"
+    assert refs == []
+
+
+def test_extract_text_and_refs_filters_non_file_citation_types(reload_module):
+    """Only file_citation annotations should be considered when type is provided."""
+    retrieval = reload_module("common.retrieval")
+    annotations = [
+        SimpleNamespace(
+            type="url_citation",
+            index=0,
+            file_id="file-1",
+            filename="a.pdf",
+            additional_properties={"page_numbers": [1]},
+        ),
+        SimpleNamespace(
+            type="file_citation",
+            index=1,
+            file_id="file-1",
+            filename="a.pdf",
+            additional_properties={"page_numbers": [1]},
+        ),
+    ]
+    response = _make_response("abcd", annotations)
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "a[1] bcd"
+    assert refs == [{"n": 1, "filename": "a.pdf", "pages": [1]}]
+
+
+def test_extract_text_and_refs_separates_same_filename_by_file_id(reload_module):
+    """Different file_id values should not collapse into the same reference."""
+    retrieval = reload_module("common.retrieval")
+    annotations = [
+        _make_annotation(index=0, file_id="file-1", filename="shared.pdf", pages=[2]),
+        _make_annotation(index=2, file_id="file-2", filename="shared.pdf", pages=[2]),
+    ]
+    response = _make_response("abcd", annotations)
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] ab[2] cd"
+    assert refs == [
+        {"n": 1, "filename": "shared.pdf", "pages": [2]},
+        {"n": 2, "filename": "shared.pdf", "pages": [2]},
+    ]
+
+
+def test_extract_text_and_refs_ignores_invalid_indexes(reload_module):
+    """Annotations with invalid indexes should be skipped."""
+    retrieval = reload_module("common.retrieval")
+    annotations = [
+        _make_annotation(index=0, file_id="file-1", filename="a.pdf", pages=[1]),
+        _make_annotation(index=999, file_id="file-2", filename="b.pdf", pages=[2]),
+        SimpleNamespace(
+            index="x",
+            file_id="file-3",
+            filename="c.pdf",
+            additional_properties={"page_numbers": [3]},
+        ),
+    ]
+    response = _make_response("abcd", annotations)
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] abcd"
+    assert refs == [{"n": 1, "filename": "a.pdf", "pages": [1]}]
+
+
+def test_extract_text_and_refs_does_not_merge_unknown_file_annotations(reload_module):
+    """Unknown source annotations should not be merged under a single reference."""
+    retrieval = reload_module("common.retrieval")
+    annotations = [
+        SimpleNamespace(index=0, additional_properties={"page_numbers": [1]}),
+        SimpleNamespace(index=2, additional_properties={"page_numbers": [1]}),
+    ]
+    response = _make_response("abcd", annotations)
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] ab[2] cd"
+    assert refs == [
+        {"n": 1, "filename": "unknown_file", "pages": [1]},
+        {"n": 2, "filename": "unknown_file", "pages": [1]},
+    ]

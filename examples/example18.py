@@ -20,6 +20,7 @@ from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 TEMPERATURE = 0.0
 
+
 def main() -> None:
     """Query a Vector Store."""
     print_runtime_config()
