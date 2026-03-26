@@ -12,8 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from common import get_control_plane_client
-from config_private import VECTOR_STORE_ID
+from common import get_inference_client
+from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 
 def _list_all_vector_store_files(client) -> list:
@@ -26,7 +26,10 @@ def _list_all_vector_store_files(client) -> list:
         if after:
             params["after"] = after
 
-        page = client.vector_stores.files.list(**params)
+        page = client.vector_stores.files.list(
+            **params,
+            extra_headers={"OpenAI-Project": PROJECT_ID},
+        )
         data = getattr(page, "data", []) or []
         all_items.extend(data)
 
@@ -50,7 +53,10 @@ def _existing_filenames_in_vector_store(client) -> set[str]:
             continue
 
         try:
-            file_info = client.files.retrieve(file_id)
+            file_info = client.files.retrieve(
+                file_id=file_id,
+                extra_headers={"OpenAI-Project": PROJECT_ID},
+            )
             filename = getattr(file_info, "filename", None)
             if filename:
                 existing_names.add(filename)
@@ -80,7 +86,7 @@ def main() -> None:
         print(f"No files found in {source_dir}")
         return
 
-    client = get_control_plane_client()
+    client = get_inference_client()
 
     print("Collecting existing filenames in vector store...")
     existing_names = _existing_filenames_in_vector_store(client)
@@ -97,14 +103,23 @@ def main() -> None:
 
         print(f"UPLOAD {file_path.name}")
         with open(file_path, "rb") as file_stream:
-            file_batch = client.vector_stores.file_batches.upload_and_poll(
-                vector_store_id=VECTOR_STORE_ID,
-                files=[file_stream],
+            uploaded_file = client.files.create(
+                file=file_stream,
+                purpose="user_data",
+                extra_headers={"OpenAI-Project": PROJECT_ID},
             )
 
-        status = getattr(file_batch, "status", "unknown")
-        file_counts = getattr(file_batch, "file_counts", {})
-        print(f"  status={status} file_counts={file_counts}")
+        file_id = getattr(uploaded_file, "id", None)
+        if not file_id:
+            print("  ERROR missing file_id after upload; skipping vector store attach")
+            continue
+
+        attach_result = client.vector_stores.files.create(
+            vector_store_id=VECTOR_STORE_ID,
+            file_id=file_id,
+        )
+        status = getattr(attach_result, "status", "unknown")
+        print(f"  file_id={file_id} attach_status={status}")
 
         uploaded += 1
         existing_names.add(file_path.name)

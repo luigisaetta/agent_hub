@@ -27,7 +27,8 @@ python -m demos.demo4.load_files
 Behavior:
 - reads all files in `pdf_rag/`
 - checks by filename if already present in vector store
-- uploads only missing files via `vector_stores.file_batches.upload_and_poll(...)`
+- uploads missing files one-by-one via `files.create(...)`
+- then attaches each uploaded file to the vector store via `vector_stores.files.create(...)`
 
 ## 2) Run Streamlit UI
 
