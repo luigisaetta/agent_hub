@@ -21,7 +21,12 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
-from demos.demo4.backend import DEFAULT_MODEL, ask_rag, create_client, create_conversation
+from demos.demo4.backend import (
+    DEFAULT_MODEL,
+    create_client,
+    create_conversation,
+    stream_rag,
+)
 from demos.demo4.state import (
     append_message,
     clear_messages,
@@ -91,18 +96,30 @@ def main() -> None:
         st.markdown(user_prompt)
 
     with st.chat_message("assistant"):
-        with st.spinner("Searching documents and preparing strict answer..."):
-            answer_text, refs = ask_rag(
-                client,
-                model_id=model_id,
-                user_prompt=user_prompt,
-                conversation_id=get_conversation_id(st.session_state),
-            )
+        status_placeholder = st.empty()
+        status_placeholder.info("Searching documents and preparing strict answer...")
+        placeholder = st.empty()
+        answer_chunks: list[str] = []
+        chunk_stream, stream_result = stream_rag(
+            client,
+            model_id=model_id,
+            user_prompt=user_prompt,
+            conversation_id=get_conversation_id(st.session_state),
+        )
+        for chunk in chunk_stream:
+            answer_chunks.append(chunk)
+            placeholder.markdown("".join(answer_chunks))
 
-        answer_text = (answer_text or "").strip() or "I could not generate a text answer."
-        st.markdown(answer_text)
+        final_answer = (
+            (stream_result.get("answer_text", "") or "").strip()
+            or "".join(answer_chunks).strip()
+            or "I could not generate a text answer."
+        )
+        refs = stream_result.get("refs", []) or []
+        status_placeholder.empty()
+        placeholder.markdown(final_answer)
 
-    append_message(st.session_state, "assistant", answer_text)
+    append_message(st.session_state, "assistant", final_answer)
     set_last_references(st.session_state, refs)
     st.rerun()
 

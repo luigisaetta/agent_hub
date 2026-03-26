@@ -9,6 +9,8 @@ Description:
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+
 from common import (
     extract_provider_name,
     extract_text_and_refs,
@@ -55,15 +57,17 @@ def _build_input_for_model(model_id: str, user_prompt: str) -> list[dict[str, st
     ]
 
 
-def ask_rag(
+def stream_rag(
     client,
     *,
     model_id: str,
     user_prompt: str,
     conversation_id: str,
-) -> tuple[str, list[dict]]:
-    """Run strict file_search-based RAG and return answer text with references."""
-    response = client.responses.create(
+) -> tuple[Iterator[str], dict]:
+    """Stream strict file_search-based RAG output and collect final refs."""
+    result: dict = {"answer_text": "", "refs": []}
+
+    stream = client.responses.create(
         model=model_id,
         temperature=DEFAULT_TEMPERATURE,
         input=_build_input_for_model(model_id=model_id, user_prompt=user_prompt),
@@ -78,6 +82,36 @@ def ask_rag(
         extra_headers={"OpenAI-Project": PROJECT_ID},
         tool_choice="required",
         include=["file_search_call.results"],
+        stream=True,
     )
 
-    return extract_text_and_refs(response)
+    def _iter_chunks() -> Iterator[str]:
+        """Yield streamed output chunks and finalize answer text/references."""
+        chunks: list[str] = []
+        completed_response = None
+
+        for event in stream:
+            event_type = getattr(event, "type", "")
+            if event_type == "response.output_text.delta":
+                delta = getattr(event, "delta", "")
+                if delta:
+                    chunks.append(delta)
+                    yield delta
+                continue
+
+            if event_type in {"response.completed", "response.done"}:
+                completed_response = getattr(event, "response", None)
+
+        streamed_text = "".join(chunks).strip()
+        if completed_response is not None:
+            text_with_refs, refs = extract_text_and_refs(completed_response)
+            if text_with_refs:
+                result["answer_text"] = text_with_refs
+            else:
+                result["answer_text"] = streamed_text
+            result["refs"] = refs
+        else:
+            result["answer_text"] = streamed_text
+            result["refs"] = []
+
+    return _iter_chunks(), result

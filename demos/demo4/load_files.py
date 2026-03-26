@@ -125,7 +125,9 @@ def main() -> None:
         existing_names.add(file_path.name)
 
     print("")
-    print(f"Done. Uploaded={uploaded}, Skipped={skipped}, Total local files={len(local_files)}")
+    print(
+        f"Done. Uploaded={uploaded}, Skipped={skipped}, Total local files={len(local_files)}"
+    )
 
 
 if __name__ == "__main__":

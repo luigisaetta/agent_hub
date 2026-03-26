@@ -34,3 +34,4 @@ htmlcov/
 .DS_Store
 .vscode/
 .idea/
+pdf_rag/

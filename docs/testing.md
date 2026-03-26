@@ -56,4 +56,4 @@ The repository includes `run_quality.sh` to run formatting/lint checks:
 ./run_quality.sh
 ```
 
-It runs `black` and `pylint` across Python files.
+It runs `black` and `pylint` on changed Python files.

@@ -2,7 +2,7 @@
 
 Demo4 includes two parts:
 - **Loading**: progressively ingest all files from `pdf_rag/` into the configured vector store, skipping filenames already present.
-- **Query UI**: Streamlit chatbot with conversation memory and strict `file_search` retrieval.
+- **Query UI**: Streamlit chatbot with conversation memory, strict `file_search`, and streamed output.
 
 ## Prerequisites
 
@@ -41,5 +41,5 @@ streamlit run demos/demo4/app.py
 UI behavior:
 - creates one conversation and keeps it across turns
 - each user request runs strict `file_search`
-- main area shows final answer
+- main area streams the answer token-by-token, then shows the final consolidated text
 - sidebar shows references with filename and pages
