@@ -29,12 +29,18 @@ def main() -> None:
     to write a report about his career, achievements, and current position. 
     Use the web search tool to find the most recent information about him."""
 
+    # added filters on domains
     response = client.responses.create(
         model=MODEL_ID,
         temperature=TEMPERATURE,
         max_output_tokens=MAX_OUTPUT_TOKENS,
         input=request,
-        tools=[{"type": "web_search"}],
+        tools=[
+            {
+                "type": "web_search",
+                "filters": {"allowed_domains": ["oracle.com", "linkedin.com"]},
+            }
+        ],
     )
 
     print("Request:", request)
