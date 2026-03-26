@@ -16,21 +16,13 @@ from common import (
     extract_text_and_refs,
     get_inference_client,
 )
+from demos.demo4.prompts import STRICT_INSTRUCTIONS
 from config import MODEL_ID
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 DEFAULT_MODEL = MODEL_ID
 DEFAULT_TEMPERATURE = 0.0
 DEFAULT_MAX_RESULTS = 10
-
-STRICT_INSTRUCTIONS = (
-    "Answer using only information from the retrieved documents. "
-    "You may summarize or synthesize information that is explicitly "
-    "supported by the retrieved text. "
-    "Do not use outside knowledge. "
-    "If the retrieved documents do not contain enough information to answer, say exactly: "
-    "'I don't have sufficient information in the documents.'"
-)
 
 
 def create_client():
@@ -45,7 +37,11 @@ def create_conversation(client) -> str:
 
 
 def _build_input_for_model(model_id: str, user_prompt: str) -> list[dict[str, str]]:
-    """Build strict input messages with provider-aware role for instructions."""
+    """
+    Build strict input messages with provider-aware role for instructions.
+    Customize instructions in prompts.py, not here.
+    
+    """
     role_instructions = "system"
     if extract_provider_name(model_id) == "google":
         # Gemini variants may reject system-role instructions in this runtime.

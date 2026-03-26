@@ -114,7 +114,7 @@ def main() -> None:
             print(f"SKIP  {file_path.name} (already present)")
             continue
 
-        print(f"UPLOAD {file_path.name}")
+        print(f"Uploading {file_path.name} ...")
         with open(file_path, "rb") as file_stream:
             uploaded_file = client.files.create(
                 file=file_stream,

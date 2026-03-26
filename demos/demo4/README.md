@@ -54,6 +54,15 @@ UI behavior:
 - main area streams the answer token-by-token, then shows the final consolidated text
 - sidebar shows references with filename and pages
 
+## Prompt customization
+
+Prompt text used by Demo4 is defined in:
+
+`demos/demo4/prompts.py`
+
+If you want to change system behavior (strictness, tone, fallback sentence), edit
+`STRICT_INSTRUCTIONS` there.
+
 ## 3) Check file status in vector store
 
 From repository root:
