@@ -81,7 +81,9 @@ def main() -> None:
         print("Create pdf_rag/ and add files to ingest.")
         return
 
-    local_files = sorted(p for p in source_dir.iterdir() if p.is_file())
+    local_files = sorted(
+        p for p in source_dir.iterdir() if p.is_file() and p.suffix.lower() == ".pdf"
+    )
     if not local_files:
         print(f"No files found in {source_dir}")
         return

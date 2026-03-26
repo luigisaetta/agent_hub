@@ -25,7 +25,7 @@ python -m demos.demo4.load_files
 ```
 
 Behavior:
-- reads all files in `pdf_rag/`
+- reads only `.pdf` files in `pdf_rag/`
 - checks by filename if already present in vector store
 - uploads missing files one-by-one via `files.create(...)`
 - then attaches each uploaded file to the vector store via `vector_stores.files.create(...)`
