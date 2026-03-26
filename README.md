@@ -47,6 +47,7 @@ Highlights from the most useful examples and demos:
 | 16 | Langfuse integration | [`examples/example19.py`](examples/example19.py) | Sends a non-streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(...)`, `langfuse.flush()` | Observability/tracing of LLM calls. | Requires Langfuse keys/host. |
 | 17 | Langfuse integration (streaming) | [`examples/example20.py`](examples/example20.py) | Sends a streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(..., stream=True)`, `langfuse.flush()` | Observability/tracing with token-by-token output. | Requires Langfuse keys/host. |
 | 18 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
+| 19 | Code interpreter tool | [`examples/example22.py`](examples/example22.py) | Runs a Responses API request with `code_interpreter` so the model can execute Python in an isolated container to solve a math task and return the computed result. | `tools=[{"type":"code_interpreter","container":{"type":"auto","memory_limit":"4g"}}]`, `responses.create(...)` | Computational tasks (math/data transformations) where model-generated code execution is needed. | Prints raw `resp.output`, including tool execution artifacts. |
 
 ## Detailed Demos
 
