@@ -97,15 +97,18 @@ def main() -> None:
 
     with st.chat_message("assistant"):
         status_placeholder = st.empty()
-        status_placeholder.info("Searching documents and preparing strict answer...")
+        status_placeholder.info("Searching documents and preparing answer...")
         placeholder = st.empty()
         answer_chunks: list[str] = []
+        
+        # here we call the responses API
         chunk_stream, stream_result = stream_rag(
             client,
             model_id=model_id,
             user_prompt=user_prompt,
             conversation_id=get_conversation_id(st.session_state),
         )
+
         for chunk in chunk_stream:
             answer_chunks.append(chunk)
             placeholder.markdown("".join(answer_chunks))
