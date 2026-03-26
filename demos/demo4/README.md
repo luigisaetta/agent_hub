@@ -7,8 +7,17 @@ Demo4 includes two parts:
 ## Prerequisites
 
 - Existing project configuration (`config.py`, `config_private.py`)
-- `VECTOR_STORE_ID` configured in the active `.env` profile
+- A vector store already created in your OCI project
+- `VECTOR_STORE_ID` configured in the active `.env` profile (pointing to that existing vector store)
 - Local files to ingest under `pdf_rag/`
+
+If you still need to create a vector store, run:
+
+```bash
+python -m examples.example11
+```
+
+Then copy the created vector store id into your active `.env` profile as `VECTOR_STORE_ID`.
 
 ## Install demo dependency
 
