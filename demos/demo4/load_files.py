@@ -15,6 +15,8 @@ from pathlib import Path
 from common import get_inference_client
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5 MB
+
 
 def _list_all_vector_store_files(client) -> list:
     """List all file entries currently attached to the vector store."""
@@ -98,6 +100,15 @@ def main() -> None:
     skipped = 0
 
     for file_path in local_files:
+        file_size = file_path.stat().st_size
+        if file_size > MAX_FILE_SIZE:
+            skipped += 1
+            print(
+                f"SKIP  {file_path.name} (size={file_size} bytes > "
+                f"MAX_FILE_SIZE={MAX_FILE_SIZE} bytes)"
+            )
+            continue
+
         if file_path.name in existing_names:
             skipped += 1
             print(f"SKIP  {file_path.name} (already present)")

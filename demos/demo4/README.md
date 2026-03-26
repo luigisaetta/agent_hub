@@ -26,6 +26,7 @@ python -m demos.demo4.load_files
 
 Behavior:
 - reads only `.pdf` files in `pdf_rag/`
+- enforces `MAX_FILE_SIZE=5MB` and skips files above the limit
 - checks by filename if already present in vector store
 - uploads missing files one-by-one via `files.create(...)`
 - then attaches each uploaded file to the vector store via `vector_stores.files.create(...)`
