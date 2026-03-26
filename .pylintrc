@@ -1,0 +1,16 @@
+[MASTER]
+py-version=3.11
+ignore=__pycache__
+
+[MESSAGES CONTROL]
+disable=
+    duplicate-code
+
+[FORMAT]
+max-line-length=100
+
+[DESIGN]
+max-locals=20
+max-branches=15
+max-statements=60
+max-returns=8
