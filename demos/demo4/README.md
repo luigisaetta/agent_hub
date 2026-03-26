@@ -44,3 +44,15 @@ UI behavior:
 - each user request runs strict `file_search`
 - main area streams the answer token-by-token, then shows the final consolidated text
 - sidebar shows references with filename and pages
+
+## 3) Check file status in vector store
+
+From repository root:
+
+```bash
+python -m demos.demo4.list_files_in_vector_store
+```
+
+This utility lists files currently attached to the configured vector store and
+prints status-related fields (`status`, `created_at`, `usage_bytes`), plus
+filename resolution when available.
