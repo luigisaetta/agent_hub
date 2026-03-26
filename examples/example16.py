@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Last modified: 2026-03-16
+Last modified: 2026-03-26
 License: MIT
 
 Description:
@@ -35,9 +35,29 @@ def main() -> None:
         extra_headers={"OpenAI-Project": PROJECT_ID},
     )
 
-    for _page in search_results.data:
-        print(_page)
+    sorted_results = sorted(
+        search_results.data,
+        key=lambda item: getattr(item, "score", 0.0) or 0.0,
+        reverse=True,
+    )
+
+    for item in sorted_results:
+        print(item)
         print("")
+
+    print("References:")
+    for idx, item in enumerate(sorted_results, start=1):
+        additional_properties = getattr(item, "additional_properties", {}) or {}
+        if not isinstance(additional_properties, dict):
+            additional_properties = {}
+
+        chunk_id = additional_properties.get("chunk_id", "N/A")
+        pages = additional_properties.get("page_numbers") or []
+        if not isinstance(pages, list):
+            pages = [pages]
+
+        print(f"{idx}. chunk_id={chunk_id} pages={pages}")
+    print("")
 
 
 if __name__ == "__main__":
