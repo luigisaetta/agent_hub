@@ -14,6 +14,7 @@ Highlights from the most useful examples and demos:
 - [`examples/example03.py`](examples/example03.py): structured parsing into typed objects (Pydantic), useful for automation flows.
 - [`examples/example05.py`](examples/example05.py): multi-turn state with the Conversations API plus streaming responses.
 - [`examples/example06.py`](examples/example06.py): reasoning summary output for debugging and response explainability.
+- [`examples/example23.py`](examples/example23.py): end-to-end custom function tool calling loop (`function_call` + `function_call_output`).
 - [`examples/example18.py`](examples/example18.py): file-search over vector stores with inline citations in final answers.
 - [`connectors/create_connector.py`](connectors/create_connector.py) + related scripts in [`connectors/`](connectors): create/sync/manage vector-store connectors to Object Storage.
 - [`demos/demo2`](demos/demo2): Streamlit chatbot with web search and Langfuse-integrated observability/tracing.
@@ -48,6 +49,7 @@ Highlights from the most useful examples and demos:
 | 17 | Langfuse integration (streaming) | [`examples/example20.py`](examples/example20.py) | Sends a streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(..., stream=True)`, `langfuse.flush()` | Observability/tracing with token-by-token output. | Requires Langfuse keys/host. |
 | 18 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
 | 19 | Code interpreter tool | [`examples/example22.py`](examples/example22.py) | Runs a Responses API request with `code_interpreter` so the model can execute Python in an isolated container to solve a math task and return the computed result. | `tools=[{"type":"code_interpreter","container":{"type":"auto","memory_limit":"4g"}}]`, `responses.create(...)` | Computational tasks (math/data transformations) where model-generated code execution is needed. | Prints raw `resp.output`, including tool execution artifacts. |
+| 20 | Custom function tool calling | [`examples/example23.py`](examples/example23.py) | Demonstrates a complete iterative loop where the model emits `function_call`, local Python executes the function, and the script returns `function_call_output` until final answer. | `tools=[{"type":"function",...}]`, `responses.create(...)`, `previous_response_id=...` | Building agentic workflows with domain-specific tools. | Uses a simulated weather function (`get_weather`) to keep the example self-contained. |
 
 ## Detailed Demos
 

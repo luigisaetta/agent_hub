@@ -69,7 +69,7 @@ def main() -> None:
     st.set_page_config(
         page_title="Demo3 - PDF Preview and Processing", page_icon="file"
     )
-    st.title("Demo3: structured extraction from legal documents")
+    st.title("Structured extraction from legal documents")
 
     with st.sidebar:
         st.subheader("PDF Input")

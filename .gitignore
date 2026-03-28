@@ -35,3 +35,4 @@ htmlcov/
 .vscode/
 .idea/
 pdf_rag/
+.pylint.d/
