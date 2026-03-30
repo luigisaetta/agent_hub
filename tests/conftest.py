@@ -40,7 +40,7 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
 
     openai_mod.OpenAI = FakeOpenAI
 
-    oci_openai_mod = types.ModuleType("oci_openai")
+    oci_genai_auth_mod = types.ModuleType("oci_genai_auth")
 
     class FakeOciSessionAuth(httpx.Auth):  # pylint: disable=too-few-public-methods
         """Small stub replacing OciSessionAuth in tests."""
@@ -51,21 +51,10 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         def auth_flow(self, request):
             yield request
 
-    class FakeOciUserPrincipalAuth:  # pylint: disable=too-few-public-methods
-        """Small stub replacing OciUserPrincipalAuth in tests."""
-
-    class FakeOciOpenAI:  # pylint: disable=too-few-public-methods
-        """Small stub replacing OciOpenAI in tests."""
-
-        def __init__(self, **kwargs):
-            self.kwargs = kwargs
-
-    oci_openai_mod.OciOpenAI = FakeOciOpenAI
-    oci_openai_mod.OciSessionAuth = FakeOciSessionAuth
-    oci_openai_mod.OciUserPrincipalAuth = FakeOciUserPrincipalAuth
+    oci_genai_auth_mod.OciSessionAuth = FakeOciSessionAuth
 
     monkeypatch.setitem(sys.modules, "openai", openai_mod)
-    monkeypatch.setitem(sys.modules, "oci_openai", oci_openai_mod)
+    monkeypatch.setitem(sys.modules, "oci_genai_auth", oci_genai_auth_mod)
 
 
 @pytest.fixture

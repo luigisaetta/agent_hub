@@ -18,7 +18,8 @@ from oci.auth.signers import SecurityTokenSigner
 from oci.generative_ai import GenerativeAiClient
 from oci.signer import load_private_key_from_file
 from openai import OpenAI
-from oci_openai import OciSessionAuth
+
+from oci_genai_auth import OciSessionAuth
 
 from config import BASE_URL, CP_BASE_URL, REGION
 from config_private import COMPARTMENT_ID, KEY1, PROJECT_ID
