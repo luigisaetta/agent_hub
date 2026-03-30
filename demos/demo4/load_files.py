@@ -12,6 +12,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from openai import NotFoundError
+
 from common import get_inference_client
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
@@ -62,6 +64,10 @@ def _existing_filenames_in_vector_store(client) -> set[str]:
             filename = getattr(file_info, "filename", None)
             if filename:
                 existing_names.add(filename)
+        except NotFoundError as exc:
+            if "File is a connector file" in str(exc):
+                continue
+            print(f"Warning: cannot resolve filename for file_id={file_id}: {exc}")
         except Exception as exc:  # pylint: disable=broad-exception-caught
             print(f"Warning: cannot resolve filename for file_id={file_id}: {exc}")
 

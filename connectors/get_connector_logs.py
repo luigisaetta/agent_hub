@@ -9,10 +9,7 @@ Description:
 
 from common import build_oci_genai_client, print_runtime_config
 
-CONNECTOR_ID = (
-    "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
-    "amaaaaaa2xxap7yahtzwclcsmcvayhtpow52ws2ddhk7l5xbg5rnzolm63qq"
-)
+CONNECTOR_ID = "ocid1.generativeaivectorconnector.oc1.us-chicago-1.amaaaaaa2xxap7yall25iqlkmct364vclhhhmkc47ktj65aoyxqn53ebkq7a"
 
 
 def main() -> None:

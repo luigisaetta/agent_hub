@@ -80,6 +80,7 @@ Highlights from the most useful examples and demos:
 | 5 | Update connector | [`connectors/update_connector.py`](connectors/update_connector.py) | Updates connector settings such as source configuration and schedule. |
 | 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
 | 7 | Connector logs | [`connectors/get_connector_logs.py`](connectors/get_connector_logs.py) | Retrieves and prints recent logs for one connector. |
+| 8 | Trigger file sync | [`connectors/trigger_file_sync.py`](connectors/trigger_file_sync.py) | Triggers a manual file sync operation for one connector. |
 
 ## Prerequisites
 

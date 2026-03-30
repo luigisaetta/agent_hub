@@ -27,6 +27,7 @@ def main() -> None:
 
     # Search Vector Store
     query = "What are the main impacts of AI on labor market?"
+    # query = "what is PSG?"
 
     search_results = client.vector_stores.search(
         vector_store_id=VECTOR_STORE_ID,

@@ -16,13 +16,11 @@ from oci.generative_ai.models import (
     ScheduleIntervalConfig,
 )
 from common import build_oci_genai_client, print_runtime_config
-from config_private import COMPARTMENT_ID
-
-VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
+from config_private import COMPARTMENT_ID, VECTOR_STORE_ID
 
 # OCI Object Storage source for the connector
 OS_NAMESPACE = "frpj5kvxryk1"
-OS_BUCKET = "agent_hub_files"
+OS_BUCKET = "agent_hub_chicago"
 # entire bucket
 OS_PREFIX = ""
 
