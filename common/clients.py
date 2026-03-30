@@ -9,10 +9,14 @@ Description:
 
 from __future__ import annotations
 
+import os
 from typing import Callable, Any
 
 import httpx
-import oci
+from oci import config as oci_config
+from oci.auth.signers import SecurityTokenSigner
+from oci.generative_ai import GenerativeAiClient
+from oci.signer import load_private_key_from_file
 from openai import OpenAI
 from oci_openai import OciSessionAuth
 
@@ -55,8 +59,22 @@ def build_oci_genai_client(
     region: str = REGION,
 ):
     """Build an OCI Generative AI client using profile auth."""
-    config = oci.config.from_file(profile_name=profile)
-    return oci.generative_ai.GenerativeAiClient(
-        config=config,
-        service_endpoint=get_oci_genai_service_endpoint(region=region),
-    )
+    config = oci_config.from_file(profile_name=profile)
+    client_kwargs: dict[str, Any] = {
+        "config": config,
+        "service_endpoint": get_oci_genai_service_endpoint(region=region),
+    }
+
+    # When OCI session auth is configured, use a SecurityTokenSigner explicitly.
+    token_file = config.get("security_token_file")
+    key_file = config.get("key_file")
+    if token_file and key_file:
+        with open(os.path.expanduser(token_file), encoding="utf-8") as token_handle:
+            token = token_handle.read()
+        private_key = load_private_key_from_file(os.path.expanduser(key_file))
+        client_kwargs["signer"] = SecurityTokenSigner(
+            token,
+            private_key,
+        )
+
+    return GenerativeAiClient(**client_kwargs)

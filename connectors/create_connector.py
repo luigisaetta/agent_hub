@@ -15,7 +15,7 @@ from oci.generative_ai.models import (
     OciObjectStorageConfiguration,
     ScheduleIntervalConfig,
 )
-from common.clients import build_oci_genai_client
+from common import build_oci_genai_client, print_runtime_config
 from config_private import COMPARTMENT_ID
 
 VECTOR_STORE_ID = "vs_fra_qa4kr3kodsiobau3521kqqxky6l2dunnlxju6dpplppmyw9i"
@@ -29,6 +29,9 @@ OS_PREFIX = ""
 
 def main() -> None:
     """Build connector details for an Object Storage to Vector Store connector."""
+    print_runtime_config()
+    print("")
+
     client = build_oci_genai_client()
 
     # list existing connectors

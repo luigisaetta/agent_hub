@@ -7,7 +7,7 @@ Description:
     Retrieve connector ingestion logs.
 """
 
-from common.clients import build_oci_genai_client
+from common import build_oci_genai_client, print_runtime_config
 
 CONNECTOR_ID = (
     "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
@@ -17,6 +17,9 @@ CONNECTOR_ID = (
 
 def main() -> None:
     """List connectors in compartment."""
+    print_runtime_config()
+    print("")
+
     client = build_oci_genai_client()
 
     response = client.list_vector_store_connector_ingestion_logs(CONNECTOR_ID)

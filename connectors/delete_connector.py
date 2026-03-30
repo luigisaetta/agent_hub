@@ -9,7 +9,7 @@ Description:
 
 from oci.exceptions import ServiceError
 
-from common.clients import build_oci_genai_client
+from common import build_oci_genai_client, print_runtime_config
 
 CONNECTOR_ID = (
     "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
@@ -19,6 +19,9 @@ CONNECTOR_ID = (
 
 def main() -> None:
     """Delete a connector by OCID and confirm the result."""
+    print_runtime_config()
+    print("")
+
     genai_client = build_oci_genai_client()
     genai_client.delete_vector_store_connector(CONNECTOR_ID)
     print(f"Delete request accepted for: {CONNECTOR_ID}")

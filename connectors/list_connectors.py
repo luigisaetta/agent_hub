@@ -7,12 +7,15 @@ Description:
     List all vector store connectors in a compartment.
 """
 
-from common.clients import build_oci_genai_client
+from common import build_oci_genai_client, print_runtime_config
 from config_private import COMPARTMENT_ID
 
 
 def main() -> None:
     """List connectors in compartment."""
+    print_runtime_config()
+    print("")
+
     client = build_oci_genai_client()
 
     response = client.list_vector_store_connectors(COMPARTMENT_ID)
