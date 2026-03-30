@@ -76,11 +76,10 @@ Highlights from the most useful examples and demos:
 | 1 | Create connector | [`connectors/create_connector.py`](connectors/create_connector.py) | Creates an Object Storage connector for a vector store. |
 | 2 | List connectors | [`connectors/list_connectors.py`](connectors/list_connectors.py) | Lists vector store connectors in the configured compartment. |
 | 3 | Connector stats | [`connectors/get_connector_stats.py`](connectors/get_connector_stats.py) | Retrieves synchronization statistics for one connector. |
-| 4 | Trigger sync | [`connectors/sync_connector.py`](connectors/sync_connector.py) | Starts a file sync job for an existing connector. |
+| 4 | Trigger file sync | [`connectors/trigger_file_sync.py`](connectors/trigger_file_sync.py) | Triggers a manual file sync operation for one connector. |
 | 5 | Update connector | [`connectors/update_connector.py`](connectors/update_connector.py) | Updates connector settings such as source configuration and schedule. |
 | 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
 | 7 | Connector logs | [`connectors/get_connector_logs.py`](connectors/get_connector_logs.py) | Retrieves and prints recent logs for one connector. |
-| 8 | Trigger file sync | [`connectors/trigger_file_sync.py`](connectors/trigger_file_sync.py) | Triggers a manual file sync operation for one connector. |
 
 ## Prerequisites
 
@@ -214,7 +213,7 @@ agent_hub/
 │   ├── get_connector_logs.py
 │   ├── get_connector_stats.py
 │   ├── list_connectors.py
-│   ├── sync_connector.py
+│   ├── trigger_file_sync.py
 │   └── update_connector.py
 ├── demos/
 │   ├── demo1/

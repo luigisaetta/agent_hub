@@ -13,7 +13,7 @@ from oci.generative_ai.models import CreateVectorStoreConnectorFileSyncDetails
 
 from common import build_oci_genai_client, print_runtime_config
 
-CONNECTOR_ID = CONNECTOR_ID = "ocid1.generativeaivectorconnector.oc1.us-chicago-1.amaaaaaa2xxap7yall25iqlkmct364vclhhhmkc47ktj65aoyxqn53ebkq7a"
+CONNECTOR_ID = "ocid1.generativeaivectorconnector.oc1.us-chicago-1.amaaaaaa2xxap7yall25iqlkmct364vclhhhmkc47ktj65aoyxqn53ebkq7a"
 DISPLAY_NAME = "test-file-sync"
 
 

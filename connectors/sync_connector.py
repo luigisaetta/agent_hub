@@ -10,10 +10,7 @@ Description:
 from oci.generative_ai.models import CreateVectorStoreConnectorFileSyncDetails
 from common import build_oci_genai_client, print_runtime_config
 
-CONNECTOR_ID = (
-    "ocid1.generativeaivectorconnector.oc1.eu-frankfurt-1."
-    "amaaaaaa2xxap7yal3idppp2yjspafly4uwvntuxin6a72h2hsyvn4bg7fsq"
-)
+CONNECTOR_ID = "ocid1.generativeaivectorconnector.oc1.us-chicago-1.amaaaaaa2xxap7yall25iqlkmct364vclhhhmkc47ktj65aoyxqn53ebkq7a"
 
 
 def main() -> None:
