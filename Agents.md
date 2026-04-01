@@ -1,6 +1,6 @@
 ---
 Author: L. Saetta
-Last modified: 2026-03-25
+Last modified: 2026-04-01
 License: MIT
 Description: Operational rules and quality standards for AI agents contributing to agent_hub.
 ---
@@ -96,7 +96,7 @@ conda run -n agent_hub pylint path/to/changed_file.py
 ## Escalation
 Require human review when:
 - a change impacts OCI authentication/authorization
-- endpoints or behavior across preprod/prod are changed
+- endpoints or behavior across runtime environments are changed
 - new scripts are introduced for bulk delete/update operations on resources
 
 ## Template for New Tasks

@@ -31,15 +31,7 @@ OpenAI-Project: <PROJECT_ID>
 
 Without this header, Vector Store operations may fail even when authentication is valid.
 
-## 3) OCI SDK Preview Requirement (PPE)
-
-To use Agent Hub features in the pre-production environment (PPE), install the preview OCI Python SDK:
-
-```bash
-pip install --trusted-host=artifactory.oci.oraclecorp.com -i https://artifactory.oci.oraclecorp.com/api/pypi/global-dev-pypi/simple -U oci==2.168.1+preview.1.347
-```
-
-## 4) Additional IAM Policies Often Needed
+## 3) Additional IAM Policies Often Needed
 
 ```text
 allow any-user to manage generative-ai-family in compartment id ocid1.compartment.oc1..your_ocid where ALL {request.principal.type='generativeaiapikey'}
@@ -53,32 +45,32 @@ allow any-user to manage generative-ai-file in compartment id ocid1.compartment.
 allow any-user to read object-family in compartment id ocid1.compartment.oc1..your_ocid where ALL { request.principal.type='generativeaivectorconnector' }
 ```
 
-## 5) Test Matrix (Examples + Utilities)
+## 4) Test Matrix (Examples + Utilities)
 
 Legend:
 - `✅` working
 - `❌` not working
 - `⬜` not verified yet
 
-| File | Preprod | Prod |
-|---|---|---|
-| [example01.py](examples/example01.py) | ✅ | ✅ |
-| [example02.py](examples/example02.py) | ✅ | ✅ |
-| [example03.py](examples/example03.py) | ✅ | ✅ |
-| [example04.py](examples/example04.py) | ❌ | ✅ |
-| [example05.py](examples/example05.py) | ✅ | ✅ |
-| [example06.py](examples/example06.py) | ✅ | ✅ |
-| [example07.py](examples/example07.py) | ✅ | ✅ |
-| [example11.py](examples/example11.py) | ✅ | ✅ |
-| [example12.py](examples/example12.py) | ✅ | ✅ |
-| [example13.py](examples/example13.py) | ✅ | ✅ |
-| [example14.py](examples/example14.py) | ✅ | ✅ |
-| [example15.py](examples/example15.py) | ⬜ | ⬜ |
-| [example16.py](examples/example16.py) | ✅ | ✅ |
-| [example17.py](examples/example17.py) | ✅ | ✅ |
-| [example18.py](examples/example18.py) | ✅ | ✅ |
-| [example21.py](examples/example21.py) | ✅ | ✅ |
-| [list_all_files.py](examples/list_all_files.py) | ✅ | ✅ |
-| [delete_all_files.py](examples/delete_all_files.py) | ⬜ | ⬜ |
-| [list_all_vector_stores.py](examples/list_all_vector_stores.py) | ✅ | ✅ |
-| [delete_all_vs.py](examples/delete_all_vs.py) | ⬜ | ⬜ |
+| File | Status |
+|---|---|
+| [example01.py](examples/example01.py) | ✅ |
+| [example02.py](examples/example02.py) | ✅ |
+| [example03.py](examples/example03.py) | ✅ |
+| [example04.py](examples/example04.py) | ✅ |
+| [example05.py](examples/example05.py) | ✅ |
+| [example06.py](examples/example06.py) | ✅ |
+| [example07.py](examples/example07.py) | ✅ |
+| [example11.py](examples/example11.py) | ✅ |
+| [example12.py](examples/example12.py) | ✅ |
+| [example13.py](examples/example13.py) | ✅ |
+| [example14.py](examples/example14.py) | ✅ |
+| [example15.py](examples/example15.py) | ⬜ |
+| [example16.py](examples/example16.py) | ✅ |
+| [example17.py](examples/example17.py) | ✅ |
+| [example18.py](examples/example18.py) | ✅ |
+| [example21.py](examples/example21.py) | ✅ |
+| [list_all_files.py](examples/list_all_files.py) | ✅ |
+| [delete_all_files.py](examples/delete_all_files.py) | ⬜ |
+| [list_all_vector_stores.py](examples/list_all_vector_stores.py) | ✅ |
+| [delete_all_vs.py](examples/delete_all_vs.py) | ⬜ |

@@ -44,11 +44,13 @@ def main() -> None:
     else:
         role_instructions = "system"
 
-    query = (
-        "Summarize the retrieved documents about the impact of AI adoption "
-        "on the labor market, focusing on employment, unemployment, wages, "
-        "hiring, and which occupations appear most exposed."
-    )
+    # query = (
+    #    "Summarize the retrieved documents about the impact of AI adoption "
+    #    "on the labor market, focusing on employment, unemployment, wages, "
+    #    "hiring, and which occupations appear most exposed."
+    # )
+
+    query = "What is an HNSW index?"
 
     response = client.responses.create(
         model=MODEL_ID,

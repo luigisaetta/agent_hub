@@ -71,6 +71,7 @@ def main() -> None:
     print("")
     print("Creating connector...")
     response = client.create_vector_store_connector(create_connector_details)
+    
     connector = response.data
     connector_id = connector.id
     print(f"Connector Created: {connector_id} | State:{connector.lifecycle_state}")

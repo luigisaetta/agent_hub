@@ -22,6 +22,7 @@ def main() -> None:
     client = build_oci_genai_client()
 
     response = client.get_vector_store_connector_stats(CONNECTOR_ID)
+    
     stats = response.data
     print(f"Sync Statistics as of: {stats.time_generated}")
     print(f"Created: {stats.created.total_files_synced if stats.created else 0}")
