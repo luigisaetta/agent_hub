@@ -10,6 +10,7 @@ Description:
 from __future__ import annotations
 
 from types import SimpleNamespace
+import httpx
 
 
 def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
@@ -41,7 +42,7 @@ def test_get_inference_client_uses_openai_with_expected_kwargs(reload_module):
 
 
 def test_get_control_plane_client_uses_signed_http_client(reload_module):
-    """Build control-plane client with session-auth and compartment headers."""
+    """Build control-plane client with default auth and compartment headers."""
     clients = reload_module("common.clients")
 
     client = clients.get_control_plane_client()
@@ -53,7 +54,74 @@ def test_get_control_plane_client_uses_signed_http_client(reload_module):
         client.kwargs["http_client"].headers["opc-compartment-id"]
         == clients.COMPARTMENT_ID
     )
+    assert (
+        client.kwargs["http_client"].auth.__class__.__name__
+        == "FakeOciUserPrincipalAuth"
+    )
+
+
+def test_get_control_plane_client_supports_user_principal_auth(reload_module):
+    """Build control-plane client with user-principal auth when requested."""
+    clients = reload_module("common.clients")
+
+    client = clients.get_control_plane_client(auth_mode="user_principal")
+
+    assert client.kwargs["http_client"].auth.__class__.__name__ == (
+        "FakeOciUserPrincipalAuth"
+    )
+
+
+def test_get_control_plane_client_rejects_invalid_auth_mode(reload_module):
+    """Reject unknown control-plane auth mode values."""
+    clients = reload_module("common.clients")
+
+    try:
+        clients.get_control_plane_client(auth_mode="invalid")
+    except ValueError as exc:
+        assert "Invalid auth mode" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("Expected ValueError for invalid auth_mode")
+
+
+def test_get_control_plane_client_reads_auth_mode_from_env(reload_module, monkeypatch):
+    """Use session auth when OCI_AUTH_MODE=session."""
+    monkeypatch.setenv("OCI_AUTH_MODE", "session")
+    clients = reload_module("common.clients")
+
+    client = clients.get_control_plane_client()
+
     assert client.kwargs["http_client"].auth.__class__.__name__ == "FakeOciSessionAuth"
+
+
+def test_get_control_plane_client_rejects_session_profile_for_user_principal(
+    reload_module, monkeypatch
+):
+    """Reject session-style profile when control-plane uses user_principal."""
+    clients = reload_module("common.clients")
+
+    class BadUserPrincipalAuth(httpx.Auth):  # pylint: disable=too-few-public-methods
+        """Auth stub exposing a session-style config."""
+
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+            self.config = {
+                "user": "ocid1.user.oc1..example",
+                "tenancy": "ocid1.tenancy.oc1..example",
+                "fingerprint": "aa:bb:cc:dd",
+                "key_file": "~/.oci/sessions/DEFAULT/oci_api_key.pem",
+                "security_token_file": "~/.oci/sessions/DEFAULT/token",
+            }
+
+        def auth_flow(self, request):
+            yield request
+
+    monkeypatch.setattr(clients, "OciUserPrincipalAuth", BadUserPrincipalAuth)
+    try:
+        clients.get_control_plane_client(auth_mode="user_principal")
+    except ValueError as exc:
+        assert "looks like a session-auth profile" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("Expected ValueError for incompatible profile/auth mode")
 
 
 def test_print_header_outputs_consistent_banner(reload_module, capsys):

@@ -37,6 +37,26 @@ source ./set_env.sh prod-chicago
 - Data plane (`BASE_URL`): inference/responses calls.
 - Control plane (`CP_BASE_URL`): vector stores and connector management.
 
+## OCI auth mode for connector client
+
+Set authentication mode in your active profile/shell with:
+
+```bash
+export OCI_AUTH_MODE=user_principal
+```
+
+Supported values:
+- `user_principal` (default when variable is not set)
+- `session`
+
+Both `common.build_oci_genai_client(...)` and
+`common.get_control_plane_client(...)` read this variable when `auth_mode` is
+not passed explicitly.
+
+`session` requires `security_token_file` + `key_file` in OCI profile.
+`user_principal` requires an API-key profile (for example no
+`security_token_file`, and `key_file`/`key_content` configured for the user key).
+
 ## Security notes
 
 - Never commit real secrets in tracked files.

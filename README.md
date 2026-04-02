@@ -122,6 +122,10 @@ These environment variables override `config.py` defaults for the current shell 
 Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
 `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `LF_PWD`, `VECTOR_STORE_ID`.
 
+Authentication mode can be selected with `OCI_AUTH_MODE`:
+- `user_principal` (default if not set)
+- `session`
+
 Set the active profile from repository root:
 
 ```bash

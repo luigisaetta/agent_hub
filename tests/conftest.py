@@ -51,7 +51,29 @@ def stub_external_sdk_modules(monkeypatch: pytest.MonkeyPatch) -> None:
         def auth_flow(self, request):
             yield request
 
+    class FakeUserPrincipalSigner:  # pylint: disable=too-few-public-methods
+        """Minimal signer stub exposed by FakeOciUserPrincipalAuth."""
+
+    class FakeOciUserPrincipalAuth(
+        httpx.Auth
+    ):  # pylint: disable=too-few-public-methods
+        """Small stub replacing OciUserPrincipalAuth in tests."""
+
+        def __init__(self, **kwargs):
+            self.kwargs = kwargs
+            self.signer = FakeUserPrincipalSigner()
+            self.config = {
+                "user": "ocid1.user.oc1..example",
+                "tenancy": "ocid1.tenancy.oc1..example",
+                "fingerprint": "aa:bb:cc:dd",
+                "key_file": "~/.oci/oci_api_key.pem",
+            }
+
+        def auth_flow(self, request):
+            yield request
+
     oci_genai_auth_mod.OciSessionAuth = FakeOciSessionAuth
+    oci_genai_auth_mod.OciUserPrincipalAuth = FakeOciUserPrincipalAuth
 
     monkeypatch.setitem(sys.modules, "openai", openai_mod)
     monkeypatch.setitem(sys.modules, "oci_genai_auth", oci_genai_auth_mod)
