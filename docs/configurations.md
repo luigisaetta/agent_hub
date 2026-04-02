@@ -16,19 +16,19 @@ This project uses a shared configuration at repository root and imports it from 
 - `REGION`: OCI region (for example `us-chicago-1` or `eu-frankfurt-1`).
 - `MODEL_ID`: default model used by examples/demos (for example `openai.gpt-5.2`).
 
-2. Set active secret profile:
-
-```bash
-source ./set_env.sh prod-chicago
-./show_current_env.sh
-```
-
-3. Fill/update the `.env.*` profile files with your values:
+2. Fill/update the `.env.*` profile files with your values:
 - `PROJECT_ID`: OCI Generative AI project OCID.
 - `KEY1` / `KEY2`: API keys.
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
 - `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LF_PWD` for Langfuse examples.
 - `VECTOR_STORE_ID`: vector store OCID for retrieval examples.
+
+3. Set active secret profile:
+
+```bash
+source ./set_env.sh prod-chicago
+./show_current_env.sh
+```
 
 ## Endpoint behavior
 

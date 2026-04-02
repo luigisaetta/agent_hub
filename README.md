@@ -120,7 +120,7 @@ When you run `source ./set_env.sh <profile>`, the script exports:
 These environment variables override `config.py` defaults for the current shell session.
 
 Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
-`LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `LF_PWD`, `VECTOR_STORE_ID`.
+`LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `VECTOR_STORE_ID`.
 
 Authentication mode can be selected with `OCI_AUTH_MODE`:
 - `user_principal` (default if not set)
@@ -145,7 +145,7 @@ If a script returns `401 NotAuthenticated` while using OCI session authenticatio
 ```bash
 source ./set_env.sh prod-chicago
 ```
-2. Refresh the OCI session token for your local OCI profile:
+2. Refresh the OCI session token for your local OCI profile **only if you are using session-based authentication** (`OCI_AUTH_MODE=session`):
 ```bash
 oci session authenticate --profile-name DEFAULT
 ```
