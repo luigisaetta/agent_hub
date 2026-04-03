@@ -41,6 +41,7 @@ def main() -> None:
     """Trigger a connector file sync using script-level constants."""
     print_runtime_config()
     print("")
+    
     trigger_file_sync()
 
 

@@ -43,6 +43,7 @@ def main() -> None:
     print("")
 
     print("Uploading file in vector store...")
+    # If needed, specify chunking params here with `chunking_strategy={...}`.
     create_result = client.vector_stores.files.create(
         vector_store_id=VECTOR_STORE_ID,
         file_id=FILE_ID,

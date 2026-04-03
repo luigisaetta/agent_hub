@@ -5,6 +5,10 @@ License: MIT
 
 Description:
     Shared client builders used across examples and connector scripts.
+
+    The code available here covers also Control Plane client construction, which requires OCI authentication.
+    The authentication mode can be selected via the OCI_AUTH_MODE environment variable, which can be set
+    in the .env files used for examples and connectors. Two modes are supported: user_principal and session.
 """
 
 from __future__ import annotations
@@ -127,6 +131,8 @@ def get_control_plane_client(
 
     return client_class(
         base_url=CP_BASE_URL,
+        # here we are using OCI auth instead of API key, 
+        # so we can set api_key to any non-empty value or None
         api_key="unused",
         http_client=httpx.Client(
             auth=auth,
