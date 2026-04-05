@@ -14,9 +14,9 @@ DEFAULT_REGION = "us-chicago-1"
 REGION = os.getenv("AGENT_HUB_REGION", DEFAULT_REGION)
 
 # Shared default model used by examples.
-MODEL_ID = "openai.gpt-5.2"
+# MODEL_ID = "openai.gpt-5.2"
 # MODEL_ID = "openai.gpt-5.4"
-# MODEL_ID = "google.gemini-2.5-pro"
+MODEL_ID = "google.gemini-2.5-pro"
 # MODEL_ID = "openai.gpt-oss-120b"
 
 # Production endpoints (OpenAI-compatible API).
