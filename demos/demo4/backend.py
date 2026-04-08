@@ -24,7 +24,7 @@ from config_private import PROJECT_ID, VECTOR_STORE_ID
 DEFAULT_MODEL = MODEL_ID
 DEFAULT_TEMPERATURE = 0.0
 DEFAULT_MAX_RESULTS = 10
-DEFAULT_RERANKER = "Auto"
+DEFAULT_RERANKER = "auto"
 
 
 def create_client():
@@ -108,6 +108,50 @@ def _log_api_error(exc: Exception, *, stage: str) -> None:
     print("")
 
 
+def _extract_opc_request_id_from_obj(obj) -> str:
+    """Best-effort extraction of opc-request-id from SDK/internal response objects."""
+    if obj is None:
+        return ""
+
+    # Direct headers on the object itself.
+    headers = getattr(obj, "headers", None)
+    opc_request_id = _get_header_case_insensitive(headers, "opc-request-id") or (
+        _get_header_case_insensitive(headers, "opc-requestid")
+    )
+    if opc_request_id:
+        return opc_request_id
+
+    # Common wrapper attributes used by HTTP/SDK objects.
+    for attr_name in (
+        "_response",
+        "response",
+        "http_response",
+        "raw_response",
+        "_raw_response",
+        "_client_response",
+    ):
+        nested = getattr(obj, attr_name, None)
+        if nested is None:
+            continue
+        nested_headers = getattr(nested, "headers", None)
+        opc_request_id = _get_header_case_insensitive(
+            nested_headers, "opc-request-id"
+        ) or _get_header_case_insensitive(nested_headers, "opc-requestid")
+        if opc_request_id:
+            return opc_request_id
+
+    return ""
+
+
+def _log_debug_opc_request_id(*, source, stage: str) -> None:
+    """Print opc-request-id in debug mode when available."""
+    opc_request_id = _extract_opc_request_id_from_obj(source)
+    if not opc_request_id:
+        print(f"[Demo4][DEBUG] stage={stage} opc-request-id: <not available>")
+        return
+    print(f"[Demo4][DEBUG] stage={stage} opc-request-id: {opc_request_id}")
+
+
 def _build_input_for_model(model_id: str, user_prompt: str) -> list[dict[str, str]]:
     """
     Build strict input messages with provider-aware role for instructions.
@@ -125,13 +169,14 @@ def _build_input_for_model(model_id: str, user_prompt: str) -> list[dict[str, st
     ]
 
 
-def stream_rag(
+def stream_rag(  # pylint: disable=too-many-arguments
     client,
     *,
     model_id: str,
     user_prompt: str,
     conversation_id: str,
     enable_reranking: bool = True,
+    debug_enabled: bool = False,
 ) -> tuple[Iterator[str], dict]:
     """Stream strict file_search-based RAG output and collect final refs."""
     # Mutable container shared with the caller: populated once streaming ends.
@@ -160,6 +205,8 @@ def stream_rag(
             include=["file_search_call.results"],
             stream=True,
         )
+        if debug_enabled:
+            _log_debug_opc_request_id(source=stream, stage="responses.create")
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _log_api_error(exc, stage="responses.create")
         raise
@@ -183,6 +230,11 @@ def stream_rag(
                 if event_type in {"response.completed", "response.done"}:
                     # Keep final response object to extract normalized citations/references.
                     completed_response = getattr(event, "response", None)
+                    if debug_enabled:
+                        _log_debug_opc_request_id(
+                            source=completed_response,
+                            stage=f"stream.{event_type}",
+                        )
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _log_api_error(exc, stage="responses.stream")
             raise

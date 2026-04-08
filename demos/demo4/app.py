@@ -40,8 +40,8 @@ from demos.demo4.state import (
 from config_private import VECTOR_STORE_ID
 
 
-def _render_sidebar() -> tuple[str, bool]:
-    """Render sidebar controls and return selected model id + rerank flag."""
+def _render_sidebar() -> tuple[str, bool, bool]:
+    """Render sidebar controls and return model/rerank/debug flags."""
     with st.sidebar:
         st.subheader("Settings")
         model_id = st.text_input("Model ID", value=DEFAULT_MODEL)
@@ -63,7 +63,10 @@ def _render_sidebar() -> tuple[str, bool]:
             for ref in refs:
                 st.markdown(f"[{ref['n']}] {ref['filename']} (pages={ref['pages']})")
 
-    return model_id, enable_reranking
+        st.divider()
+        debug_enabled = st.toggle("Debug", value=False)
+
+    return model_id, enable_reranking, debug_enabled
 
 
 def main() -> None:
@@ -82,7 +85,7 @@ def main() -> None:
     if not get_conversation_id(st.session_state):
         set_conversation_id(st.session_state, create_conversation(client))
 
-    model_id, enable_reranking = _render_sidebar()
+    model_id, enable_reranking, debug_enabled = _render_sidebar()
 
     for msg in get_messages(st.session_state):
         with st.chat_message(msg["role"]):
@@ -109,6 +112,7 @@ def main() -> None:
                 user_prompt=user_prompt,
                 conversation_id=get_conversation_id(st.session_state),
                 enable_reranking=enable_reranking,
+                debug_enabled=debug_enabled,
             )
 
             for chunk in chunk_stream:
