@@ -48,7 +48,6 @@ def _render_sidebar(config: dict[str, str]) -> int:
     with st.sidebar:
         st.subheader("Runtime Configuration")
         st.caption(f"REGION: `{config['region']}`")
-        st.caption(f"MODEL_ID: `{config['model_id']}`")
         st.caption(f"VECTOR_STORE_ID: `{config['vector_store_id'] or 'MISSING'}`")
 
         st.divider()

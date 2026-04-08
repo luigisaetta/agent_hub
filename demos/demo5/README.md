@@ -34,11 +34,8 @@ streamlit run demos/demo5/app.py
 
 The sidebar always shows the effective runtime configuration:
 - `REGION`
-- `MODEL_ID`
 - `VECTOR_STORE_ID`
 
 ## Notes
 
 - Search is executed with `client.vector_stores.search(...)`.
-- `MODEL_ID` is displayed for runtime visibility/consistency with other demos,
-  even if this specific API call does not require a model parameter.

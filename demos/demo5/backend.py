@@ -12,10 +12,9 @@ from __future__ import annotations
 from typing import Any
 
 from common import get_inference_client
-from config import MODEL_ID, REGION
+from config import REGION
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
-DEFAULT_MODEL = MODEL_ID
 DEFAULT_REGION = REGION
 DEFAULT_MAX_RESULTS = 10
 
@@ -29,7 +28,6 @@ def get_runtime_config() -> dict[str, str]:
     """Return effective runtime config used by this demo."""
     return {
         "region": DEFAULT_REGION,
-        "model_id": DEFAULT_MODEL,
         "vector_store_id": VECTOR_STORE_ID or "",
     }
 
