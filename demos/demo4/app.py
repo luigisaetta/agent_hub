@@ -40,11 +40,12 @@ from demos.demo4.state import (
 from config_private import VECTOR_STORE_ID
 
 
-def _render_sidebar() -> str:
-    """Render sidebar controls and return selected model id."""
+def _render_sidebar() -> tuple[str, bool]:
+    """Render sidebar controls and return selected model id + rerank flag."""
     with st.sidebar:
         st.subheader("Settings")
         model_id = st.text_input("Model ID", value=DEFAULT_MODEL)
+        enable_reranking = st.toggle("Enable reranking", value=True)
         st.caption(f"Vector Store ID: `{VECTOR_STORE_ID or 'MISSING'}`")
 
         if st.button("New Conversation"):
@@ -62,7 +63,7 @@ def _render_sidebar() -> str:
             for ref in refs:
                 st.markdown(f"[{ref['n']}] {ref['filename']} (pages={ref['pages']})")
 
-    return model_id
+    return model_id, enable_reranking
 
 
 def main() -> None:
@@ -81,7 +82,7 @@ def main() -> None:
     if not get_conversation_id(st.session_state):
         set_conversation_id(st.session_state, create_conversation(client))
 
-    model_id = _render_sidebar()
+    model_id, enable_reranking = _render_sidebar()
 
     for msg in get_messages(st.session_state):
         with st.chat_message(msg["role"]):
@@ -100,27 +101,32 @@ def main() -> None:
         status_placeholder.info("Searching documents and preparing answer...")
         placeholder = st.empty()
         answer_chunks: list[str] = []
-        
-        # here we call the responses API
-        chunk_stream, stream_result = stream_rag(
-            client,
-            model_id=model_id,
-            user_prompt=user_prompt,
-            conversation_id=get_conversation_id(st.session_state),
-        )
+        try:
+            # here we call the responses API
+            chunk_stream, stream_result = stream_rag(
+                client,
+                model_id=model_id,
+                user_prompt=user_prompt,
+                conversation_id=get_conversation_id(st.session_state),
+                enable_reranking=enable_reranking,
+            )
 
-        for chunk in chunk_stream:
-            answer_chunks.append(chunk)
-            placeholder.markdown("".join(answer_chunks))
+            for chunk in chunk_stream:
+                answer_chunks.append(chunk)
+                placeholder.markdown("".join(answer_chunks))
 
-        final_answer = (
-            (stream_result.get("answer_text", "") or "").strip()
-            or "".join(answer_chunks).strip()
-            or "I could not generate a text answer."
-        )
-        refs = stream_result.get("refs", []) or []
-        status_placeholder.empty()
-        placeholder.markdown(final_answer)
+            final_answer = (
+                (stream_result.get("answer_text", "") or "").strip()
+                or "".join(answer_chunks).strip()
+                or "I could not generate a text answer."
+            )
+            refs = stream_result.get("refs", []) or []
+            status_placeholder.empty()
+            placeholder.markdown(final_answer)
+        except Exception as exc:  # pylint: disable=broad-exception-caught
+            status_placeholder.empty()
+            st.error(f"Search request failed: {exc}")
+            return
 
     append_message(st.session_state, "assistant", final_answer)
     set_last_references(st.session_state, refs)

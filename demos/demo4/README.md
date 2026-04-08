@@ -53,6 +53,7 @@ streamlit run demos/demo4/app.py
 UI behavior:
 - creates one conversation and keeps it across turns
 - each user request runs strict `file_search`
+- sidebar toggle enables/disables file-search reranking on the fly (enabled by default)
 - main area streams the answer token-by-token, then shows the final consolidated text
 - sidebar shows references with filename and pages
 
