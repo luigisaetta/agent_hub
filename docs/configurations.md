@@ -21,7 +21,7 @@ This project uses a shared configuration at repository root and imports it from 
 - `PROJECT_ID`: OCI Generative AI project OCID.
 - `KEY1` / `KEY2`: API keys.
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
-- `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` / `LF_PWD` for Langfuse examples.
+- `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` for Langfuse examples.
 - `VECTOR_STORE_ID`: vector store OCID for retrieval examples.
 
 3. Set active secret profile:

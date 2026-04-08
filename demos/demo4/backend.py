@@ -108,10 +108,10 @@ def _log_api_error(exc: Exception, *, stage: str) -> None:
     print("")
 
 
-def _extract_opc_request_id_from_obj(obj) -> str:
-    """Best-effort extraction of opc-request-id from SDK/internal response objects."""
+def _extract_opc_request_id_from_obj(obj) -> tuple[str, str]:
+    """Best-effort extraction of opc-request-id with source location info."""
     if obj is None:
-        return ""
+        return "", "none"
 
     # Direct headers on the object itself.
     headers = getattr(obj, "headers", None)
@@ -119,7 +119,7 @@ def _extract_opc_request_id_from_obj(obj) -> str:
         _get_header_case_insensitive(headers, "opc-requestid")
     )
     if opc_request_id:
-        return opc_request_id
+        return opc_request_id, "direct.headers"
 
     # Common wrapper attributes used by HTTP/SDK objects.
     for attr_name in (
@@ -138,18 +138,25 @@ def _extract_opc_request_id_from_obj(obj) -> str:
             nested_headers, "opc-request-id"
         ) or _get_header_case_insensitive(nested_headers, "opc-requestid")
         if opc_request_id:
-            return opc_request_id
+            return opc_request_id, f"{attr_name}.headers"
 
-    return ""
+    return "", "not_found"
 
 
-def _log_debug_opc_request_id(*, source, stage: str) -> None:
-    """Print opc-request-id in debug mode when available."""
-    opc_request_id = _extract_opc_request_id_from_obj(source)
+def _log_debug_opc_request_id(*, source, stage: str, app_action: str) -> None:
+    """Print app-level debug intent plus opc-request-id when available."""
+    print(f"[Demo4][DEBUG] stage={stage} action={app_action}")
+    opc_request_id, source_location = _extract_opc_request_id_from_obj(source)
     if not opc_request_id:
-        print(f"[Demo4][DEBUG] stage={stage} opc-request-id: <not available>")
+        print(
+            f"[Demo4][DEBUG] stage={stage} opc-request-id: <not available> "
+            f"(source={source_location})"
+        )
         return
-    print(f"[Demo4][DEBUG] stage={stage} opc-request-id: {opc_request_id}")
+    print(
+        f"[Demo4][DEBUG] stage={stage} opc-request-id: {opc_request_id} "
+        f"(source={source_location})"
+    )
 
 
 def _build_input_for_model(model_id: str, user_prompt: str) -> list[dict[str, str]]:
@@ -206,7 +213,15 @@ def stream_rag(  # pylint: disable=too-many-arguments
             stream=True,
         )
         if debug_enabled:
-            _log_debug_opc_request_id(source=stream, stage="responses.create")
+            rerank_label = "enabled" if enable_reranking else "disabled"
+            _log_debug_opc_request_id(
+                source=stream,
+                stage="responses.create",
+                app_action=(
+                    "Calling Responses API with file_search "
+                    f"(reranking={rerank_label})"
+                ),
+            )
     except Exception as exc:  # pylint: disable=broad-exception-caught
         _log_api_error(exc, stage="responses.create")
         raise
@@ -234,6 +249,7 @@ def stream_rag(  # pylint: disable=too-many-arguments
                         _log_debug_opc_request_id(
                             source=completed_response,
                             stage=f"stream.{event_type}",
+                            app_action="Received completed response; extracting references",
                         )
         except Exception as exc:  # pylint: disable=broad-exception-caught
             _log_api_error(exc, stage="responses.stream")

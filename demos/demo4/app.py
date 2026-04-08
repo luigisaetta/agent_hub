@@ -45,7 +45,7 @@ def _render_sidebar() -> tuple[str, bool, bool]:
     with st.sidebar:
         st.subheader("Settings")
         model_id = st.text_input("Model ID", value=DEFAULT_MODEL)
-        enable_reranking = st.toggle("Enable reranking", value=True)
+        enable_reranking = st.toggle("Enable reranking", value=False)
         st.caption(f"Vector Store ID: `{VECTOR_STORE_ID or 'MISSING'}`")
 
         if st.button("New Conversation"):
