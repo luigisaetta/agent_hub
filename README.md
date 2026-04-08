@@ -19,6 +19,7 @@ Highlights from the most useful examples and demos:
 - [`connectors/create_connector.py`](connectors/create_connector.py) + related scripts in [`connectors/`](connectors): create/sync/manage vector-store connectors to Object Storage.
 - [`demos/demo2`](demos/demo2): Streamlit chatbot with web search and Langfuse-integrated observability/tracing.
 - [`demos/demo4`](demos/demo4): full RAG flow with progressive loading from `pdf_rag/`, strict `file_search`, persistent conversation, streamed answers, and sidebar references with pages.
+- [`demos/demo5`](demos/demo5): Streamlit vector-store explorer that returns retrieved chunk text and metadata for a user query.
 
 ## Documentation
 
@@ -59,6 +60,7 @@ Highlights from the most useful examples and demos:
 | 2 | Responses chatbot + web search + Langfuse | [`demos/demo2`](demos/demo2) | Streamlit chatbot with multi-turn context, built-in web search, and Langfuse traces on LLM calls. | `conversations.create(...)`, `responses.create(..., tools=[{"type":"web_search"}], stream=True)`, `langfuse.openai` instrumentation | End-to-end chat UX demo with observability/tracing. | Includes basic UI/backend separation (`app.py`, `backend.py`, `state.py`). |
 | 3 | Structured extraction from legal PDFs | [`demos/demo3`](demos/demo3) | Streamlit app that previews one uploaded PDF, extracts raw text, and produces structured JSON output. | `files.create(...)`, `responses.create(...)` for PDF-to-text, `responses.parse(..., text_format=ProceduraVendita)` | End-to-end document extraction pipeline with typed schema output. | Uses hybrid models: Gemini for text extraction + GPT-5.2 for structured parsing. |
 | 4 | Full RAG with file_search | [`demos/demo4`](demos/demo4) | Two-step RAG demo: progressive ingestion from `pdf_rag/` and Streamlit chat UI on indexed docs. | Loading: `vector_stores.files.list(...)`, `files.retrieve(...)`, `files.create(...)`, `vector_stores.files.create(...)`; Query: `conversations.create(...)`, `responses.create(..., tools=[{"type":"file_search"}], include=["file_search_call.results"], stream=True)` | Practical end-to-end RAG workflow with strict grounding, streaming UX, and citations. | Sidebar shows references (`filename`, `pages`) extracted from response annotations. |
+| 5 | Vector store chunk explorer | [`demos/demo5`](demos/demo5) | Streamlit explorer that executes semantic search on a vector store and renders retrieved chunks plus metadata. | `vector_stores.search(...)` | Debugging retrieval quality and inspecting chunk-level evidence. | Sidebar shows runtime config (`REGION`, `MODEL_ID`, `VECTOR_STORE_ID`). |
 
 ## Utility Scripts
 
@@ -186,6 +188,9 @@ streamlit run demos/demo3/app.py
 
 pip install -r demos/demo4/requirements.txt
 streamlit run demos/demo4/app.py
+
+pip install -r demos/demo5/requirements.txt
+streamlit run demos/demo5/app.py
 ```
 
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
@@ -243,13 +248,18 @@ agent_hub/
 │   │   ├── proc_vendita.json
 │   │   ├── README.md
 │   │   └── requirements.txt
-│   └── demo4/
+│   ├── demo4/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── load_files.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   └── demo5/
 │       ├── app.py
 │       ├── backend.py
-│       ├── load_files.py
 │       ├── README.md
-│       ├── requirements.txt
-│       └── state.py
+│       └── requirements.txt
 ├── examples/
 │   ├── __init__.py
 │   ├── example01.py
