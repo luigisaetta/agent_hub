@@ -66,3 +66,80 @@ agent_hub/
 ├── config_private.py
 └── README.md
 ```
+
+## Detailed project structure
+
+```text
+agent_hub/
+├── README.md
+├── docs/
+│   ├── architecture.md
+│   ├── configurations.md
+│   └── testing.md
+├── issues_found.md
+├── LICENSE
+├── pytest.ini
+├── requirements.txt
+├── requirements-dev.txt
+├── config.py
+├── config_private.py
+├── set_env.sh
+├── show_current_env.sh
+├── common/
+│   ├── __init__.py
+│   ├── clients.py
+│   ├── models.py
+│   ├── output.py
+│   └── retrieval.py
+├── connectors/
+│   ├── __init__.py
+│   ├── create_connector.py
+│   ├── delete_connector.py
+│   ├── get_connector_logs.py
+│   ├── get_connector_stats.py
+│   ├── list_connectors.py
+│   ├── trigger_file_sync.py
+│   └── update_connector.py
+├── demos/
+│   ├── demo1/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   ├── demo2/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   ├── demo3/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── llm_schema_models.py
+│   │   ├── proc_vendita.json
+│   │   ├── README.md
+│   │   └── requirements.txt
+│   ├── demo4/
+│   │   ├── app.py
+│   │   ├── backend.py
+│   │   ├── load_files.py
+│   │   ├── README.md
+│   │   ├── requirements.txt
+│   │   └── state.py
+│   └── demo5/
+│       ├── app.py
+│       ├── backend.py
+│       ├── README.md
+│       └── requirements.txt
+├── examples/
+│   ├── __init__.py
+│   ├── example01.py
+│   ...
+│   └── example21.py
+├── tests/
+│   ├── conftest.py
+│   └── test_*.py
+├── images/
+└── pdf/
+```

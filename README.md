@@ -27,6 +27,34 @@ Highlights from the most useful examples and demos:
 - Testing: [`docs/testing.md`](docs/testing.md)
 - Architecture: [`docs/architecture.md`](docs/architecture.md)
 
+## Quickstart
+
+1. Install base dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Select active production profile:
+
+```bash
+source ./set_env.sh prod-chicago
+./show_current_env.sh
+```
+
+3. Run a first connectivity example:
+
+```bash
+python -m examples.example01
+```
+
+4. Run one demo (example: Demo 4):
+
+```bash
+pip install -r demos/demo4/requirements.txt
+streamlit run demos/demo4/app.py
+```
+
 ## Detailed Examples
 
 | # | Example | File | Purpose | Key API usage | Good for | Notes |
@@ -195,84 +223,7 @@ streamlit run demos/demo5/app.py
 
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
 
-## Project Structure
-
-```text
-agent_hub/
-├── README.md
-├── docs/
-│   ├── architecture.md
-│   ├── configurations.md
-│   └── testing.md
-├── issues_found.md
-├── LICENSE
-├── pytest.ini
-├── requirements.txt
-├── requirements-dev.txt
-├── config.py
-├── config_private.py
-├── set_env.sh
-├── show_current_env.sh
-├── common/
-│   ├── __init__.py
-│   ├── clients.py
-│   ├── models.py
-│   ├── output.py
-│   └── retrieval.py
-├── connectors/
-│   ├── __init__.py
-│   ├── create_connector.py
-│   ├── delete_connector.py
-│   ├── get_connector_logs.py
-│   ├── get_connector_stats.py
-│   ├── list_connectors.py
-│   ├── trigger_file_sync.py
-│   └── update_connector.py
-├── demos/
-│   ├── demo1/
-│   │   ├── app.py
-│   │   ├── backend.py
-│   │   ├── README.md
-│   │   ├── requirements.txt
-│   │   └── state.py
-│   ├── demo2/
-│   │   ├── app.py
-│   │   ├── backend.py
-│   │   ├── README.md
-│   │   ├── requirements.txt
-│   │   └── state.py
-│   ├── demo3/
-│   │   ├── app.py
-│   │   ├── backend.py
-│   │   ├── llm_schema_models.py
-│   │   ├── proc_vendita.json
-│   │   ├── README.md
-│   │   └── requirements.txt
-│   ├── demo4/
-│   │   ├── app.py
-│   │   ├── backend.py
-│   │   ├── load_files.py
-│   │   ├── README.md
-│   │   ├── requirements.txt
-│   │   └── state.py
-│   └── demo5/
-│       ├── app.py
-│       ├── backend.py
-│       ├── README.md
-│       └── requirements.txt
-├── examples/
-│   ├── __init__.py
-│   ├── example01.py
-│   ...
-│   └── example21.py
-├── tests/
-│   ├── conftest.py
-│   └── test_*.py
-├── images/
-└── pdf/
-```
-
-Architecture details are documented in [`docs/architecture.md`](docs/architecture.md).
+Project structure and module layout are documented in [`docs/architecture.md`](docs/architecture.md).
 
 ## Known Issue
 
