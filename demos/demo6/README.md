@@ -73,3 +73,11 @@ curl -N -X POST "http://127.0.0.1:8000/chat/stream" \
   -H "Accept: text/event-stream" \
   -d '{"user_request":"What is LangGraph used for in this demo?","history":[]}'
 ```
+
+## CLI test client
+
+From repository root:
+
+```bash
+python -m demos.demo6.test_client "Spiegami l'architettura di demo6"
+```
