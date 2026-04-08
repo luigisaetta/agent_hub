@@ -4,55 +4,31 @@ Last modified: 2026-04-08
 License: MIT
 
 Description:
-    Demo 6 backend core: simulated LangGraph-style RAG agent with standardized
-    streaming events (OpenAI-like envelope) for SSE transport.
+    Demo 6 backend core.
+    It orchestrates a LangGraph-style RAG pipeline and emits standardized
+    execution events for SSE transport to the UI layer.
 """
 
-# pylint: disable=too-few-public-methods,broad-exception-caught,too-many-instance-attributes
+# pylint: disable=too-few-public-methods,broad-exception-caught,too-many-instance-attributes,redefined-builtin
 
 from __future__ import annotations
 
-import asyncio
-import inspect
 import logging
 import time
 from collections.abc import Iterator
 from typing import Any, AsyncIterator, Callable, TypedDict
 from uuid import uuid4
 
+from langchain_core.runnables.base import Runnable
+from langgraph.graph import END, START, StateGraph
+
 from common import get_inference_client
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 from demos.demo6.prompts import ANSWER_SYSTEM_PROMPT
 
-try:
-    from langchain_core.runnables import RunnableLambda
-except ImportError:
-
-    class RunnableLambda:  # type: ignore[override]
-        """Minimal fallback runnable when langchain_core is not installed."""
-
-        def __init__(self, func):
-            """Store wrapped callable."""
-            self._func = func
-
-        async def ainvoke(self, input_data):
-            """Invoke sync/async callable with uniform async API."""
-            result = self._func(input_data)
-            if inspect.isawaitable(result):
-                return await result
-            return result
-
-
-try:
-    from langgraph.graph import END, START, StateGraph
-except ImportError:
-    END = "__end__"
-    START = "__start__"
-    StateGraph = None
-
 
 class RagState(TypedDict, total=False):
-    """State used by the simulated RAG graph."""
+    """Mutable state shared across graph nodes during one run."""
 
     user_request: str
     history: list[dict[str, str]]
@@ -65,7 +41,7 @@ class RagState(TypedDict, total=False):
 
 
 class GraphRunConfig(TypedDict, total=False):
-    """Runtime config overrides passed to the LangGraph-style agent."""
+    """Runtime overrides controlling model choices and retrieval sizes."""
 
     model_id: str
     reranker_model_id: str
@@ -81,6 +57,7 @@ DEFAULT_TOP_N = 8
 DEFAULT_VECTOR_STORE_ID = VECTOR_STORE_ID or ""
 DEFAULT_MAX_HISTORY_MESSAGES = 20
 
+# Keep logging local to this module so backend runs show node lifecycle clearly.
 LOGGER = logging.getLogger(__name__)
 LOGGER.setLevel(logging.INFO)
 if not LOGGER.handlers:
@@ -93,7 +70,7 @@ LOGGER.propagate = False
 
 
 def default_graph_config() -> GraphRunConfig:
-    """Return default runtime config for one graph run."""
+    """Return the baseline graph configuration used when request has no overrides."""
     return {
         "model_id": DEFAULT_MODEL_ID,
         "reranker_model_id": DEFAULT_RERANKER_MODEL_ID,
@@ -104,7 +81,7 @@ def default_graph_config() -> GraphRunConfig:
 
 
 def _normalize_graph_config(config: GraphRunConfig | None) -> GraphRunConfig:
-    """Merge optional config with defaults and enforce valid ranges."""
+    """Merge user overrides with defaults and enforce safe/consistent values."""
     merged = default_graph_config()
     if config:
         merged.update(config)
@@ -116,14 +93,14 @@ def _normalize_graph_config(config: GraphRunConfig | None) -> GraphRunConfig:
 
 
 def _as_dict(value: Any) -> dict[str, Any]:
-    """Normalize optional dict-like values."""
+    """Return value as dict when possible, otherwise return an empty dict."""
     if isinstance(value, dict):
         return value
     return {}
 
 
 def _normalize_pages(value: Any) -> list[Any]:
-    """Normalize page numbers to a list."""
+    """Normalize page metadata to a list shape for uniform downstream handling."""
     if value is None:
         return []
     if isinstance(value, list):
@@ -132,7 +109,7 @@ def _normalize_pages(value: Any) -> list[Any]:
 
 
 def extract_chunk_text(item: Any) -> str:
-    """Extract chunk text from one vector-store search item."""
+    """Extract plain chunk text from a vector-store item (SDK object or dict-like)."""
     content = getattr(item, "content", None)
     if isinstance(content, list):
         text_parts: list[str] = []
@@ -155,7 +132,7 @@ def extract_chunk_text(item: Any) -> str:
 
 
 def normalize_search_item(item: Any, rank: int) -> dict[str, Any]:
-    """Convert one API item to stable dict output."""
+    """Convert a raw vector-store item to the internal chunk representation."""
     additional_properties = _as_dict(getattr(item, "additional_properties", None))
     pages = _normalize_pages(additional_properties.get("page_numbers"))
     return {
@@ -171,7 +148,7 @@ def normalize_search_item(item: Any, rank: int) -> dict[str, Any]:
 
 
 def normalize_search_results(search_results: Any) -> list[dict[str, Any]]:
-    """Normalize and sort vector-store search results by descending score."""
+    """Normalize search results and sort chunks by descending score."""
     raw_items = list(getattr(search_results, "data", []) or [])
     sorted_items = sorted(
         raw_items,
@@ -185,7 +162,7 @@ def normalize_search_results(search_results: Any) -> list[dict[str, Any]]:
 
 
 def _chunks_for_ui(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
-    """Reduce chunks to UI-safe payload (filename + pages)."""
+    """Reduce chunk payload to UI-safe fields (filename + pages only)."""
     reduced: list[dict[str, Any]] = []
     for chunk in chunks:
         reduced.append(
@@ -198,7 +175,7 @@ def _chunks_for_ui(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
 
 
 def _final_state_for_ui(state: RagState) -> dict[str, Any]:
-    """Build UI-safe final state without chunk texts/internal prompts."""
+    """Build a final state snapshot safe to expose to the frontend."""
     return {
         "user_request": state.get("user_request", ""),
         "graph_config": state.get("graph_config", {}),
@@ -214,7 +191,7 @@ def _default_semantic_search(
     top_k: int,
     vector_store_id: str,
 ) -> list[dict[str, Any]]:
-    """Execute semantic search using the configured OpenAI-compatible client."""
+    """Run semantic retrieval against the configured vector store."""
     client = get_inference_client()
     search_results = client.vector_stores.search(
         vector_store_id=vector_store_id,
@@ -231,7 +208,7 @@ def _default_response_stream(
     system_prompt: str,
     user_prompt: str,
 ) -> Iterator[Any]:
-    """Create streaming response iterator using Responses API."""
+    """Open a streaming Responses API call for final answer generation."""
     client = get_inference_client()
     return client.responses.create(
         model=model_id,
@@ -245,112 +222,69 @@ def _default_response_stream(
     )
 
 
-def build_event(
-    *,
-    event_type: str,
-    run_id: str,
-    data: dict[str, Any],
-    node: str | None = None,
-) -> dict[str, Any]:
-    """Build a standardized event envelope."""
-    return {
-        "id": f"evt_{uuid4().hex}",
-        "type": event_type,
-        "timestamp": int(time.time()),
-        "run_id": run_id,
-        "node": node,
-        "data": data,
-    }
+class QueryRewriterRunnable(Runnable):
+    """No-op query rewriter node (current phase keeps the request unchanged)."""
 
-
-class Demo6RagAgent:
-    """Simulated LangGraph-style RAG agent with runnable nodes."""
-
-    def __init__(
-        self,
-        *,
-        latency_seconds: float = 0.03,
-        semantic_search_fn: Callable[..., list[dict[str, Any]]] | None = None,
-        response_stream_fn: Callable[..., Iterator[Any]] | None = None,
-    ):
-        self.latency_seconds = max(0.0, latency_seconds)
-        self.semantic_search_fn = semantic_search_fn or _default_semantic_search
-        self.response_stream_fn = response_stream_fn or _default_response_stream
-
-        self.query_rewriter = RunnableLambda(self._query_rewriter_node)
-        self.semantic_searcher = RunnableLambda(self._semantic_searcher_node)
-        self.reranker = RunnableLambda(self._reranker_node)
-        self.answer_generator = RunnableLambda(self._answer_generator_node)
-
-        self.node_sequence: list[tuple[str, RunnableLambda]] = [
-            ("QueryRewriter", self.query_rewriter),
-            ("SemanticeSearcher", self.semantic_searcher),
-            ("Reranker", self.reranker),
-            ("AnswerGenerator", self.answer_generator),
-        ]
-        self.graph = self._build_langgraph()
-
-    def _build_langgraph(self):
-        """Create a LangGraph graph object when dependency is available."""
-        if StateGraph is None:
-            return None
-
-        workflow = StateGraph(RagState)
-        workflow.add_node("QueryRewriter", self.query_rewriter)
-        workflow.add_node("SemanticeSearcher", self.semantic_searcher)
-        workflow.add_node("Reranker", self.reranker)
-        workflow.add_node("AnswerGenerator", self.answer_generator)
-
-        workflow.add_edge(START, "QueryRewriter")
-        workflow.add_edge("QueryRewriter", "SemanticeSearcher")
-        workflow.add_edge("SemanticeSearcher", "Reranker")
-        workflow.add_edge("Reranker", "AnswerGenerator")
-        workflow.add_edge("AnswerGenerator", END)
-        return workflow.compile()
-
-    async def _query_rewriter_node(self, state: RagState) -> dict[str, Any]:
-        user_request = str(state.get("user_request", "")).strip()
-        config = _normalize_graph_config(state.get("graph_config"))
-        # Current phase: no-op rewriter.
-        rewritten = user_request
+    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
+        del config, kwargs
+        user_request = str(input.get("user_request", "")).strip()
+        graph_config = _normalize_graph_config(input.get("graph_config"))
         return {
-            "rewritten_query": rewritten,
-            "rewriter_model_id": config["model_id"],
+            "rewritten_query": user_request,
+            "rewriter_model_id": graph_config["model_id"],
         }
 
-    async def _semantic_searcher_node(self, state: RagState) -> dict[str, Any]:
-        rewritten_query = str(state.get("rewritten_query", "")).strip()
-        base = rewritten_query or str(state.get("user_request", "")).strip()
-        config = _normalize_graph_config(state.get("graph_config"))
-        if not config["vector_store_id"]:
+
+class SemanticSearcherRunnable(Runnable):
+    """Retrieval node backed by `vector_stores.search(...)`."""
+
+    def __init__(self, semantic_search_fn: Callable[..., list[dict[str, Any]]]):
+        self.semantic_search_fn = semantic_search_fn
+
+    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
+        del config, kwargs
+        rewritten_query = str(input.get("rewritten_query", "")).strip()
+        base = rewritten_query or str(input.get("user_request", "")).strip()
+        graph_config = _normalize_graph_config(input.get("graph_config"))
+        if not graph_config["vector_store_id"]:
             raise RuntimeError(
                 "vector_store_id is empty. Configure VECTOR_STORE_ID in env or pass it in request."
             )
         chunks = self.semantic_search_fn(
             query=base,
-            top_k=config["top_k"],
-            vector_store_id=config["vector_store_id"],
+            top_k=graph_config["top_k"],
+            vector_store_id=graph_config["vector_store_id"],
         )
         return {
             "retrieved_chunks": chunks,
-            "search_model_id": config["model_id"],
+            "search_model_id": graph_config["model_id"],
         }
 
-    async def _reranker_node(self, state: RagState) -> dict[str, Any]:
-        retrieved = list(state.get("retrieved_chunks", []))
-        config = _normalize_graph_config(state.get("graph_config"))
+
+class RerankerRunnable(Runnable):
+    """Reranker node using score-based ordering with `top_n` truncation."""
+
+    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
+        del config, kwargs
+        retrieved = list(input.get("retrieved_chunks", []))
+        graph_config = _normalize_graph_config(input.get("graph_config"))
         reranked = sorted(
             retrieved, key=lambda item: item.get("score", 0), reverse=True
         )
         return {
-            "reranked_chunks": reranked[: config["top_n"]],
-            "reranker_model_id": config["reranker_model_id"],
+            "reranked_chunks": reranked[: graph_config["top_n"]],
+            "reranker_model_id": graph_config["reranker_model_id"],
         }
 
-    async def _answer_generator_node(self, state: RagState) -> dict[str, Any]:
-        reranked = list(state.get("reranked_chunks", []))
-        user_request = str(state.get("user_request", "")).strip()
-        history = list(state.get("history", []))
+
+class AnswerGeneratorRunnable(Runnable):
+    """Node that builds the grounded prompt consumed by final generation."""
+
+    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
+        del config, kwargs
+        reranked = list(input.get("reranked_chunks", []))
+        user_request = str(input.get("user_request", "")).strip()
+        history = list(input.get("history", []))
 
         history_lines = [
             f"{message.get('role', 'user')}: {message.get('content', '').strip()}"
@@ -361,6 +295,7 @@ class Demo6RagAgent:
             "\n".join(history_lines) if history_lines else "No prior messages."
         )
 
+        # Keep chunk formatting explicit so the model can cite only provided evidence.
         chunk_lines: list[str] = []
         for index, chunk in enumerate(reranked, start=1):
             chunk_lines.append(
@@ -386,10 +321,69 @@ class Demo6RagAgent:
         )
         return {"answer_user_prompt": answer_user_prompt}
 
+
+def build_event(
+    *,
+    event_type: str,
+    run_id: str,
+    data: dict[str, Any],
+    node: str | None = None,
+) -> dict[str, Any]:
+    """Build a standardized event envelope."""
+    return {
+        "id": f"evt_{uuid4().hex}",
+        "type": event_type,
+        "timestamp": int(time.time()),
+        "run_id": run_id,
+        "node": node,
+        "data": data,
+    }
+
+
+class Demo6RagAgent:
+    """RAG orchestrator exposing an async stream of UI-oriented execution events."""
+
+    def __init__(
+        self,
+        *,
+        semantic_search_fn: Callable[..., list[dict[str, Any]]] | None = None,
+        response_stream_fn: Callable[..., Iterator[Any]] | None = None,
+    ):
+        self.semantic_search_fn = semantic_search_fn or _default_semantic_search
+        self.response_stream_fn = response_stream_fn or _default_response_stream
+
+        self.query_rewriter = QueryRewriterRunnable()
+        self.semantic_searcher = SemanticSearcherRunnable(self.semantic_search_fn)
+        self.reranker = RerankerRunnable()
+        self.answer_generator = AnswerGeneratorRunnable()
+
+        self.node_sequence: list[tuple[str, Runnable]] = [
+            ("QueryRewriter", self.query_rewriter),
+            ("SemanticSearcher", self.semantic_searcher),
+            ("Reranker", self.reranker),
+            ("AnswerGenerator", self.answer_generator),
+        ]
+        self.graph = self._build_langgraph()
+
+    def _build_langgraph(self):
+        """Build and compile the fixed execution graph used by this demo."""
+        workflow = StateGraph(RagState)
+        workflow.add_node("QueryRewriter", self.query_rewriter)
+        workflow.add_node("SemanticSearcher", self.semantic_searcher)
+        workflow.add_node("Reranker", self.reranker)
+        workflow.add_node("AnswerGenerator", self.answer_generator)
+
+        workflow.add_edge(START, "QueryRewriter")
+        workflow.add_edge("QueryRewriter", "SemanticSearcher")
+        workflow.add_edge("SemanticSearcher", "Reranker")
+        workflow.add_edge("Reranker", "AnswerGenerator")
+        workflow.add_edge("AnswerGenerator", END)
+        return workflow.compile()
+
     def _stream_answer_from_model(
         self, *, model_id: str, user_prompt: str
     ) -> Iterator[str]:
-        """Yield model text deltas from Responses API stream."""
+        """Yield response text deltas from Responses API streaming events."""
         stream = self.response_stream_fn(
             model_id=model_id,
             system_prompt=ANSWER_SYSTEM_PROMPT,
@@ -407,14 +401,10 @@ class Demo6RagAgent:
                 "response.output_text.done",
                 "response.output_text.completed",
             }:
+                # Some providers may only emit a final text chunk with no deltas.
                 final_chunk = getattr(event, "text", "")
                 if final_chunk and not emitted_delta:
                     yield str(final_chunk)
-
-    async def _maybe_sleep(self) -> None:
-        if self.latency_seconds > 0:
-            # Keep a small delay to make streaming behavior visible in clients.
-            await asyncio.sleep(self.latency_seconds)
 
     async def stream_events(
         self,
@@ -423,9 +413,10 @@ class Demo6RagAgent:
         history: list[dict[str, str]] | None = None,
         graph_config: GraphRunConfig | None = None,
     ) -> AsyncIterator[dict[str, Any]]:
-        """Stream standardized events for one run."""
+        """Execute one agent run and emit standardized events in logical order."""
         run_id = f"run_{uuid4().hex}"
         effective_config = _normalize_graph_config(graph_config)
+        # Keep only the latest history turns to cap prompt size and token usage.
         trimmed_history = list(history or [])[-DEFAULT_MAX_HISTORY_MESSAGES:]
         state: RagState = {
             "user_request": user_request,
@@ -451,9 +442,8 @@ class Demo6RagAgent:
                     node=node_name,
                     data={"status": "running"},
                 )
-                await self._maybe_sleep()
 
-                if node_name == "SemanticeSearcher":
+                if node_name == "SemanticSearcher":
                     yield build_event(
                         event_type="response.tool_call.started",
                         run_id=run_id,
@@ -468,13 +458,14 @@ class Demo6RagAgent:
                 node_delta = await runnable.ainvoke(state)
                 state.update(node_delta)
 
+                # Event payloads are intentionally reduced for UI/debug usage.
                 yield build_event(
                     event_type="graph.state.delta",
                     run_id=run_id,
                     node=node_name,
                     data=(
                         {"chunks": _chunks_for_ui(node_delta["retrieved_chunks"])}
-                        if node_name == "SemanticeSearcher"
+                        if node_name == "SemanticSearcher"
                         else (
                             {
                                 "delta": {
@@ -499,6 +490,7 @@ class Demo6RagAgent:
                 if node_name == "AnswerGenerator":
                     user_prompt = str(state.get("answer_user_prompt", ""))
                     streamed_text = ""
+                    # Forward model deltas directly as incremental UI output.
                     for delta in self._stream_answer_from_model(
                         model_id=effective_config["model_id"],
                         user_prompt=user_prompt,
@@ -510,7 +502,6 @@ class Demo6RagAgent:
                             node=node_name,
                             data={"delta": delta},
                         )
-                        await self._maybe_sleep()
 
                     state["answer"] = streamed_text.strip()
                     yield build_event(
@@ -527,7 +518,7 @@ class Demo6RagAgent:
                         data={"text": state["answer"]},
                     )
 
-                if node_name == "SemanticeSearcher":
+                if node_name == "SemanticSearcher":
                     documents = len(state.get("retrieved_chunks", []))
                     yield build_event(
                         event_type="response.tool_call.completed",
@@ -547,7 +538,6 @@ class Demo6RagAgent:
                     data={"status": "completed"},
                 )
                 LOGGER.info("run_id=%s node=%s status=completed", run_id, node_name)
-                await self._maybe_sleep()
 
             yield build_event(
                 event_type="response.completed",
@@ -559,6 +549,7 @@ class Demo6RagAgent:
                 },
             )
         except Exception as exc:
+            # Keep one stable error event type for the UI, regardless of source.
             yield build_event(
                 event_type="response.error",
                 run_id=run_id,

@@ -8,10 +8,10 @@ Implemented goals:
 - standardized event envelope for lifecycle, graph, tool, and output events,
 - runnable nodes for:
   - `QueryRewriter`
-  - `SemanticeSearcher`
+  - `SemanticSearcher`
   - `Reranker`
   - `AnswerGenerator`
-- `SemanticeSearcher` integrated with `vector_stores.search(...)`.
+- `SemanticSearcher` integrated with `vector_stores.search(...)`.
 - `AnswerGenerator` uses Responses API with streamed output text deltas.
 
 ## Install demo dependencies

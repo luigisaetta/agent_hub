@@ -67,7 +67,6 @@ def _fake_response_stream(*, model_id: str, system_prompt: str, user_prompt: str
 def _make_agent() -> Demo6RagAgent:
     """Create test agent with fully stubbed external integrations."""
     return Demo6RagAgent(
-        latency_seconds=0.0,
         semantic_search_fn=_fake_semantic_search,
         response_stream_fn=_fake_response_stream,
     )
@@ -118,7 +117,7 @@ def test_stream_events_includes_expected_types_and_node_order():
     ]
     assert started_nodes == [
         "QueryRewriter",
-        "SemanticeSearcher",
+        "SemanticSearcher",
         "Reranker",
         "AnswerGenerator",
     ]
@@ -209,7 +208,7 @@ def test_query_rewriter_is_noop():
 
 
 def test_semantic_delta_contains_chunks_payload():
-    """SemanticeSearcher emits chunk list as data payload."""
+    """SemanticSearcher emits chunk list as data payload."""
     agent = _make_agent()
 
     async def _collect():
@@ -227,7 +226,7 @@ def test_semantic_delta_contains_chunks_payload():
         event
         for event in events
         if event["type"] == "graph.state.delta"
-        and event.get("node") == "SemanticeSearcher"
+        and event.get("node") == "SemanticSearcher"
     )
     assert "chunks" in semantic_delta["data"]
     assert len(semantic_delta["data"]["chunks"]) == 2
@@ -255,7 +254,7 @@ def test_events_do_not_expose_chunk_texts_in_ui_payloads():
         event
         for event in events
         if event["type"] == "graph.state.delta"
-        and event.get("node") == "SemanticeSearcher"
+        and event.get("node") == "SemanticSearcher"
     )
     rerank_delta = next(
         event
@@ -316,7 +315,6 @@ def test_history_is_trimmed_to_last_20_messages():
         return iter([SimpleNamespace(type="response.output_text.delta", delta="ok")])
 
     agent = Demo6RagAgent(
-        latency_seconds=0.0,
         semantic_search_fn=_fake_semantic_search,
         response_stream_fn=_capturing_response_stream,
     )
