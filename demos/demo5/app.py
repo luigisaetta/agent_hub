@@ -12,6 +12,7 @@ Description:
 from __future__ import annotations
 
 import sys
+import time
 from pathlib import Path
 
 import streamlit as st
@@ -31,6 +32,8 @@ from demos.demo5.backend import (  # noqa: E402
 RESULTS_KEY = "demo5_results"
 QUERY_KEY = "demo5_query"
 MAX_RESULTS_KEY = "demo5_max_results"
+RESPONSE_TIME_KEY = "demo5_response_time_seconds"
+SCORE_STATS_KEY = "demo5_score_stats"
 
 
 def _init_session_state() -> None:
@@ -41,14 +44,18 @@ def _init_session_state() -> None:
         st.session_state[QUERY_KEY] = ""
     if MAX_RESULTS_KEY not in st.session_state:
         st.session_state[MAX_RESULTS_KEY] = DEFAULT_MAX_RESULTS
+    if RESPONSE_TIME_KEY not in st.session_state:
+        st.session_state[RESPONSE_TIME_KEY] = None
+    if SCORE_STATS_KEY not in st.session_state:
+        st.session_state[SCORE_STATS_KEY] = None
 
 
 def _render_sidebar(config: dict[str, str]) -> int:
-    """Render sidebar configuration and controls."""
+    """Render sidebar configuration and search controls."""
     with st.sidebar:
         st.subheader("Runtime Configuration")
-        st.caption(f"REGION: `{config['region']}`")
-        st.caption(f"VECTOR_STORE_ID: `{config['vector_store_id'] or 'MISSING'}`")
+        st.write(f"REGION: {config['region']}")
+        st.write(f"VECTOR_STORE_ID: {config['vector_store_id'] or 'MISSING'}")
 
         st.divider()
         st.subheader("Search Options")
@@ -61,6 +68,25 @@ def _render_sidebar(config: dict[str, str]) -> int:
         )
 
     return max_results
+
+
+def _render_sidebar_stats() -> None:
+    """Render sidebar stats computed from the latest executed query."""
+    with st.sidebar:
+        response_time_seconds = st.session_state.get(RESPONSE_TIME_KEY)
+        score_stats = st.session_state.get(SCORE_STATS_KEY)
+        if response_time_seconds is None:
+            return
+
+        st.divider()
+        st.subheader("Last Search Stats")
+        st.write(f"Response time: {response_time_seconds:.3f}s")
+        if score_stats is not None:
+            st.write(f"Avg score: {score_stats['avg']:.4f}")
+            st.write(f"Min score: {score_stats['min']:.4f}")
+            st.write(f"Max score: {score_stats['max']:.4f}")
+        else:
+            st.write("Score stats: N/A")
 
 
 def _render_results(results: list[dict]) -> None:
@@ -126,16 +152,31 @@ def main() -> None:
         client = create_client()
         with st.spinner("Searching vector store..."):
             try:
+                start_time = time.perf_counter()
                 st.session_state[RESULTS_KEY] = search_vector_store(
                     client,
                     query=cleaned_query,
                     max_num_results=max_results,
                 )
+                elapsed_seconds = time.perf_counter() - start_time
+                st.session_state[RESPONSE_TIME_KEY] = elapsed_seconds
+                scores = [item["score"] for item in st.session_state[RESULTS_KEY]]
+                if scores:
+                    st.session_state[SCORE_STATS_KEY] = {
+                        "avg": sum(scores) / len(scores),
+                        "min": min(scores),
+                        "max": max(scores),
+                    }
+                else:
+                    st.session_state[SCORE_STATS_KEY] = None
             except Exception as exc:  # pylint: disable=broad-exception-caught
                 st.session_state[RESULTS_KEY] = []
+                st.session_state[RESPONSE_TIME_KEY] = None
+                st.session_state[SCORE_STATS_KEY] = None
                 st.error(f"Search failed: {exc}")
                 return
 
+    _render_sidebar_stats()
     _render_results(st.session_state[RESULTS_KEY])
 
 
