@@ -10,6 +10,8 @@ Demo4 includes two parts:
 - A vector store already created in your OCI project
 - `VECTOR_STORE_ID` configured in the active `.env` profile (pointing to that existing vector store)
 - Local files to ingest under `pdf_rag/`
+- Active production profile selected in the same shell
+  (`source ./set_env.sh prod-chicago` or `source ./set_env.sh prod-frankfurt`)
 
 If you still need to create a vector store, run:
 

@@ -13,8 +13,9 @@ This project uses a shared configuration at repository root and imports it from 
 ## What to edit
 
 1. Edit `config.py`:
-- `REGION`: OCI region (for example `us-chicago-1` or `eu-frankfurt-1`).
 - `MODEL_ID`: default model used by examples/demos (for example `openai.gpt-5.2`).
+  `REGION` has a default in code, but normal operation should select region via
+  `source ./set_env.sh <profile>` which exports `AGENT_HUB_REGION`.
 
 2. Fill/update the `.env.*` profile files with your values:
 - `PROJECT_ID`: OCI Generative AI project OCID.
@@ -29,6 +30,10 @@ This project uses a shared configuration at repository root and imports it from 
 source ./set_env.sh prod-chicago
 ./show_current_env.sh
 ```
+
+Supported profiles are production only:
+- `prod-chicago`
+- `prod-frankfurt`
 
 ## Endpoint behavior
 

@@ -112,12 +112,13 @@ Secrets are loaded from environment profile files:
 - `.env.prod-chicago`
 - `.env.prod-frankfurt`
 
-`REGION` remains defined in `config.py`.
+This repository supports only production profiles (`prod-*`).
 When you run `source ./set_env.sh <profile>`, the script exports:
 - `AGENT_HUB_REGION`
 - `AGENT_HUB_ENV_FILE`
 
-These environment variables override `config.py` defaults for the current shell session.
+These environment variables drive runtime configuration for the current shell
+session (instead of editing region values manually in code).
 
 Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
 `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `VECTOR_STORE_ID`.
@@ -136,6 +137,9 @@ source ./set_env.sh prod-chicago
 Profiles currently available:
 - `prod-chicago`
 - `prod-frankfurt`
+
+Before running examples/demos/connectors, always select one of the profiles
+above in the same terminal session.
 
 ## Authentication Troubleshooting
 
