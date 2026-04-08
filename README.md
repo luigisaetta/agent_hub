@@ -35,20 +35,25 @@ Highlights from the most useful examples and demos:
 pip install -r requirements.txt
 ```
 
-2. Select active production profile:
+2. Fill the `.env` file for your target production region (for example
+`.env.prod-chicago` or `.env.prod-frankfurt`) with valid values for:
+`PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`, `VECTOR_STORE_ID`
+(and Langfuse keys if needed).
+
+3. Select active production profile:
 
 ```bash
 source ./set_env.sh prod-chicago
 ./show_current_env.sh
 ```
 
-3. Run a first connectivity example:
+4. Run a first connectivity example:
 
 ```bash
 python -m examples.example01
 ```
 
-4. Run one demo (example: Demo 4):
+5. Run one demo (example: Demo 4):
 
 ```bash
 pip install -r demos/demo4/requirements.txt
