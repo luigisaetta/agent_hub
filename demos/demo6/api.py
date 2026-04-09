@@ -31,7 +31,7 @@ class ChatStreamRequest(BaseModel):
     class MessageItem(BaseModel):
         """One history message item."""
 
-        role: Literal["user", "ai"]
+        role: Literal["user", "assistant"]
         content: str
 
     user_request: str | None = None
