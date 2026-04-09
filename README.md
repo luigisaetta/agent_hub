@@ -20,6 +20,7 @@ Highlights from the most useful examples and demos:
 - [`demos/demo2`](demos/demo2): Streamlit chatbot with web search and Langfuse-integrated observability/tracing.
 - [`demos/demo4`](demos/demo4): full RAG flow with progressive loading from `pdf_rag/`, strict `file_search`, persistent conversation, streamed answers, and sidebar references with pages.
 - [`demos/demo5`](demos/demo5): Streamlit vector-store explorer that returns retrieved chunk text and metadata for a user query.
+- [`demos/demo6`](demos/demo6): LangGraph-style RAG backend with SSE plus Streamlit chat UI with streamed final answer and sidebar references from reranker.
 
 ## Documentation
 
@@ -94,7 +95,7 @@ streamlit run demos/demo4/app.py
 | 3 | Structured extraction from legal PDFs | [`demos/demo3`](demos/demo3) | Streamlit app that previews one uploaded PDF, extracts raw text, and produces structured JSON output. | `files.create(...)`, `responses.create(...)` for PDF-to-text, `responses.parse(..., text_format=ProceduraVendita)` | End-to-end document extraction pipeline with typed schema output. | Uses hybrid models: Gemini for text extraction + GPT-5.2 for structured parsing. |
 | 4 | Full RAG with file_search | [`demos/demo4`](demos/demo4) | Two-step RAG demo: progressive ingestion from `pdf_rag/` and Streamlit chat UI on indexed docs. | Loading: `vector_stores.files.list(...)`, `files.retrieve(...)`, `files.create(...)`, `vector_stores.files.create(...)`; Query: `conversations.create(...)`, `responses.create(..., tools=[{"type":"file_search"}], include=["file_search_call.results"], stream=True)` | Practical end-to-end RAG workflow with strict grounding, streaming UX, and citations. | Sidebar shows references (`filename`, `pages`) extracted from response annotations. |
 | 5 | Vector store chunk explorer | [`demos/demo5`](demos/demo5) | Streamlit explorer that executes semantic search on a vector store and renders retrieved chunks plus metadata. | `vector_stores.search(...)` | Debugging retrieval quality and inspecting chunk-level evidence. | Sidebar shows runtime config (`REGION`, `VECTOR_STORE_ID`). |
-| 6 | LangGraph-style RAG backend with SSE | [`demos/demo6`](demos/demo6) | FastAPI backend with 4-node LangGraph-style RAG flow and standardized SSE event streaming. | `POST /chat/stream` with `text/event-stream`; `SemanticeSearcher` uses `vector_stores.search(...)`; `AnswerGenerator` streams via Responses API | Building and debugging event-driven agent orchestration before frontend integration. | Backend-only phase; UI payloads for retrieval/rerank expose only `filename` and `pages`. |
+| 6 | LangGraph-style RAG backend + Streamlit UI | [`demos/demo6`](demos/demo6) | FastAPI backend with 4-node LangGraph-style RAG flow and standardized SSE events, plus Streamlit chat UI with history and real-time streamed answer. | `POST /chat` with `text/event-stream`; `SemanticSearcher` uses `vector_stores.search(...)`; `AnswerGenerator` streams via Responses API | Building and debugging event-driven agent orchestration with a lightweight chat frontend. | Sidebar shows runtime config and current-turn reranker references (`filename`, `pages`) in collapsible items. |
 
 ## Utility Scripts
 
@@ -225,6 +226,10 @@ streamlit run demos/demo4/app.py
 
 pip install -r demos/demo5/requirements.txt
 streamlit run demos/demo5/app.py
+
+pip install -r demos/demo6/requirements.txt
+uvicorn demos.demo6.api:app --reload --port 8000
+streamlit run demos/demo6/app.py
 ```
 
 Testing details are documented in [`docs/testing.md`](docs/testing.md).
