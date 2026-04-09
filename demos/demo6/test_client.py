@@ -52,7 +52,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("query", help="User request to send to backend.")
     parser.add_argument(
         "--url",
-        default="http://127.0.0.1:8000/chat/stream",
+        default="http://127.0.0.1:8000/chat",
         help="Backend stream endpoint.",
     )
     parser.add_argument("--model-id", default=None)

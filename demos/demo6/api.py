@@ -16,7 +16,7 @@ from collections.abc import AsyncIterator
 from typing import Literal
 
 from fastapi import FastAPI, HTTPException
-from fastapi.responses import StreamingResponse
+from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
 from demos.demo6.backend import Demo6RagAgent, GraphRunConfig
@@ -78,12 +78,18 @@ def to_sse(event: dict) -> str:
 
 
 @app.get("/health")
-async def health() -> dict[str, str]:
-    """Lightweight health endpoint."""
-    return {"status": "ok"}
+async def health() -> Response:
+    """Liveness endpoint used to verify container is alive."""
+    return Response(status_code=200, media_type="application/json")
 
 
-@app.post("/chat/stream")
+@app.get("/ready")
+async def ready() -> Response:
+    """Readiness endpoint used to verify container can receive traffic."""
+    return Response(status_code=200, media_type="application/json")
+
+
+@app.post("/chat")
 async def chat_stream(payload: ChatStreamRequest):
     """Stream standardized execution events over SSE."""
     query = payload.resolved_query()

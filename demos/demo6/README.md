@@ -4,7 +4,7 @@ This demo provides only the backend API (no frontend yet).
 
 Implemented goals:
 - backend/frontend separation (backend only in this phase),
-- HTTP streaming with SSE on `POST /chat/stream`,
+- HTTP streaming with SSE on `POST /chat`,
 - standardized event envelope for lifecycle, graph, tool, and output events,
 - runnable nodes for:
   - `QueryRewriter`
@@ -30,7 +30,7 @@ uvicorn demos.demo6.api:app --reload --port 8000
 
 ## Endpoint
 
-- `POST /chat/stream`
+- `POST /chat`
 - Request body (JSON):
 
 ```json
@@ -68,7 +68,7 @@ data: <json_payload>
 ## Quick curl example
 
 ```bash
-curl -N -X POST "http://127.0.0.1:8000/chat/stream" \
+curl -N -X POST "http://127.0.0.1:8000/chat" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{"user_request":"What is LangGraph used for in this demo?","history":[]}'
