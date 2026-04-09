@@ -28,6 +28,7 @@ from demos.demo6.nodes import (
     QueryRewriterRunnable,
     RerankerRunnable,
     SemanticSearcherRunnable,
+    default_query_rewrite,
     default_response_stream,
     default_semantic_search,
     iter_model_text_deltas,
@@ -147,13 +148,15 @@ class Demo6RagAgent:
     def __init__(
         self,
         *,
+        query_rewrite_fn: Callable[..., str] | None = None,
         semantic_search_fn: Callable[..., list[dict[str, Any]]] | None = None,
         response_stream_fn: Callable[..., Iterator[Any]] | None = None,
     ):
+        self.query_rewrite_fn = query_rewrite_fn or default_query_rewrite
         self.semantic_search_fn = semantic_search_fn or default_semantic_search
         self.response_stream_fn = response_stream_fn or default_response_stream
 
-        self.query_rewriter = QueryRewriterRunnable()
+        self.query_rewriter = QueryRewriterRunnable(self.query_rewrite_fn)
         self.semantic_searcher = SemanticSearcherRunnable(self.semantic_search_fn)
         self.reranker = RerankerRunnable()
         self.answer_generator = AnswerGeneratorRunnable()

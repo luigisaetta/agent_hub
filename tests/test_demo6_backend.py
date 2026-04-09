@@ -64,9 +64,20 @@ def _fake_response_stream(*, model_id: str, system_prompt: str, user_prompt: str
     )
 
 
+def _fake_query_rewrite(
+    *, model_id: str, user_request: str, history: list[dict[str, str]]
+) -> str:
+    """Deterministic rewrite stub for tests."""
+    del model_id
+    if not history:
+        return user_request
+    return f"standalone: {user_request}"
+
+
 def _make_agent() -> Demo6RagAgent:
     """Create test agent with fully stubbed external integrations."""
     return Demo6RagAgent(
+        query_rewrite_fn=_fake_query_rewrite,
         semantic_search_fn=_fake_semantic_search,
         response_stream_fn=_fake_response_stream,
     )
@@ -185,7 +196,7 @@ def test_stream_events_applies_runtime_graph_config_overrides():
 
 
 def test_query_rewriter_is_noop():
-    """QueryRewriter keeps user_request unchanged in current phase."""
+    """QueryRewriter keeps user_request unchanged when history is empty."""
     agent = _make_agent()
 
     async def _collect():
@@ -205,6 +216,32 @@ def test_query_rewriter_is_noop():
         if event["type"] == "graph.state.delta" and event.get("node") == "QueryRewriter"
     )
     assert rewrite_delta["data"]["delta"]["rewritten_query"] == "original request"
+
+
+def test_query_rewriter_rewrites_when_history_is_present():
+    """QueryRewriter calls rewrite function when history is not empty."""
+    agent = _make_agent()
+
+    async def _collect():
+        return [
+            event
+            async for event in agent.stream_events(
+                user_request="e quando è nata?",
+                history=[{"role": "user", "content": "Parlami di Ada Lovelace"}],
+                graph_config={"vector_store_id": "vs_test"},
+            )
+        ]
+
+    events = asyncio.run(_collect())
+    rewrite_delta = next(
+        event
+        for event in events
+        if event["type"] == "graph.state.delta" and event.get("node") == "QueryRewriter"
+    )
+    assert (
+        rewrite_delta["data"]["delta"]["rewritten_query"]
+        == "standalone: e quando è nata?"
+    )
 
 
 def test_semantic_delta_contains_chunks_payload():
@@ -315,6 +352,7 @@ def test_history_is_trimmed_to_last_20_messages():
         return iter([SimpleNamespace(type="response.output_text.delta", delta="ok")])
 
     agent = Demo6RagAgent(
+        query_rewrite_fn=_fake_query_rewrite,
         semantic_search_fn=_fake_semantic_search,
         response_stream_fn=_capturing_response_stream,
     )

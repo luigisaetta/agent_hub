@@ -12,7 +12,10 @@ from demos.demo6.nodes.answer_generator import (
     default_response_stream,
     iter_model_text_deltas,
 )
-from demos.demo6.nodes.query_rewriter import QueryRewriterRunnable
+from demos.demo6.nodes.query_rewriter import (
+    QueryRewriterRunnable,
+    default_query_rewrite,
+)
 from demos.demo6.nodes.reranker import RerankerRunnable
 from demos.demo6.nodes.semantic_searcher import (
     SemanticSearcherRunnable,
@@ -22,6 +25,7 @@ from demos.demo6.nodes.semantic_searcher import (
 __all__ = [
     "AnswerGeneratorRunnable",
     "QueryRewriterRunnable",
+    "default_query_rewrite",
     "RerankerRunnable",
     "SemanticSearcherRunnable",
     "default_response_stream",
