@@ -81,3 +81,9 @@ From repository root:
 ```bash
 python -m demos.demo6.test_client "Spiegami l'architettura di demo6"
 ```
+
+## Event contract (dettaglio)
+
+Per la specifica completa del formato eventi SSE:
+
+- `demos/demo6/README_EVENTS.md`
