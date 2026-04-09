@@ -29,10 +29,10 @@ pip install -r demos/demo6/requirements.txt
 
 ## Docker Compose (backend API)
 
-Per avviare il backend API in container con Docker Compose:
+To run the backend API in a container with Docker Compose:
 
-- vedi guida completa: `demos/demo6/README_DOCKER.md`
-- file principali:
+- full guide: `demos/demo6/README_DOCKER.md`
+- main files:
   - `demos/demo6/Dockerfile`
   - `demos/demo6/docker-compose.yml`
   - `demos/demo6/.env.compose.example`
@@ -114,6 +114,6 @@ python -m demos.demo6.test_client "Spiegami l'architettura di demo6"
 
 ## Event contract (dettaglio)
 
-Per la specifica completa del formato eventi SSE:
+For the full SSE event format specification:
 
 - `demos/demo6/README_EVENTS.md`
