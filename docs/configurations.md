@@ -19,7 +19,7 @@ This project uses a shared configuration at repository root and imports it from 
 
 2. Fill/update the `.env.*` profile files with your values:
 - `PROJECT_ID`: OCI Generative AI project OCID.
-- `KEY1` / `KEY2`: API keys.
+- `KEY1`: API key.
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
 - `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` for Langfuse examples.
 - `VECTOR_STORE_ID`: vector store OCID for retrieval examples.

@@ -38,7 +38,7 @@ pip install -r requirements.txt
 
 2. Fill the `.env` file for your target production region (for example
 `.env.prod-chicago` or `.env.prod-frankfurt`) with valid values for:
-`PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`, `VECTOR_STORE_ID`
+`PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, `VECTOR_STORE_ID`
 (and Langfuse keys if needed).
 
 3. Select active production profile:
@@ -157,7 +157,7 @@ When you run `source ./set_env.sh <profile>`, the script exports:
 These environment variables drive runtime configuration for the current shell
 session (instead of editing region values manually in code).
 
-Each profile should define: `PROJECT_ID`, `KEY1`, `KEY2`, `COMPARTMENT_ID`,
+Each profile should define: `PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`,
 `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `VECTOR_STORE_ID`.
 
 Authentication mode can be selected with `OCI_AUTH_MODE`:
