@@ -35,3 +35,7 @@ htmlcov/
 .idea/
 pdf_rag/
 .pylint.d/
+
+# internal docs
+demos/demo6/readme_hosted_deployment.md
+

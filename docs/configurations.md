@@ -22,6 +22,7 @@ This project uses a shared configuration at repository root and imports it from 
 - `KEY1`: API key.
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
 - `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` for Langfuse examples.
+  If Langfuse is not used, both can be unset or empty strings.
 - `VECTOR_STORE_ID`: vector store OCID for retrieval examples.
 
 3. Set active secret profile:

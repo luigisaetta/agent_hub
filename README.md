@@ -39,7 +39,7 @@ pip install -r requirements.txt
 2. Fill the `.env` file for your target production region (for example
 `.env.prod-chicago` or `.env.prod-frankfurt`) with valid values for:
 `PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, `VECTOR_STORE_ID`
-(and Langfuse keys if needed).
+(and Langfuse keys only if needed; otherwise they can be left unset/empty).
 
 3. Select active production profile:
 
@@ -159,6 +159,8 @@ session (instead of editing region values manually in code).
 
 Each profile should define: `PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`,
 `LANGFUSE_SECRET_KEY`, `LANGFUSE_PUBLIC_KEY`, `VECTOR_STORE_ID`.
+If you do not use Langfuse, `LANGFUSE_SECRET_KEY` and `LANGFUSE_PUBLIC_KEY`
+can be unset or empty strings.
 
 Authentication mode can be selected with `OCI_AUTH_MODE`:
 - `user_principal` (default if not set)

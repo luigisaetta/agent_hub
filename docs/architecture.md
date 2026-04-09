@@ -34,7 +34,7 @@ Core idea:
 - `AGENT_HUB_ENV_FILE` (explicit path exported in current shell)
 - `.env.active` symlink in repository root
 - region-based default profile (`.env.prod-chicago` or `.env.prod-frankfurt`)
-3. The selected `.env` file is loaded with `override=True`, then required secrets are validated (`PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, etc.).
+3. The selected `.env` file is loaded with `override=True`, then required secrets are validated (`PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, etc.). Langfuse keys are optional and can be empty when Langfuse integrations are not used.
 4. `common.clients.get_inference_client()` and `common.clients.get_control_plane_client()` provide the two OpenAI-compatible clients used by examples.
 5. Scripts execute API calls and reuse common output/retrieval helpers for consistency.
 
