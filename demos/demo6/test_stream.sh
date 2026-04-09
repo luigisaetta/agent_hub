@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-API_URL="${API_URL:-http://127.0.0.1:8000/chat}"
+API_URL="${API_URL:-http://127.0.0.1:8080/chat}"
 USER_REQUEST="${USER_REQUEST:-}"
 if [[ -z "$USER_REQUEST" ]]; then
   USER_REQUEST="Spiegami cosa è l'aspirina"

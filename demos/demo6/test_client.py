@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Last modified: 2026-04-08
+Last modified: 2026-04-09
 License: MIT
 
 Description:
@@ -52,7 +52,7 @@ def _build_arg_parser() -> argparse.ArgumentParser:
     parser.add_argument("query", help="User request to send to backend.")
     parser.add_argument(
         "--url",
-        default="http://127.0.0.1:8000/chat",
+        default="http://127.0.0.1:8080/chat",
         help="Backend stream endpoint.",
     )
     parser.add_argument("--model-id", default=None)

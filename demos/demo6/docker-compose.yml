@@ -6,7 +6,7 @@ services:
       dockerfile: demos/demo6/Dockerfile
     image: ${DEMO6_IMAGE_NAME:-agent-hub-demo6-api}:latest
     ports:
-      - "${DEMO6_HOST_PORT:-8000}:8000"
+      - "${DEMO6_HOST_PORT:-8080}:8080"
     environment:
       AGENT_HUB_REGION: ${AGENT_HUB_REGION:-us-chicago-1}
       AGENT_HUB_ENV_FILE: /run/config/agent_hub.env
@@ -18,7 +18,7 @@ services:
     command: >
       sh -c "uvicorn demos.demo6.api:app
       --host 0.0.0.0
-      --port 8000
+      --port 8080
       --workers ${DEMO6_UVICORN_WORKERS:-1}
       --log-level ${DEMO6_LOG_LEVEL:-info}"
     restart: unless-stopped

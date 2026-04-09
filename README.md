@@ -228,7 +228,7 @@ pip install -r demos/demo5/requirements.txt
 streamlit run demos/demo5/app.py
 
 pip install -r demos/demo6/requirements.txt
-uvicorn demos.demo6.api:app --reload --port 8000
+uvicorn demos.demo6.api:app --reload --port 8080
 streamlit run demos/demo6/app.py
 ```
 

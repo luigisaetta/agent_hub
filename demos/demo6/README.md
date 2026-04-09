@@ -42,7 +42,7 @@ To run the backend API in a container with Docker Compose:
 From repository root:
 
 ```bash
-uvicorn demos.demo6.api:app --reload --port 8000
+uvicorn demos.demo6.api:app --reload --port 8080
 ```
 
 ## Run Streamlit UI
@@ -98,7 +98,7 @@ data: <json_payload>
 ## Quick curl example
 
 ```bash
-curl -N -X POST "http://127.0.0.1:8000/chat" \
+curl -N -X POST "http://127.0.0.1:8080/chat" \
   -H "Content-Type: application/json" \
   -H "Accept: text/event-stream" \
   -d '{"user_request":"What is LangGraph used for in this demo?","history":[]}'

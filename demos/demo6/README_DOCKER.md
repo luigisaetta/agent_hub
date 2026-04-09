@@ -52,13 +52,13 @@ docker compose --env-file demos/demo6/.env.compose -f demos/demo6/docker-compose
 - `GET /.well-known/agent.json`
 - `POST /chat` (SSE stream)
 
-Default local URL: `http://127.0.0.1:8000`
+Default local URL: `http://127.0.0.1:8080`
 
 ## Configurable Settings
 
 The following settings are in `demos/demo6/.env.compose`:
 
-- `DEMO6_HOST_PORT`: host port mapped to container port 8000.
+- `DEMO6_HOST_PORT`: host port mapped to container port 8080.
 - `DEMO6_API_CONTAINER_NAME`: container name override.
 - `DEMO6_IMAGE_NAME`: final Docker image name.
 - `DEMO6_UVICORN_WORKERS`: uvicorn worker count.

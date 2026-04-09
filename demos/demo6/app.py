@@ -34,7 +34,7 @@ BACKEND_URL_KEY = "demo6_backend_url"
 MODEL_ID_KEY = "demo6_model_id"
 VECTOR_STORE_ID_KEY = "demo6_vector_store_id"
 REGION_KEY = "demo6_region"
-DEFAULT_CHAT_URL = "http://127.0.0.1:8000/chat"
+DEFAULT_CHAT_URL = "http://127.0.0.1:8080/chat"
 REQUEST_TIMEOUT_SECONDS = 300
 
 
