@@ -22,9 +22,16 @@ from uuid import uuid4
 from langchain_core.runnables.base import Runnable
 from langgraph.graph import END, START, StateGraph
 
-from common import get_inference_client
-from config_private import PROJECT_ID, VECTOR_STORE_ID
-from demos.demo6.prompts import ANSWER_SYSTEM_PROMPT
+from config_private import VECTOR_STORE_ID
+from demos.demo6.nodes import (
+    AnswerGeneratorRunnable,
+    QueryRewriterRunnable,
+    RerankerRunnable,
+    SemanticSearcherRunnable,
+    default_response_stream,
+    default_semantic_search,
+    iter_model_text_deltas,
+)
 
 
 class RagState(TypedDict, total=False):
@@ -92,75 +99,6 @@ def _normalize_graph_config(config: GraphRunConfig | None) -> GraphRunConfig:
     return merged
 
 
-def _as_dict(value: Any) -> dict[str, Any]:
-    """Return value as dict when possible, otherwise return an empty dict."""
-    if isinstance(value, dict):
-        return value
-    return {}
-
-
-def _normalize_pages(value: Any) -> list[Any]:
-    """Normalize page metadata to a list shape for uniform downstream handling."""
-    if value is None:
-        return []
-    if isinstance(value, list):
-        return value
-    return [value]
-
-
-def extract_chunk_text(item: Any) -> str:
-    """Extract plain chunk text from a vector-store item (SDK object or dict-like)."""
-    content = getattr(item, "content", None)
-    if isinstance(content, list):
-        text_parts: list[str] = []
-        for block in content:
-            if isinstance(block, dict):
-                if block.get("type") == "text" and block.get("text"):
-                    text_parts.append(str(block["text"]))
-                continue
-
-            if getattr(block, "type", None) == "text" and getattr(block, "text", None):
-                text_parts.append(str(block.text))
-
-        if text_parts:
-            return "\n".join(text_parts).strip()
-
-    text = getattr(item, "text", None)
-    if isinstance(text, str) and text.strip():
-        return text.strip()
-    return ""
-
-
-def normalize_search_item(item: Any, rank: int) -> dict[str, Any]:
-    """Convert a raw vector-store item to the internal chunk representation."""
-    additional_properties = _as_dict(getattr(item, "additional_properties", None))
-    pages = _normalize_pages(additional_properties.get("page_numbers"))
-    return {
-        "rank": rank,
-        "score": float(getattr(item, "score", 0.0) or 0.0),
-        "filename": getattr(item, "filename", None) or "unknown_file",
-        "file_id": getattr(item, "file_id", None) or "",
-        "chunk_id": additional_properties.get("chunk_id", "N/A"),
-        "pages": pages,
-        "text": extract_chunk_text(item),
-        "metadata": additional_properties,
-    }
-
-
-def normalize_search_results(search_results: Any) -> list[dict[str, Any]]:
-    """Normalize search results and sort chunks by descending score."""
-    raw_items = list(getattr(search_results, "data", []) or [])
-    sorted_items = sorted(
-        raw_items,
-        key=lambda item: getattr(item, "score", 0.0) or 0.0,
-        reverse=True,
-    )
-    return [
-        normalize_search_item(item, rank=index)
-        for index, item in enumerate(sorted_items, start=1)
-    ]
-
-
 def _chunks_for_ui(chunks: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Reduce chunk payload to UI-safe fields (filename + pages only)."""
     reduced: list[dict[str, Any]] = []
@@ -183,143 +121,6 @@ def _final_state_for_ui(state: RagState) -> dict[str, Any]:
         "reranked_chunks": _chunks_for_ui(list(state.get("reranked_chunks", []))),
         "answer": state.get("answer", ""),
     }
-
-
-def _default_semantic_search(
-    *,
-    query: str,
-    top_k: int,
-    vector_store_id: str,
-) -> list[dict[str, Any]]:
-    """Run semantic retrieval against the configured vector store."""
-    client = get_inference_client()
-    search_results = client.vector_stores.search(
-        vector_store_id=vector_store_id,
-        query=query,
-        max_num_results=top_k,
-        extra_headers={"OpenAI-Project": PROJECT_ID},
-    )
-    return normalize_search_results(search_results)
-
-
-def _default_response_stream(
-    *,
-    model_id: str,
-    system_prompt: str,
-    user_prompt: str,
-) -> Iterator[Any]:
-    """Open a streaming Responses API call for final answer generation."""
-    client = get_inference_client()
-    return client.responses.create(
-        model=model_id,
-        temperature=0.0,
-        input=[
-            {"role": "system", "content": system_prompt},
-            {"role": "user", "content": user_prompt},
-        ],
-        extra_headers={"OpenAI-Project": PROJECT_ID},
-        stream=True,
-    )
-
-
-class QueryRewriterRunnable(Runnable):
-    """No-op query rewriter node (current phase keeps the request unchanged)."""
-
-    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
-        del config, kwargs
-        user_request = str(input.get("user_request", "")).strip()
-        graph_config = _normalize_graph_config(input.get("graph_config"))
-        return {
-            "rewritten_query": user_request,
-            "rewriter_model_id": graph_config["model_id"],
-        }
-
-
-class SemanticSearcherRunnable(Runnable):
-    """Retrieval node backed by `vector_stores.search(...)`."""
-
-    def __init__(self, semantic_search_fn: Callable[..., list[dict[str, Any]]]):
-        self.semantic_search_fn = semantic_search_fn
-
-    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
-        del config, kwargs
-        rewritten_query = str(input.get("rewritten_query", "")).strip()
-        base = rewritten_query or str(input.get("user_request", "")).strip()
-        graph_config = _normalize_graph_config(input.get("graph_config"))
-        if not graph_config["vector_store_id"]:
-            raise RuntimeError(
-                "vector_store_id is empty. Configure VECTOR_STORE_ID in env or pass it in request."
-            )
-        chunks = self.semantic_search_fn(
-            query=base,
-            top_k=graph_config["top_k"],
-            vector_store_id=graph_config["vector_store_id"],
-        )
-        return {
-            "retrieved_chunks": chunks,
-            "search_model_id": graph_config["model_id"],
-        }
-
-
-class RerankerRunnable(Runnable):
-    """Reranker node using score-based ordering with `top_n` truncation."""
-
-    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
-        del config, kwargs
-        retrieved = list(input.get("retrieved_chunks", []))
-        graph_config = _normalize_graph_config(input.get("graph_config"))
-        reranked = sorted(
-            retrieved, key=lambda item: item.get("score", 0), reverse=True
-        )
-        return {
-            "reranked_chunks": reranked[: graph_config["top_n"]],
-            "reranker_model_id": graph_config["reranker_model_id"],
-        }
-
-
-class AnswerGeneratorRunnable(Runnable):
-    """Node that builds the grounded prompt consumed by final generation."""
-
-    def invoke(self, input: RagState, config=None, **kwargs) -> dict[str, Any]:
-        del config, kwargs
-        reranked = list(input.get("reranked_chunks", []))
-        user_request = str(input.get("user_request", "")).strip()
-        history = list(input.get("history", []))
-
-        history_lines = [
-            f"{message.get('role', 'user')}: {message.get('content', '').strip()}"
-            for message in history
-            if str(message.get("content", "")).strip()
-        ]
-        history_block = (
-            "\n".join(history_lines) if history_lines else "No prior messages."
-        )
-
-        # Keep chunk formatting explicit so the model can cite only provided evidence.
-        chunk_lines: list[str] = []
-        for index, chunk in enumerate(reranked, start=1):
-            chunk_lines.append(
-                (
-                    f"[{index}] filename={chunk.get('filename', 'unknown_file')} "
-                    f"score={float(chunk.get('score', 0.0) or 0.0):.4f} "
-                    f"chunk_id={chunk.get('chunk_id', 'N/A')}\n"
-                    f"text: {chunk.get('text', '')}"
-                )
-            )
-        chunks_block = (
-            "\n\n".join(chunk_lines) if chunk_lines else "No retrieved chunks."
-        )
-
-        answer_user_prompt = (
-            "User request:\n"
-            f"{user_request}\n\n"
-            "Conversation history:\n"
-            f"{history_block}\n\n"
-            "Retrieved document chunks:\n"
-            f"{chunks_block}\n\n"
-            "Write the final answer for the user."
-        )
-        return {"answer_user_prompt": answer_user_prompt}
 
 
 def build_event(
@@ -349,8 +150,8 @@ class Demo6RagAgent:
         semantic_search_fn: Callable[..., list[dict[str, Any]]] | None = None,
         response_stream_fn: Callable[..., Iterator[Any]] | None = None,
     ):
-        self.semantic_search_fn = semantic_search_fn or _default_semantic_search
-        self.response_stream_fn = response_stream_fn or _default_response_stream
+        self.semantic_search_fn = semantic_search_fn or default_semantic_search
+        self.response_stream_fn = response_stream_fn or default_response_stream
 
         self.query_rewriter = QueryRewriterRunnable()
         self.semantic_searcher = SemanticSearcherRunnable(self.semantic_search_fn)
@@ -379,32 +180,6 @@ class Demo6RagAgent:
         workflow.add_edge("Reranker", "AnswerGenerator")
         workflow.add_edge("AnswerGenerator", END)
         return workflow.compile()
-
-    def _stream_answer_from_model(
-        self, *, model_id: str, user_prompt: str
-    ) -> Iterator[str]:
-        """Yield response text deltas from Responses API streaming events."""
-        stream = self.response_stream_fn(
-            model_id=model_id,
-            system_prompt=ANSWER_SYSTEM_PROMPT,
-            user_prompt=user_prompt,
-        )
-        emitted_delta = False
-        for event in stream:
-            event_type = getattr(event, "type", "")
-            if event_type == "response.output_text.delta":
-                delta = getattr(event, "delta", "")
-                if delta:
-                    emitted_delta = True
-                    yield str(delta)
-            elif event_type in {
-                "response.output_text.done",
-                "response.output_text.completed",
-            }:
-                # Some providers may only emit a final text chunk with no deltas.
-                final_chunk = getattr(event, "text", "")
-                if final_chunk and not emitted_delta:
-                    yield str(final_chunk)
 
     async def stream_events(
         self,
@@ -491,7 +266,8 @@ class Demo6RagAgent:
                     user_prompt = str(state.get("answer_user_prompt", ""))
                     streamed_text = ""
                     # Forward model deltas directly as incremental UI output.
-                    for delta in self._stream_answer_from_model(
+                    for delta in iter_model_text_deltas(
+                        response_stream_fn=self.response_stream_fn,
                         model_id=effective_config["model_id"],
                         user_prompt=user_prompt,
                     ):
