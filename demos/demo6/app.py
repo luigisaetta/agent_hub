@@ -25,6 +25,7 @@ REPO_ROOT = Path(__file__).resolve().parents[2]
 if str(REPO_ROOT) not in sys.path:
     sys.path.insert(0, str(REPO_ROOT))
 
+from config import REGION  # noqa: E402
 from demos.demo6.backend import DEFAULT_MODEL_ID, DEFAULT_VECTOR_STORE_ID  # noqa: E402
 
 MESSAGES_KEY = "demo6_messages"
@@ -32,6 +33,7 @@ REFERENCES_KEY = "demo6_references"
 BACKEND_URL_KEY = "demo6_backend_url"
 MODEL_ID_KEY = "demo6_model_id"
 VECTOR_STORE_ID_KEY = "demo6_vector_store_id"
+REGION_KEY = "demo6_region"
 DEFAULT_CHAT_URL = "http://127.0.0.1:8000/chat"
 REQUEST_TIMEOUT_SECONDS = 300
 
@@ -48,6 +50,8 @@ def _init_session_state() -> None:
         st.session_state[MODEL_ID_KEY] = DEFAULT_MODEL_ID
     if VECTOR_STORE_ID_KEY not in st.session_state:
         st.session_state[VECTOR_STORE_ID_KEY] = DEFAULT_VECTOR_STORE_ID
+    if REGION_KEY not in st.session_state:
+        st.session_state[REGION_KEY] = REGION
 
 
 def _normalize_references(raw_refs: Any) -> list[dict[str, Any]]:
@@ -90,6 +94,7 @@ def _render_sidebar() -> tuple[dict[str, str], Any]:
     with st.sidebar:
         st.subheader("Runtime Configuration")
         backend_url = st.text_input("Backend /chat URL", key=BACKEND_URL_KEY)
+        st.text_input("region", key=REGION_KEY, disabled=True)
         model_id = st.text_input("model_id", key=MODEL_ID_KEY)
         vector_store_id = st.text_input("vector_store_id", key=VECTOR_STORE_ID_KEY)
 

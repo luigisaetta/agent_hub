@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Last modified: 2026-04-08
+Last modified: 2026-04-09
 License: MIT
 
 Description:
@@ -13,9 +13,9 @@ from __future__ import annotations
 
 import json
 from collections.abc import AsyncIterator
-from typing import Literal
+from typing import Any, Literal
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -23,6 +23,50 @@ from demos.demo6.backend import Demo6RagAgent, GraphRunConfig
 
 app = FastAPI(title="Demo6 RAG Backend", version="0.1.0")
 agent = Demo6RagAgent()
+AGENT_CARD_PATH = "/.well-known/agent.json"
+
+
+def build_agent_card(base_url: str) -> dict[str, Any]:
+    """Build a minimal A2A-style agent card for demo6 backend."""
+    normalized_base = base_url.rstrip("/")
+    return {
+        "schema_version": "a2a-card.v1",
+        "id": "demo6-rag-agent",
+        "name": "Demo6 RAG Agent",
+        "description": (
+            "LangGraph-style RAG assistant with SSE streaming and semantic search."
+        ),
+        "url": normalized_base,
+        "version": "0.1.0",
+        "default_input_modes": ["text/plain"],
+        "default_output_modes": ["text/plain"],
+        "capabilities": {
+            "streaming": True,
+            "push_notifications": False,
+            "history": True,
+        },
+        "skills": [
+            {
+                "id": "rag_qa",
+                "name": "RAG Question Answering",
+                "description": (
+                    "Rewrites query, retrieves/reranks chunks from vector store, "
+                    "then streams grounded answer."
+                ),
+                "tags": ["rag", "semantic-search", "sse", "langgraph"],
+                "examples": [
+                    "Spiegami l'architettura di demo6",
+                    "Quali sono i nodi del flusso?",
+                ],
+            }
+        ],
+        "endpoints": {
+            "chat_sse": f"{normalized_base}/chat",
+            "health": f"{normalized_base}/health",
+            "ready": f"{normalized_base}/ready",
+            "agent_card": f"{normalized_base}{AGENT_CARD_PATH}",
+        },
+    }
 
 
 class ChatStreamRequest(BaseModel):
@@ -87,6 +131,12 @@ async def health() -> Response:
 async def ready() -> Response:
     """Readiness endpoint used to verify container can receive traffic."""
     return Response(status_code=200, media_type="application/json")
+
+
+@app.get(AGENT_CARD_PATH)
+async def agent_card(request: Request) -> dict[str, Any]:
+    """Expose a well-known A2A-style card for discovery."""
+    return build_agent_card(str(request.base_url))
 
 
 @app.post("/chat")

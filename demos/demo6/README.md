@@ -27,6 +27,16 @@ Implemented goals:
 pip install -r demos/demo6/requirements.txt
 ```
 
+## Docker Compose (backend API)
+
+Per avviare il backend API in container con Docker Compose:
+
+- vedi guida completa: `demos/demo6/README_DOCKER.md`
+- file principali:
+  - `demos/demo6/Dockerfile`
+  - `demos/demo6/docker-compose.yml`
+  - `demos/demo6/.env.compose.example`
+
 ## Run Backend API (uvicorn)
 
 From repository root:
@@ -46,6 +56,7 @@ streamlit run demos/demo6/app.py
 ## Endpoint
 
 - `POST /chat`
+- `GET /.well-known/agent.json` (A2A-style agent card)
 - Request body (JSON):
 
 ```json
