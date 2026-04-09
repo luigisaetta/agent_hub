@@ -25,6 +25,18 @@ This project uses a shared configuration at repository root and imports it from 
   If Langfuse is not used, both can be unset or empty strings.
 - `VECTOR_STORE_ID`: vector store OCID for retrieval examples.
 
+Example `.env` profile:
+
+```bash
+ENV_NAME=prod-chicago
+PROJECT_ID=ocid1.generativeaiproject.oc1.us-chicago-1.xxxxx
+KEY1=sk-xxxxxxxxxxxxxxxxxxxxxxxx
+COMPARTMENT_ID=ocid1.compartment.oc1..xxxxxxxxxxxxxxxxxxxxxxxx
+LANGFUSE_SECRET_KEY=
+LANGFUSE_PUBLIC_KEY=
+VECTOR_STORE_ID=vs_ord_xxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
 3. Set active secret profile:
 
 ```bash
