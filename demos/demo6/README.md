@@ -1,9 +1,11 @@
-# Demo6: LangGraph-style RAG Backend with SSE
+# Demo6: LangGraph-style RAG Backend with SSE + Streamlit UI
 
-This demo provides only the backend API (no frontend yet).
+This demo provides:
+- backend API with SSE streaming (`POST /chat`)
+- Streamlit chat UI that consumes the SSE stream in real time
 
 Implemented goals:
-- backend/frontend separation (backend only in this phase),
+- backend/frontend separation,
 - HTTP streaming with SSE on `POST /chat`,
 - standardized event envelope for lifecycle, graph, tool, and output events,
 - runnable nodes for:
@@ -13,6 +15,11 @@ Implemented goals:
   - `AnswerGenerator`
 - `SemanticSearcher` integrated with `vector_stores.search(...)`.
 - `AnswerGenerator` uses Responses API with streamed output text deltas.
+- Streamlit UI with:
+  - sidebar runtime config (`model_id`, `vector_store_id`)
+  - sidebar references updated after reranker (`filename` + `pages`, collapsible items)
+  - central chat view (ChatGPT-style layout)
+  - conversation history stored in session state and sent to backend
 
 ## Install demo dependencies
 
@@ -28,6 +35,14 @@ From repository root:
 uvicorn demos.demo6.api:app --reload --port 8000
 ```
 
+## Run Streamlit UI
+
+From repository root (in a second terminal):
+
+```bash
+streamlit run demos/demo6/app.py
+```
+
 ## Endpoint
 
 - `POST /chat`
@@ -36,7 +51,10 @@ uvicorn demos.demo6.api:app --reload --port 8000
 ```json
 {
   "user_request": "Explain the architecture",
-  "history": []
+  "history": [
+    {"role": "user", "content": "What is demo6?"},
+    {"role": "assistant", "content": "It is a LangGraph-style RAG backend."}
+  ]
 }
 ```
 
@@ -46,6 +64,7 @@ Optional runtime config fields:
 - `top_k` (default: `10`)
 - `top_n` (default: `8`)
 - `vector_store_id` (default: loaded from env profile, same behavior as demo5)
+- `history[*].role` supports: `user`, `assistant`
 
 Prompt configuration:
 - system prompt for answer grounding is defined in
