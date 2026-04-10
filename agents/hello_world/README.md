@@ -35,3 +35,35 @@ Compatibilita con payload demo6-like:
 ```bash
 conda run -n agent_hub python -m agents.hello_world.client Luca
 ```
+
+## Docker Deploy
+
+### Build image
+
+Da root repository:
+
+```bash
+docker build -f agents/hello_world/Dockerfile -t agent-hub-hello-world:latest .
+```
+
+### Run container
+
+```bash
+docker run --rm -p 8080:8080 --name hello-world-agent agent-hub-hello-world:latest
+```
+
+### Check endpoints
+
+```bash
+curl -i http://127.0.0.1:8080/health
+curl -i http://127.0.0.1:8080/ready
+```
+
+### Docker Compose (opzionale)
+
+```bash
+docker compose -f agents/hello_world/docker-compose.yml up --build -d
+docker compose -f agents/hello_world/docker-compose.yml ps
+docker compose -f agents/hello_world/docker-compose.yml logs -f hello-world-agent
+docker compose -f agents/hello_world/docker-compose.yml down
+```

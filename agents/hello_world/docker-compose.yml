@@ -1,0 +1,16 @@
+services:
+  hello-world-agent:
+    container_name: ${HELLO_WORLD_CONTAINER_NAME:-hello-world-agent}
+    build:
+      context: ../..
+      dockerfile: agents/hello_world/Dockerfile
+    image: ${HELLO_WORLD_IMAGE_NAME:-agent-hub-hello-world}:latest
+    ports:
+      - "${HELLO_WORLD_HOST_PORT:-8080}:8080"
+    command: >
+      sh -c "uvicorn agents.hello_world.api:app
+      --host 0.0.0.0
+      --port 8080
+      --workers ${HELLO_WORLD_UVICORN_WORKERS:-1}
+      --log-level ${HELLO_WORLD_LOG_LEVEL:-info}"
+    restart: unless-stopped
