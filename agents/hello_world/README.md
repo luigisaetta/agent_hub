@@ -5,7 +5,7 @@ Primo agent demo separato dalle demo generiche (`demos/`).
 ## Run API (host/port come demo6)
 
 ```bash
-conda run -n agent_hub python -m uvicorn agents.hello_world.api:app --host 0.0.0.0 --port 8080
+uvicorn agents.hello_world.api:app --reload --port 8080
 ```
 
 ## Endpoint
