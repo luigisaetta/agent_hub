@@ -2,6 +2,8 @@
 .env
 .env.*
 *.env
+examples/example24.env.sample
+examples/.env-jwt
 my_notes.md
 
 # Python cache/compiled
@@ -38,4 +40,3 @@ pdf_rag/
 
 # internal docs
 demos/demo6/readme_hosted_deployment.md
-
