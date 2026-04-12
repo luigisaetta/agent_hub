@@ -22,6 +22,7 @@ from common.output import (
     print_streamed_output,
 )
 from common.models import extract_provider_name
+from common.oci_jwt_token_client import OciJwtTokenClient
 from common.retrieval import extract_text_and_refs
 
 __all__ = [
@@ -36,5 +37,6 @@ __all__ = [
     "print_runtime_config",
     "print_streamed_output",
     "extract_provider_name",
+    "OciJwtTokenClient",
     "extract_text_and_refs",
 ]
