@@ -150,6 +150,7 @@ class DeepAgentsLocalBackend:
             openai_api_base=BASE_URL,
             openai_api_key=_resolve_api_key(),
             temperature=0.0,
+            # important: force to responses (not completions)
             use_responses_api=True,
             output_version="responses/v1",
             default_headers=default_headers,
