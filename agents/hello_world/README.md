@@ -33,13 +33,13 @@ Compatibilita con payload demo6-like:
 ## Client CLI
 
 ```bash
-conda run -n agent_hub python -m agents.hello_world.client Luca
+python -m agents.hello_world.client Luca
 ```
 
 ## Client CLI (JWT)
 
 ```bash
-conda run -n agent_hub python -m agents.hello_world.client_jwt Luca
+python -m agents.hello_world.client_jwt Luca
 ```
 
 Before running, update values in the dedicated env file:
@@ -51,7 +51,7 @@ Before running, update values in the dedicated env file:
 You can also pass a custom env file path:
 
 ```bash
-conda run -n agent_hub python -m agents.hello_world.client_jwt Luca --env-file path/to/.env.file
+python -m agents.hello_world.client_jwt Luca --env-file path/to/.env.file
 ```
 
 ## Docker Deploy
