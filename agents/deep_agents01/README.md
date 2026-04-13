@@ -27,7 +27,9 @@ High-level flow:
   - builds the deep agent (`create_deep_agent`)
   - configures `ChatOpenAI` on OCI endpoint
   - forces Responses API
-  - converts output to SSE-friendly events (`response.started`, `response.output_text.delta`, `response.completed`, `response.error`)
+  - focuses on orchestration and streaming flow
+- `agents/deep_agents01/utility.py`
+  - shared helper functions (env loading/resolution, event envelope, output extraction, error summary)
 - `agents/deep_agents01/api.py`
   - exposes `GET /health`, `GET /ready`, `POST /chat`
   - serializes events in SSE format

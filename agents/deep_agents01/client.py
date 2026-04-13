@@ -17,6 +17,26 @@ import urllib.request
 from typing import Iterator
 
 
+def _print_configuration(*, backend_config: dict, url: str, prompt: str) -> None:
+    """Print a readable runtime configuration header from backend settings."""
+    model = str(backend_config.get("model", "n/a"))
+    api_base = str(backend_config.get("openai_api_base", "n/a"))
+    use_responses_api = str(backend_config.get("use_responses_api", "n/a"))
+    output_version = str(backend_config.get("output_version", "n/a"))
+
+    print("=== Deep Agents 01 Client ===")
+    print("Backend configuration:")
+    print(f"- model: {model}")
+    print(f"- openai_api_base: {api_base}")
+    print(f"- use_responses_api: {use_responses_api}")
+    print(f"- output_version: {output_version}")
+    print("Request:")
+    print(f"- endpoint: {url}")
+    print(f"- prompt: {prompt}")
+    print("")
+    print("Output:")
+
+
 def _iter_sse_events(stream) -> Iterator[tuple[str, str]]:
     """Yield SSE events as (event_type, data_text)."""
     current_event = "message"
@@ -75,6 +95,7 @@ def main() -> int:
 
     had_output = False
     error_message = ""
+    header_printed = False
 
     try:
         with urllib.request.urlopen(request) as response:
@@ -88,6 +109,20 @@ def main() -> int:
                 data = (
                     event.get("data", {}) if isinstance(event.get("data"), dict) else {}
                 )
+
+                if payload_type == "response.started" and not header_printed:
+                    backend_config = (
+                        data.get("backend_config", {})
+                        if isinstance(data.get("backend_config"), dict)
+                        else {}
+                    )
+                    _print_configuration(
+                        backend_config=backend_config,
+                        url=args.url,
+                        prompt=args.prompt,
+                    )
+                    header_printed = True
+                    continue
 
                 if payload_type == "response.output_text.delta":
                     delta = str(data.get("delta", ""))
@@ -118,8 +153,11 @@ def main() -> int:
     if error_message:
         return 1
     if not had_output:
+        if not header_printed:
+            _print_configuration(backend_config={}, url=args.url, prompt=args.prompt)
         print("No output received from server.", file=sys.stderr)
         return 1
+    print("")
 
     return 0
 

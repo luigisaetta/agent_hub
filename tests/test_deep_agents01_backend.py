@@ -13,11 +13,11 @@ from __future__ import annotations
 
 import asyncio
 
-from agents.deep_agents01.backend import (
-    DeepAgentsLocalBackend,
-    _extract_output_text,
-    _resolve_project_id,
+from agents.deep_agents01.backend import DeepAgentsLocalBackend
+from agents.deep_agents01.utility import (
     build_event,
+    extract_output_text,
+    resolve_project_id,
 )
 
 
@@ -68,14 +68,14 @@ def test_extract_output_text_supports_assistant_messages():
         ]
     }
 
-    assert _extract_output_text(state) == "risposta finale"
+    assert extract_output_text(state) == "risposta finale"
 
 
 def test_resolve_project_id_from_environment(monkeypatch):
     """Project id should prefer environment override when provided."""
     monkeypatch.setenv("OPENAI_PROJECT_ID", "proj_env_123")
     monkeypatch.delenv("OCI_PROJECT_ID", raising=False)
-    assert _resolve_project_id() == "proj_env_123"
+    assert resolve_project_id() == "proj_env_123"
 
 
 def test_stream_events_returns_completed_with_output_text():
@@ -96,6 +96,14 @@ def test_stream_events_returns_completed_with_output_text():
         event for event in events if event["type"] == "response.completed"
     )
     assert "risposta di test" in final_event["data"]["output_text"]
+
+    started_event = next(
+        event for event in events if event["type"] == "response.started"
+    )
+    backend_config = started_event["data"].get("backend_config", {})
+    assert backend_config.get("model")
+    assert backend_config.get("openai_api_base")
+    assert backend_config.get("use_responses_api") is True
 
 
 def test_stream_events_emits_error_event_on_runtime_failure():
