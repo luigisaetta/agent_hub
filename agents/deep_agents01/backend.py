@@ -8,7 +8,7 @@ Description:
     The model is configured to OCI OpenAI-compatible endpoint via ChatOpenAI.
 """
 
-# pylint: disable=too-few-public-methods,import-error,import-outside-toplevel
+# pylint: disable=too-few-public-methods,import-error
 
 from __future__ import annotations
 
@@ -19,7 +19,9 @@ from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
+from deepagents import create_deep_agent
 from dotenv import load_dotenv
+from langchain_openai import ChatOpenAI
 
 from config import BASE_URL
 
@@ -140,10 +142,6 @@ class DeepAgentsLocalBackend:
     @staticmethod
     def _build_deep_agent_graph() -> Any:
         """Create compiled Deep Agent graph with OCI ChatOpenAI model."""
-        # Imported lazily to keep tests independent from optional runtime deps.
-        from deepagents import create_deep_agent  # pylint: disable=import-error
-        from langchain_openai import ChatOpenAI  # pylint: disable=import-error
-
         project_id = _resolve_project_id()
         default_headers = {"OpenAI-Project": project_id} if project_id else None
 

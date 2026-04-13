@@ -1,190 +1,190 @@
 # Deep Agents 01
 
-Esempio `agents/` basato su Deep Agents (LangChain/LangGraph) con:
-- backend agent separato
-- API FastAPI SSE separata
-- client CLI separato
-- integrazione OCI OpenAI-compatible via `ChatOpenAI`
+`agents/` example based on Deep Agents (LangChain/LangGraph) with:
+- separate agent backend
+- separate FastAPI SSE API
+- separate CLI client
+- OCI OpenAI-compatible integration via `ChatOpenAI`
 
-Questo esempio e pensato per esecuzione locale (senza JWT).
+This example is designed for local execution (no JWT).
 
-## Obiettivo
+## Goal
 
-Fornire un secondo agente nel progetto `agent_hub` con struttura simile a `hello_world`, ma usando il framework Deep Agents.
+Provide a second agent in the `agent_hub` project with a structure similar to `hello_world`, but using the Deep Agents framework.
 
-## Architettura
+## Architecture
 
-Flusso alto livello:
-1. Il client CLI invia `POST /chat` con `prompt`
-2. L'API riceve la richiesta e apre stream SSE
-3. Il backend invoca Deep Agents con `ChatOpenAI`
-4. L'API inoltra eventi SSE al client
-5. Il client stampa il testo finale oppure errore
+High-level flow:
+1. The CLI client sends `POST /chat` with `prompt`
+2. The API receives the request and opens an SSE stream
+3. The backend invokes Deep Agents with `ChatOpenAI`
+4. The API forwards SSE events to the client
+5. The client prints final text output or an error
 
-## File principali
+## Main files
 
 - `agents/deep_agents01/backend.py`
-  - costruisce il deep agent (`create_deep_agent`)
-  - configura `ChatOpenAI` su endpoint OCI
-  - forza Responses API
-  - converte output in eventi SSE-friendly (`response.started`, `response.output_text.delta`, `response.completed`, `response.error`)
+  - builds the deep agent (`create_deep_agent`)
+  - configures `ChatOpenAI` on OCI endpoint
+  - forces Responses API
+  - converts output to SSE-friendly events (`response.started`, `response.output_text.delta`, `response.completed`, `response.error`)
 - `agents/deep_agents01/api.py`
-  - espone `GET /health`, `GET /ready`, `POST /chat`
-  - serializza eventi in formato SSE
-  - inizializza backend in modo lazy (al primo `POST /chat`)
+  - exposes `GET /health`, `GET /ready`, `POST /chat`
+  - serializes events in SSE format
+  - lazily initializes the backend (on first `POST /chat`)
 - `agents/deep_agents01/client.py`
-  - client CLI minimale
-  - legge stream SSE
-  - stampa output testuale
-  - su errore backend stampa su `stderr` ed esce con code `1`
+  - minimal CLI client
+  - reads SSE stream
+  - prints text output
+  - prints backend errors to `stderr` and exits with code `1`
 - `agents/deep_agents01/requirements.txt`
-  - dipendenze specifiche di questo agente
+  - dependencies specific to this agent
 - `agents/deep_agents01/.env.local`
-  - secrets locali per API key e project id (non versionato)
+  - local secrets for API key and project id (not versioned)
 - `agents/deep_agents01/deep_agents01.env.sample`
-  - template da copiare per creare `.env.local`
+  - template to create `.env.local`
 - `tests/test_deep_agents01_api.py`
 - `tests/test_deep_agents01_backend.py`
 - `tests/test_deep_agents01_client.py`
 
-## Configurazione OCI: dove viene presa
+## OCI configuration: where values come from
 
-### File env locale consigliato
+### Recommended local env file
 
-Questo agente carica automaticamente:
+This agent automatically loads:
 - `agents/deep_agents01/.env.local`
 
-Workflow consigliato:
+Recommended workflow:
 
 ```bash
 cp agents/deep_agents01/deep_agents01.env.sample agents/deep_agents01/.env.local
 ```
 
-Poi valorizza nel file:
+Then set in that file:
 - `OPENAI_API_KEY`
 - `OPENAI_PROJECT_ID`
 
-### Endpoint e regione
+### Endpoint and region
 
-L'endpoint e letto da:
+Endpoint is read from:
 - `config.py` -> `BASE_URL`
 
-Costruzione endpoint:
+Endpoint pattern:
 - `https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1`
 
-Regione:
-- `AGENT_HUB_REGION` (env var), fallback a `us-chicago-1`
+Region:
+- `AGENT_HUB_REGION` (env var), fallback `us-chicago-1`
 
 ### API key
 
-Ordine di risoluzione nel backend:
+Resolution order in backend:
 1. `OPENAI_API_KEY`
 2. `OCI_GENAI_API_KEY`
-3. errore esplicito se non impostata
+3. explicit error if missing
 
 ### Project ID
 
-Ordine di risoluzione nel backend:
+Resolution order in backend:
 1. `OPENAI_PROJECT_ID`
 2. `OCI_PROJECT_ID`
-3. errore esplicito se non impostato
+3. explicit error if missing
 
-Il project viene passato come header:
+Project ID is sent as header:
 - `OpenAI-Project: <project_id>`
 
-### Modello
+### Model
 
 Default:
 - `openai.gpt-5.4`
 
-Override runtime:
+Runtime override:
 - `DEEP_AGENTS_MODEL`
 
-Esempio:
+Example:
 ```bash
 export DEEP_AGENTS_MODEL=openai.gpt-5.2
 ```
 
-## Punto importante: forcing Responses API
+## Important point: forcing Responses API
 
-Nel tuo ambiente, con `deepagents` + `langchain-openai`, in auto-detect il model wrapper poteva usare `chat.completions`.
+In this environment, with `deepagents` + `langchain-openai`, auto-detection could route model calls to `chat.completions`.
 
-Con OCI e questo modello, quel percorso ha prodotto:
+With OCI and this model, that path produced:
 - `openai.NotFoundError: Not Found`
 
-Per evitare regressioni, nel backend e impostato esplicitamente:
+To avoid regressions, backend explicitly sets:
 - `use_responses_api=True`
 - `output_version="responses/v1"`
 
-Questa scelta forza l'uso della Responses API invece di Chat Completions.
+This forces Responses API instead of Chat Completions.
 
-## Installazione
+## Installation
 
-Dal root repo:
+From repository root:
 
 ```bash
 pip install -r agents/deep_agents01/requirements.txt
 ```
 
-Se usi Conda (come nel progetto):
+If you use Conda (as in this project):
 
 ```bash
 conda run -n agent_hub pip install -r agents/deep_agents01/requirements.txt
 ```
 
-## Sicurezza secrets
+## Secrets security
 
-- I secrets runtime vanno in `agents/deep_agents01/.env.local`
-- `.env.local` e ignorato da git
-- Il template versionato e `agents/deep_agents01/deep_agents01.env.sample`
+- Runtime secrets must be in `agents/deep_agents01/.env.local`
+- `.env.local` is ignored by git
+- Versioned template is `agents/deep_agents01/deep_agents01.env.sample`
 
-## Avvio
+## Run
 
-### 1) Avvia API
+### 1) Start API
 
 ```bash
 uvicorn agents.deep_agents01.api:app --reload --port 8090
 ```
 
-### 2) Lancia client
+### 2) Run client
 
 ```bash
-python -m agents.deep_agents01.client "Spiega in breve cos'e Deep Agents"
+python -m agents.deep_agents01.client "Explain what Deep Agents is in short"
 ```
 
-Con URL custom:
+With custom URL:
 
 ```bash
-python -m agents.deep_agents01.client "Dammi 3 use case" --url http://127.0.0.1:8090/chat
+python -m agents.deep_agents01.client "Give me 3 use cases" --url http://127.0.0.1:8090/chat
 ```
 
 ## API contract
 
-### Endpoint
+### Endpoints
 
 - `GET /health`
 - `GET /ready`
 - `POST /chat` (SSE)
 
-### Payload accettati
+### Accepted payloads
 
-Forma primaria:
-
-```json
-{
-  "prompt": "Spiega cos'e Deep Agents"
-}
-```
-
-Compatibilita con payload stile demo:
+Primary form:
 
 ```json
 {
-  "user_request": "Spiega cos'e Deep Agents"
+  "prompt": "Explain what Deep Agents is"
 }
 ```
 
-### Eventi SSE principali
+Compatibility with demo-style payload:
+
+```json
+{
+  "user_request": "Explain what Deep Agents is"
+}
+```
+
+### Main SSE events
 
 - `response.started`
 - `graph.node.started`
@@ -194,50 +194,50 @@ Compatibilita con payload stile demo:
 
 ## Error handling
 
-### Errori di runtime del modello
+### Model runtime errors
 
-Se il backend riceve eccezioni dal provider/modello:
-- non fa crash dello stream
-- invia evento `response.error`
-- chiude con `response.completed` contenente campo `error`
+If backend receives provider/model exceptions:
+- stream does not crash
+- emits `response.error`
+- closes with `response.completed` containing `error`
 
-### Comportamento client
+### Client behavior
 
-Il client ora:
-- stampa `Backend error: ...` su `stderr` quando riceve `response.error`
-- ritorna exit code `1` in caso di errore
-- ritorna exit code `1` anche se non arriva output
+Client now:
+- prints `Backend error: ...` to `stderr` when receiving `response.error`
+- returns exit code `1` on error
+- returns exit code `1` if no output is received
 
-Questo evita il caso "silenzioso" in cui non si vedeva nulla.
+This avoids silent failure mode.
 
-## Troubleshooting rapido
+## Quick troubleshooting
 
 ### `Not Found`
 
-Possibili cause:
-- modello non disponibile sulla route usata
-- endpoint/region errati
-- path API non coerente
-- mancata forzatura Responses API (gia risolta in questo esempio)
+Possible causes:
+- model not available on selected route
+- wrong endpoint/region
+- API path mismatch
+- Responses API not forced (already handled in this example)
 
-Controlli consigliati:
-1. verifica `AGENT_HUB_REGION`
-2. verifica `BASE_URL` in `config.py`
-3. verifica key (`OPENAI_API_KEY` o `OCI_GENAI_API_KEY`)
-4. prova modello alternativo:
+Recommended checks:
+1. verify `AGENT_HUB_REGION`
+2. verify `BASE_URL` in `config.py`
+3. verify key (`OPENAI_API_KEY` or `OCI_GENAI_API_KEY`)
+4. try alternate model:
    ```bash
    export DEEP_AGENTS_MODEL=openai.gpt-5.2
    ```
 
-### Client non stampa nulla
+### Client prints nothing
 
-Con la versione corrente non dovrebbe succedere:
-- se errore backend: stampa messaggio e exit `1`
-- se stream senza testo: stampa `No output received from server.` e exit `1`
+With current version this should not happen:
+- on backend error: prints message and exits `1`
+- on stream without text: prints `No output received from server.` and exits `1`
 
-## Riferimento origine esempio
+## Upstream example reference
 
-Adattato dal quickstart ufficiale Deep Agents:
+Adapted from official Deep Agents quickstart:
 - https://github.com/langchain-ai/deepagents
 
-Con integrazione specifica per `agent_hub` (OCI endpoint, config locale, API/client separati).
+With `agent_hub`-specific integration (OCI endpoint, local config, separated API/client).
