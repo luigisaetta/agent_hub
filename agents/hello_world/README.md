@@ -36,6 +36,24 @@ Compatibilita con payload demo6-like:
 conda run -n agent_hub python -m agents.hello_world.client Luca
 ```
 
+## Client CLI (JWT)
+
+```bash
+conda run -n agent_hub python -m agents.hello_world.client_jwt Luca
+```
+
+Before running, update values in the dedicated env file:
+- `agents/hello_world/.env.client_jwt.local`
+- Start from sample: `agents/hello_world/client_jwt.env.sample`
+- Required keys: `AGENT_URL`, `OCI_DOMAIN_URL`, `OCI_CLIENT_ID`, `OCI_CLIENT_SECRET`, `OCI_SCOPE`
+- Optional keys: `OCI_TOKEN_URL`, `REQUEST_TIMEOUT_SECONDS`, `DEBUG_TOKEN_HTTP_REQUEST`
+
+You can also pass a custom env file path:
+
+```bash
+conda run -n agent_hub python -m agents.hello_world.client_jwt Luca --env-file path/to/.env.file
+```
+
 ## Docker Deploy
 
 ### Build image

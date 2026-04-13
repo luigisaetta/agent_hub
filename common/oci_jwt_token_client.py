@@ -26,6 +26,7 @@ class OciJwtTokenClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.scope = scope
+        print("Scope requested:", scope)
 
     @staticmethod
     def _decode_b64url_json(data: str) -> dict:
@@ -41,7 +42,10 @@ class OciJwtTokenClient:
         return f"{self.domain_url.rstrip('/')}/oauth2/v1/token"
 
     def request_jwt_token(
-        self, *, explicit_token_url: str | None = None
+        self,
+        *,
+        explicit_token_url: str | None = None,
+        debug_http_request: bool = False,
     ) -> tuple[str, dict]:
         """Request JWT token and return the resolved token URL plus response payload."""
         token_url = self._resolve_token_url(explicit_token_url)
@@ -64,6 +68,8 @@ class OciJwtTokenClient:
             },
             method="POST",
         )
+        if debug_http_request:
+            self._print_full_http_request(request=request, payload=payload)
 
         try:
             with urllib.request.urlopen(request) as response:
@@ -94,3 +100,16 @@ class OciJwtTokenClient:
         jwt_payload = self._decode_b64url_json(parts[1])
         signature = parts[2]
         return access_token, jwt_header, jwt_payload, signature
+
+    @staticmethod
+    def _print_full_http_request(
+        *, request: urllib.request.Request, payload: bytes
+    ) -> None:
+        """Print a full HTTP request snapshot to help troubleshoot auth issues."""
+        print("")
+        print("DEBUG - Full HTTP request to token endpoint:")
+        print(f"{request.get_method()} {request.full_url} HTTP/1.1")
+        for header_name, header_value in request.header_items():
+            print(f"{header_name}: {header_value}")
+        print("")
+        print(payload.decode("utf-8", errors="replace"))
