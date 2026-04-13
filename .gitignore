@@ -41,3 +41,6 @@ pdf_rag/
 
 # internal docs
 demos/demo6/readme_hosted_deployment.md
+
+# Deep Agents 01 local secrets
+agents/deep_agents01/.env.local
