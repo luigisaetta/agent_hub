@@ -26,7 +26,6 @@ class OciJwtTokenClient:
         self.client_id = client_id
         self.client_secret = client_secret
         self.scope = scope
-        print("Scope requested:", scope)
 
     @staticmethod
     def _decode_b64url_json(data: str) -> dict:
