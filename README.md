@@ -120,7 +120,7 @@ streamlit run demos/demo4/app.py
 | 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
 | 7 | Connector logs | [`connectors/get_connector_logs.py`](connectors/get_connector_logs.py) | Retrieves and prints recent logs for one connector. |
 
-## Agent Clients
+## Agents
 
 | # | Agent Client | Folder | Purpose | Key API usage | Good for | Notes |
 |---|---|---|---|---|---|---|
