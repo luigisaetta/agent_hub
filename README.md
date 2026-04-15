@@ -64,29 +64,15 @@ streamlit run demos/demo4/app.py
 
 ## Detailed Examples
 
-| # | Example | File | Purpose | Key API usage | Good for | Notes |
-|---|---|---|---|---|---|---|
-| 1 | Basic completion | [`examples/example01.py`](examples/example01.py) | Sends a simple request to `openai.gpt-5.2` and prints text + raw response. | `responses.create(...)` | Quick connectivity check. |  |
-| 2 | Streaming response | [`examples/example02.py`](examples/example02.py) | Streams an answer incrementally. | `stream=True`, iterate `output_text.delta` | Chat/CLI live output. |  |
-| 3 | Structured parsing | [`examples/example03.py`](examples/example03.py) | Extracts event data into typed `CalendarEvent`. | `responses.parse(...)`, `text_format=CalendarEvent` | Typed automation pipelines. | Uses Pydantic model output. |
-| 4 | Web search tool | [`examples/example04.py`](examples/example04.py) | Calls the model with built-in web search enabled. | `tools=[{"type":"web_search"}]` | Retrieval-augmented answers. |  |
-| 5 | Conversation state + stream | [`examples/example05.py`](examples/example05.py) | Creates a conversation and runs two streamed turns with shared context. | `conversations.create(...)`, `conversation=...` | Stateful assistants. |  |
-| 6 | Reasoning summary output | [`examples/example06.py`](examples/example06.py) | Requests a response with reasoning summary and prints structured output JSON. | `reasoning={"summary":"auto"}` in `responses.create(...)` | Inspecting model reasoning summaries. |  |
-| 7 | Vision input (image analysis) | [`examples/example07.py`](examples/example07.py) | Encodes a local image and asks the model to extract and summarize text. | `input_image` content in `responses.create(...)` | OCR-like extraction and vision prompts. | Reads `images/page0009.png`. |
-| 8 | Vector store creation | [`examples/example11.py`](examples/example11.py) | Creates a vector store with metadata and expiration. | `vector_stores.create(...)` | Vector store setup flow. |  |
-| 9 | File upload + list files | [`examples/example12.py`](examples/example12.py) | Uploads a local PDF file, then lists files in the project. | `files.create(...)`, `files.list(...)` | File management workflow for retrieval pipelines. | Reads `pdf/labor_market_impacts_ai.pdf`. |
-| 10 | List files in vector store | [`examples/example13.py`](examples/example13.py) | Lists files already attached to a specific vector store. | `vector_stores.files.list(...)` | Inspecting ingest status/content in a vector store. | Uses a fixed `VECTOR_STORE_ID`. |
-| 11 | Attach existing file to vector store | [`examples/example14.py`](examples/example14.py) | Retrieves a file by ID and attaches it to a vector store with attributes. | `files.retrieve(...)`, `vector_stores.files.create(...)` | Incremental ingest from existing uploaded files. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`. |
-| 12 | Vector store file batch upload | [`examples/example15.py`](examples/example15.py) | Uploads a local PDF directly to a vector store and waits for processing. | `vector_stores.file_batches.upload_and_poll(...)` | End-to-end ingest into vector store. | Reads `pdf/labor_market_impacts_ai.pdf`. |
-| 13 | Vector store semantic search | [`examples/example16.py`](examples/example16.py) | Executes a semantic query against a vector store and prints results. | `vector_stores.search(...)` | Basic retrieval/query workflow over indexed files. | Uses a fixed `VECTOR_STORE_ID`. |
-| 14 | Vector store file status | [`examples/example17.py`](examples/example17.py) | Retrieves ingestion status for a specific file attached to a vector store. | `vector_stores.files.retrieve(...)` | Monitoring file ingest lifecycle and troubleshooting indexing state. | Uses fixed `VECTOR_STORE_ID` and `FILE_ID`. |
-| 15 | Vector store query with file search | [`examples/example18.py`](examples/example18.py) | Queries a vector store through Responses API and prints inline references. | `responses.create(...)` + `tools=[{"type":"file_search"}]` | Retrieval-augmented QA over indexed project documents. | Uses fixed `VECTOR_STORE_ID`. |
-| 16 | Langfuse integration | [`examples/example19.py`](examples/example19.py) | Sends a non-streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(...)`, `langfuse.flush()` | Observability/tracing of LLM calls. | Requires Langfuse keys/host. |
-| 17 | Langfuse integration (streaming) | [`examples/example20.py`](examples/example20.py) | Sends a streaming Responses API request instrumented with Langfuse and flushes traces. | `langfuse.openai.OpenAI(...)`, `responses.create(..., stream=True)`, `langfuse.flush()` | Observability/tracing with token-by-token output. | Requires Langfuse keys/host. |
-| 18 | Image generation tool | [`examples/example21.py`](examples/example21.py) | Generates an image with the image generation tool and saves it as `otter.png`. | `tools=[{"type":"image_generation"}]` | Basic tool-based image generation flow. | Script header says this is not yet working. |
-| 19 | Code interpreter tool | [`examples/example22.py`](examples/example22.py) | Runs a Responses API request with `code_interpreter` so the model can execute Python in an isolated container to solve a math task and return the computed result. | `tools=[{"type":"code_interpreter","container":{"type":"auto","memory_limit":"4g"}}]`, `responses.create(...)` | Computational tasks (math/data transformations) where model-generated code execution is needed. | Prints raw `resp.output`, including tool execution artifacts. |
-| 20 | Custom function tool calling | [`examples/example23.py`](examples/example23.py) | Demonstrates a complete iterative loop where the model emits `function_call`, local Python executes the function, and the script returns `function_call_output` until final answer. | `tools=[{"type":"function",...}]`, `responses.create(...)`, `previous_response_id=...` | Building agentic workflows with domain-specific tools. | Uses a simulated weather function (`get_weather`) to keep the example self-contained. |
-| 21 | OCI Identity Domain JWT token | [`examples/example24.py`](examples/example24.py) | Requests an OAuth2 client-credentials token from OCI Identity Domain and prints full decoded JWT content (header, payload, signature). | `POST /oauth2/v1/token` with `grant_type=client_credentials`, Base64 `Authorization: Basic ...` | Integrating with OCI domain auth and inspecting JWT claims. | Uses local env file (`--env-file`, default `examples/.env.example24.local`). |
+Examples are grouped by topic. Use the category guides below for full per-script details.
+
+| # | Category | Includes | Primary Focus | Detailed Guide |
+|---|---|---|---|---|
+| 1 | Quickstart & Core | `example01`-`example06` | First runs, streaming, conversation state, structured outputs, web search. | [`examples/README_quickstart.md`](examples/README_quickstart.md) |
+| 2 | Vector Stores & Retrieval | `example11`-`example18` | Vector store lifecycle, ingestion, status checks, semantic search, file_search. | [`examples/README_vector_stores.md`](examples/README_vector_stores.md) |
+| 3 | Tools & Multimodal | `example07`, `example21`-`example23` | Vision input, image generation, code interpreter, custom function tools. | [`examples/README_tools_multimodal.md`](examples/README_tools_multimodal.md) |
+| 4 | Observability | `example19`-`example20` | Langfuse tracing for non-streaming and streaming calls. | [`examples/README_observability.md`](examples/README_observability.md) |
+| 5 | Auth & Security | `example24` | OCI Identity Domain OAuth2/JWT client-credentials flow. | [`examples/README_auth.md`](examples/README_auth.md) |
 
 ## Detailed Demos
 
