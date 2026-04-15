@@ -12,6 +12,7 @@ Description:
 from __future__ import annotations
 
 import io
+from itertools import chain, repeat
 
 import pytest
 
@@ -108,3 +109,66 @@ def test_select_important_jwt_claims_filters_payload() -> None:
     assert selected["aud"] == "my-audience"
     assert selected["scope"] == "urn:test:scope"
     assert "extra" not in selected
+
+
+def test_parse_env_key_values_parses_basic_dotenv_lines() -> None:
+    """Parser should read key/value pairs and skip comments."""
+    parsed = runtime.parse_env_key_values("""
+        # comment
+        AGENT_URL=https://example.test/chat
+        OCI_SCOPE=invoke
+        """)
+
+    assert parsed == {
+        "AGENT_URL": "https://example.test/chat",
+        "OCI_SCOPE": "invoke",
+    }
+
+
+def test_parse_env_key_values_supports_export_and_quoted_values() -> None:
+    """Parser should support export prefix and remove surrounding quotes."""
+    parsed = runtime.parse_env_key_values("""
+        export OCI_CLIENT_ID="my-client"
+        OCI_CLIENT_SECRET='my-secret'
+        INVALID_LINE_WITHOUT_EQUALS
+        """)
+
+    assert parsed["OCI_CLIENT_ID"] == "my-client"
+    assert parsed["OCI_CLIENT_SECRET"] == "my-secret"
+    assert "INVALID_LINE_WITHOUT_EQUALS" not in parsed
+
+
+def test_invoke_agent_stops_after_response_completed(monkeypatch) -> None:
+    """Client should stop reading stream once response.completed is received."""
+
+    class _DummyResponse:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, tb):
+            return False
+
+    monkeypatch.setattr(
+        runtime.urllib.request,
+        "urlopen",
+        lambda request, timeout: _DummyResponse(),
+    )
+
+    completed_event = (
+        "response.completed",
+        '{"type":"response.completed","data":{"output_text":"done"}}',
+    )
+    endless_after = repeat(("response.output_text.delta", "{bad-json}"))
+    monkeypatch.setattr(
+        runtime,
+        "iter_sse_events",
+        lambda stream: chain([completed_event], endless_after),
+    )
+
+    result = runtime.invoke_agent(
+        agent_url="https://example.test/chat",
+        payload={"user_request": "hello"},
+        request_timeout_seconds=30,
+    )
+
+    assert result["final_output_text"] == "done"

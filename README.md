@@ -21,6 +21,7 @@ Highlights from the most useful examples and demos:
 - [`demos/demo4`](demos/demo4): full RAG flow with progressive loading from `pdf_rag/`, strict `file_search`, persistent conversation, streamed answers, and sidebar references with pages.
 - [`demos/demo5`](demos/demo5): Streamlit vector-store explorer that returns retrieved chunk text and metadata for a user query.
 - [`demos/demo6`](demos/demo6): LangGraph-style RAG backend with SSE plus Streamlit chat UI with streamed final answer and sidebar references from reranker.
+- [`agents/streamlit_client`](agents/streamlit_client): generalized Streamlit client for OCI hosted agent deployments with optional JWT authentication and `.env` drag-and-drop configuration.
 
 ## Documentation
 
@@ -118,6 +119,12 @@ streamlit run demos/demo4/app.py
 | 5 | Update connector | [`connectors/update_connector.py`](connectors/update_connector.py) | Updates connector settings such as source configuration and schedule. |
 | 6 | Delete connector | [`connectors/delete_connector.py`](connectors/delete_connector.py) | Deletes a connector by OCID. |
 | 7 | Connector logs | [`connectors/get_connector_logs.py`](connectors/get_connector_logs.py) | Retrieves and prints recent logs for one connector. |
+
+## Agent Clients
+
+| # | Agent Client | Folder | Purpose | Key API usage | Good for | Notes |
+|---|---|---|---|---|---|---|
+| 1 | Streamlit generalized hosted-agent client | [`agents/streamlit_client`](agents/streamlit_client) | Streamlit UI to invoke OCI hosted agent deployments with custom JSON/text payloads and live SSE output. | `POST` to hosted agent endpoint with `Accept: text/event-stream`; optional OAuth2 client-credentials token retrieval from OCI Identity Domain. | Manual endpoint validation, auth troubleshooting, and payload experimentation without writing code. | Supports sidebar config, URL derivation from `GenAI application id`, `.env` drag-and-drop mapping, event logging, and graceful stop on `response.completed`. |
 
 ## Prerequisites
 

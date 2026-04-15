@@ -22,6 +22,38 @@ from common.oci_jwt_token_client import OciJwtTokenClient
 DEFAULT_AGENT_API_VERSION = "20251112"
 
 
+def parse_env_key_values(env_text: str) -> dict[str, str]:
+    """Parse .env-like content into a dictionary of key/value pairs."""
+    parsed: dict[str, str] = {}
+    for raw_line in env_text.splitlines():
+        line = raw_line.strip()
+        if not line or line.startswith("#"):
+            continue
+
+        if line.startswith("export "):
+            line = line[len("export ") :].strip()
+
+        if "=" not in line:
+            continue
+
+        key, value = line.split("=", 1)
+        clean_key = key.strip()
+        if not clean_key:
+            continue
+
+        clean_value = value.strip()
+        if (
+            len(clean_value) >= 2
+            and clean_value[0] == clean_value[-1]
+            and clean_value[0] in ('"', "'")
+        ):
+            clean_value = clean_value[1:-1]
+
+        parsed[clean_key] = clean_value
+
+    return parsed
+
+
 def derive_agent_url(
     *,
     region: str,
@@ -186,6 +218,11 @@ def invoke_agent(
                         "data": event_data,
                     }
                 )
+                print(
+                    "[streamlit_client] received SSE event: "
+                    f"event_type={event_type} payload_type={payload_type}",
+                    flush=True,
+                )
 
                 if payload_type == "response.output_text.delta":
                     delta = str(event_data.get("delta", ""))
@@ -195,7 +232,11 @@ def invoke_agent(
                             on_delta("".join(deltas))
 
                 if payload_type == "response.completed":
+                    completed_error = str(event_data.get("error", "")).strip()
+                    if completed_error:
+                        raise RuntimeError(completed_error)
                     final_output_text = str(event_data.get("output_text", "")).strip()
+                    break
 
                 if payload_type == "response.error":
                     raise RuntimeError(

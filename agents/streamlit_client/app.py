@@ -26,6 +26,7 @@ from config import REGION  # noqa: E402
 from agents.streamlit_client.runtime import (  # noqa: E402
     derive_agent_url,
     invoke_agent,
+    parse_env_key_values,
     parse_payload_text,
     request_access_token,
     select_important_jwt_claims,
@@ -44,10 +45,22 @@ OCI_SCOPE_KEY = "agent_client_oci_scope"
 OCI_TOKEN_URL_KEY = "agent_client_oci_token_url"
 REQUEST_TIMEOUT_KEY = "agent_client_request_timeout"
 SHOW_JWT_CLAIMS_KEY = "agent_client_show_jwt_claims"
+ENV_UPLOAD_KEY = "agent_client_env_upload"
 
 DEFAULT_PAYLOAD = '{\n  "user_request": "Hello from Streamlit"\n}'
 DEFAULT_SCOPE = "urn:opc:resource:consumer::all"
 DEFAULT_TIMEOUT_SECONDS = 120
+
+ENV_TO_UI_MAPPING = {
+    "AGENT_URL": AGENT_URL_KEY,
+    "GENAI_APPLICATION_ID": GENAI_APP_ID_KEY,
+    "REGION": REGION_KEY,
+    "OCI_CLIENT_ID": CLIENT_ID_KEY,
+    "OCI_CLIENT_SECRET": CLIENT_SECRET_KEY,
+    "OCI_DOMAIN_URL": OCI_DOMAIN_URL_KEY,
+    "OCI_SCOPE": OCI_SCOPE_KEY,
+    "OCI_TOKEN_URL": OCI_TOKEN_URL_KEY,
+}
 
 
 def _init_session_state() -> None:
@@ -87,10 +100,85 @@ def _refresh_derived_url() -> None:
     )
 
 
+def _apply_env_mapping(env_values: dict[str, str]) -> tuple[list[str], list[str]]:
+    """Map .env vars to Streamlit UI state keys."""
+    mapped: list[str] = []
+    ignored: list[str] = []
+
+    for env_key, state_key in ENV_TO_UI_MAPPING.items():
+        if env_key in env_values:
+            st.session_state[state_key] = env_values[env_key]
+            mapped.append(env_key)
+
+    timeout_value = env_values.get("REQUEST_TIMEOUT_SECONDS")
+    if timeout_value is not None:
+        try:
+            timeout_seconds = int(timeout_value)
+        except ValueError:
+            ignored.append("REQUEST_TIMEOUT_SECONDS")
+        else:
+            st.session_state[REQUEST_TIMEOUT_KEY] = max(10, min(600, timeout_seconds))
+            mapped.append("REQUEST_TIMEOUT_SECONDS")
+
+    if any(
+        env_values.get(key)
+        for key in (
+            "OCI_CLIENT_ID",
+            "OCI_CLIENT_SECRET",
+            "OCI_DOMAIN_URL",
+            "OCI_SCOPE",
+        )
+    ):
+        st.session_state[USE_JWT_KEY] = True
+
+    for env_key in env_values:
+        if env_key not in mapped and env_key not in ignored:
+            ignored.append(env_key)
+
+    return mapped, ignored
+
+
+def _render_env_drag_drop() -> None:
+    """Render .env drag&drop uploader and apply mapping to UI values."""
+    st.caption("Drag and drop a `.env` file to automatically populate UI fields")
+    uploaded = st.file_uploader(
+        "File `.env` client",
+        key=ENV_UPLOAD_KEY,
+        type=["env", "local", "txt"],
+        help=(
+            "Supports for example `agents/hello_world/.env.client_jwt.local` "
+            "or equivalent files."
+        ),
+    )
+    if uploaded is None:
+        return
+
+    try:
+        env_text = uploaded.getvalue().decode("utf-8")
+    except UnicodeDecodeError:
+        st.error("Unable to read file: please use UTF-8 encoding.")
+        return
+
+    env_values = parse_env_key_values(env_text)
+    if not env_values:
+        st.warning("No valid variables found in the .env file.")
+        return
+
+    st.caption(f"Variables found: {len(env_values)}")
+    if st.button("Populate UI from .env file", use_container_width=True):
+        mapped, ignored = _apply_env_mapping(env_values)
+        if mapped:
+            st.success("Updated fields: " + ", ".join(sorted(mapped)))
+        if ignored:
+            st.info("Ignored variables: " + ", ".join(sorted(ignored)))
+
+
 def _render_sidebar() -> dict[str, str | bool | int]:
     """Render sidebar and return normalized runtime configuration."""
     with st.sidebar:
         st.subheader("Agent Runtime Configuration")
+        _render_env_drag_drop()
+        st.divider()
 
         st.text_input(
             "GenAI application id",
