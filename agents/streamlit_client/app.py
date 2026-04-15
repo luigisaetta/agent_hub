@@ -287,7 +287,7 @@ def _validate_runtime_config(runtime_config: dict[str, str | bool | int]) -> Non
 def main() -> None:
     """Render Streamlit page and invoke the configured agent endpoint."""
     st.set_page_config(page_title="Agent Generalized Client", page_icon="Robot")
-    st.title("OCI Enterprise AI Agent - Streamlit Client")
+    st.title("OCI Enterprise AI Agent - Client")
     st.write(
         "Configure endpoint/authentication in sidebar, edit payload below, and run "
         "the invocation."

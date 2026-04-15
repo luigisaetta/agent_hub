@@ -9,13 +9,27 @@
 This repository contains practical Python examples that call Oracle Cloud Infrastructure (OCI) Generative AI endpoints through the OpenAI-compatible API.
 
 Highlights from the most useful examples and demos:
+
+Quickstart & Core:
 - [`examples/example01.py`](examples/example01.py): minimal text request, ideal as first connectivity smoke test.
 - [`examples/example02.py`](examples/example02.py): streaming output token-by-token for chat/CLI-style incremental UX.
 - [`examples/example03.py`](examples/example03.py): structured parsing into typed objects (Pydantic), useful for automation flows.
 - [`examples/example05.py`](examples/example05.py): multi-turn state with the Conversations API plus streaming responses.
 - [`examples/example06.py`](examples/example06.py): reasoning summary output for debugging and response explainability.
-- [`examples/example23.py`](examples/example23.py): end-to-end custom function tool calling loop (`function_call` + `function_call_output`).
+
+Vector Stores & Retrieval:
 - [`examples/example18.py`](examples/example18.py): file-search over vector stores with inline citations in final answers.
+
+Tools & Multimodal:
+- [`examples/example23.py`](examples/example23.py): end-to-end custom function tool calling loop (`function_call` + `function_call_output`).
+
+Observability:
+- [`examples/example19.py`](examples/example19.py): Langfuse tracing for non-streaming responses.
+
+Auth & Security:
+- [`examples/example24.py`](examples/example24.py): OCI Identity Domain OAuth2/JWT client-credentials flow.
+
+Related demos and components:
 - [`connectors/create_connector.py`](connectors/create_connector.py) + related scripts in [`connectors/`](connectors): create/sync/manage vector-store connectors to Object Storage.
 - [`demos/demo2`](demos/demo2): Streamlit chatbot with web search and Langfuse-integrated observability/tracing.
 - [`demos/demo4`](demos/demo4): full RAG flow with progressive loading from `pdf_rag/`, strict `file_search`, persistent conversation, streamed answers, and sidebar references with pages.
