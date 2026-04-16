@@ -72,7 +72,7 @@ Endpoint is read from:
 - `config.py` -> `BASE_URL`
 
 Endpoint pattern:
-- `https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1`
+- `https://inference.generativeai.{REGION}.oci.oraclecloud.com/openai/v1`
 
 Region:
 - `AGENT_HUB_REGION` (env var), fallback `us-chicago-1`

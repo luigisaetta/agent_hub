@@ -21,7 +21,7 @@ MODEL_ID = "openai.gpt-5.4"
 
 # Production endpoints (OpenAI-compatible API).
 BASE_URL = (
-    f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
+    f"https://inference.generativeai.{REGION}.oci.oraclecloud.com/openai/v1"
 )
 CP_BASE_URL = f"https://generativeai.{REGION}.oci.oraclecloud.com/20231130/openai/v1"
 

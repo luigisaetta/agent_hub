@@ -36,6 +36,7 @@ MODEL_CANDIDATES = (
     "cohere.command-a-03-2025",
     "meta.llama-4-maverick-17b-128e-instruct-fp8",
     "meta.llama-4-scout-17b-16e-instruct",
+    "ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaa2xxap7yax7h45frvzjponh526pdphmubjxsxtwybkvbnff6se56a",
     "ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaa2xxap7ya4bvxqruf3d6f7g543zlfsogmk2axjeeva27otzilnnla"
 )
 

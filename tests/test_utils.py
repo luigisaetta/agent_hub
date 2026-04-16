@@ -30,12 +30,17 @@ def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
     assert captured.out == "Hello"
 
 
-def test_get_inference_client_uses_openai_with_expected_kwargs(reload_module):
+def test_get_inference_client_uses_openai_with_expected_kwargs(
+    reload_module, monkeypatch
+):
     """Build inference client with API key and project settings by default."""
+    monkeypatch.delenv("INFERENCE_AUTH_MODE", raising=False)
     clients = reload_module("common.clients")
 
     client = clients.get_inference_client()
 
+    assert clients.BASE_URL.endswith("/openai/v1")
+    assert "/20231130/openai/v1" not in clients.BASE_URL
     assert client.kwargs["base_url"] == clients.BASE_URL
     assert client.kwargs["api_key"] == clients.KEY1
     assert client.kwargs["project"] == clients.PROJECT_ID
