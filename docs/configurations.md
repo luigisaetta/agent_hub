@@ -19,7 +19,7 @@ This project uses a shared configuration at repository root and imports it from 
 
 2. Fill/update the `.env.*` profile files with your values:
 - `PROJECT_ID`: OCI Generative AI project OCID.
-- `KEY1`: API key.
+- `KEY1`: API key (used when inference auth mode is `api_key`, which is the default).
 - `COMPARTMENT_ID`: compartment OCID (needed by connector and compatibility flows).
 - `LANGFUSE_SECRET_KEY` / `LANGFUSE_PUBLIC_KEY` for Langfuse examples.
   If Langfuse is not used, both can be unset or empty strings.
@@ -55,6 +55,28 @@ Supported profiles are production only:
 - Data plane (`BASE_URL`): inference/responses calls.
 - Control plane (`CP_BASE_URL`): vector stores and connector management.
 
+## Inference auth mode
+
+Set inference authentication mode in your active profile/shell with:
+
+```bash
+export INFERENCE_AUTH_MODE=api_key
+```
+
+Supported values:
+- `api_key` (default when variable is not set)
+- `user_principal`
+- `session`
+
+`common.get_inference_client(...)` reads this variable.
+
+- `api_key`: uses `KEY1` (OpenAI-compatible API key) as before.
+- `user_principal`: uses OCI signer auth from `~/.oci/config` profile `DEFAULT`.
+- `session`: uses OCI session signer auth (session-based profile).
+
+This variable affects only inference/data-plane clients. It does not change
+control-plane behavior.
+
 ## OCI auth mode for connector client
 
 Set authentication mode in your active profile/shell with:
@@ -70,6 +92,9 @@ Supported values:
 Both `common.build_oci_genai_client(...)` and
 `common.get_control_plane_client(...)` read this variable when `auth_mode` is
 not passed explicitly.
+
+`OCI_AUTH_MODE` is for control-plane/OCI SDK paths, not for
+`common.get_inference_client(...)`.
 
 `session` requires `security_token_file` + `key_file` in OCI profile.
 `user_principal` requires an API-key profile (for example no

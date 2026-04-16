@@ -9,6 +9,8 @@ Description:
 
 from __future__ import annotations
 
+import os
+
 from config import BASE_URL, CP_BASE_URL, MODEL_ID, REGION
 
 
@@ -36,11 +38,16 @@ def print_header(header_type: str, where: str) -> None:
 
 def print_runtime_config() -> None:
     """Print the runtime configuration currently in use."""
+    inference_auth_mode = os.getenv("INFERENCE_AUTH_MODE", "api_key").strip().lower()
+    if not inference_auth_mode:
+        inference_auth_mode = "api_key"
+
     print("=" * COLS)
     print("Runtime Configuration")
     print("=" * COLS)
     print(f"REGION:     {REGION}")
     print(f"MODEL_ID:   {MODEL_ID}")
+    print(f"INFERENCE_AUTH_MODE: {inference_auth_mode}")
     print(f"BASE_URL:   {BASE_URL}")
     print(f"CP_BASE_URL: {CP_BASE_URL}")
 

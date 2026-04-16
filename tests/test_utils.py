@@ -31,7 +31,7 @@ def test_print_streamed_output_collects_only_text_deltas(reload_module, capsys):
 
 
 def test_get_inference_client_uses_openai_with_expected_kwargs(reload_module):
-    """Build inference client with API key and project settings."""
+    """Build inference client with API key and project settings by default."""
     clients = reload_module("common.clients")
 
     client = clients.get_inference_client()
@@ -39,6 +39,48 @@ def test_get_inference_client_uses_openai_with_expected_kwargs(reload_module):
     assert client.kwargs["base_url"] == clients.BASE_URL
     assert client.kwargs["api_key"] == clients.KEY1
     assert client.kwargs["project"] == clients.PROJECT_ID
+    assert "http_client" not in client.kwargs
+
+
+def test_get_inference_client_supports_user_principal_auth(reload_module, monkeypatch):
+    """Build inference client with user-principal signer auth."""
+    monkeypatch.setenv("INFERENCE_AUTH_MODE", "user_principal")
+    clients = reload_module("common.clients")
+
+    client = clients.get_inference_client()
+
+    assert client.kwargs["base_url"] == clients.BASE_URL
+    assert client.kwargs["api_key"] == "unused"
+    assert client.kwargs["project"] == clients.PROJECT_ID
+    assert client.kwargs["http_client"].auth.__class__.__name__ == (
+        "FakeOciUserPrincipalAuth"
+    )
+
+
+def test_get_inference_client_supports_session_auth(reload_module, monkeypatch):
+    """Build inference client with session signer auth."""
+    monkeypatch.setenv("INFERENCE_AUTH_MODE", "session")
+    clients = reload_module("common.clients")
+
+    client = clients.get_inference_client()
+
+    assert client.kwargs["base_url"] == clients.BASE_URL
+    assert client.kwargs["api_key"] == "unused"
+    assert client.kwargs["project"] == clients.PROJECT_ID
+    assert client.kwargs["http_client"].auth.__class__.__name__ == "FakeOciSessionAuth"
+
+
+def test_get_inference_client_rejects_invalid_auth_mode(reload_module, monkeypatch):
+    """Reject unknown inference auth mode values."""
+    monkeypatch.setenv("INFERENCE_AUTH_MODE", "invalid")
+    clients = reload_module("common.clients")
+
+    try:
+        clients.get_inference_client()
+    except ValueError as exc:
+        assert "Invalid inference auth mode" in str(exc)
+    else:  # pragma: no cover
+        raise AssertionError("Expected ValueError for invalid INFERENCE_AUTH_MODE")
 
 
 def test_get_control_plane_client_uses_signed_http_client(reload_module):
@@ -133,6 +175,20 @@ def test_print_header_outputs_consistent_banner(reload_module, capsys):
 
     assert "List of the files in the project" in captured.out
     assert captured.out.count("=") >= 40
+
+
+def test_print_runtime_config_includes_inference_auth_mode(
+    reload_module, monkeypatch, capsys
+):
+    """Print runtime config with explicit inference auth mode."""
+    monkeypatch.setenv("INFERENCE_AUTH_MODE", "user_principal")
+    output = reload_module("common.output")
+
+    output.print_runtime_config()
+    captured = capsys.readouterr()
+
+    assert "Runtime Configuration" in captured.out
+    assert "INFERENCE_AUTH_MODE: user_principal" in captured.out
 
 
 def test_extract_provider_name_returns_prefix_before_first_dot(reload_module):

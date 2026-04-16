@@ -176,6 +176,17 @@ Authentication mode can be selected with `OCI_AUTH_MODE`:
 - `user_principal` (default if not set)
 - `session`
 
+Inference authentication mode can be selected with `INFERENCE_AUTH_MODE`:
+- `api_key` (default if not set, uses `KEY1`)
+- `user_principal`
+- `session`
+
+Use `INFERENCE_AUTH_MODE` only for inference/data-plane calls and
+`OCI_AUTH_MODE` for control-plane operations (connectors/vector-store
+management).
+For details and setup examples, see
+[`docs/configurations.md`](docs/configurations.md).
+
 Set the active profile from repository root:
 
 ```bash

@@ -6,9 +6,12 @@ License: MIT
 Description:
     Shared client builders used across examples and connector scripts.
 
-    The code available here covers also Control Plane client construction, which requires OCI authentication.
-    The authentication mode can be selected via the OCI_AUTH_MODE environment variable, which can be set
-    in the .env files used for examples and connectors. Two modes are supported: user_principal and session.
+    The code available here covers also Control Plane client construction,
+    which requires OCI authentication.
+    The authentication mode can be selected via the OCI_AUTH_MODE
+    environment variable, which can be set in the .env files used for
+    examples and connectors. Two modes are supported: user_principal and
+    session.
 """
 
 from __future__ import annotations
@@ -30,6 +33,7 @@ from config_private import COMPARTMENT_ID, KEY1, PROJECT_ID
 
 PROFILE = "DEFAULT"
 AUTH_MODE_ENV_VAR = "OCI_AUTH_MODE"
+INFERENCE_AUTH_MODE_ENV_VAR = "INFERENCE_AUTH_MODE"
 
 
 def validate_oci_auth_config(
@@ -96,11 +100,42 @@ def _resolve_auth_mode(
 
 
 def get_inference_client(*, client_class: Callable[..., Any] = OpenAI):
-    """Build the standard inference OpenAI-compatible client for production."""
+    """Build inference client using API key or OCI signer auth."""
+    resolved_auth_mode = (
+        os.getenv(INFERENCE_AUTH_MODE_ENV_VAR, "api_key").strip().lower()
+    )
+    if resolved_auth_mode not in {"api_key", "session", "user_principal"}:
+        raise ValueError(
+            f"Invalid inference auth mode '{resolved_auth_mode}'. Expected one of: "
+            "'api_key', 'session', 'user_principal'."
+        )
+
+    if resolved_auth_mode == "api_key":
+        return client_class(
+            base_url=BASE_URL,
+            api_key=KEY1,
+            project=PROJECT_ID,
+        )
+
+    auth = (
+        OciSessionAuth(profile_name=PROFILE)
+        if resolved_auth_mode == "session"
+        else OciUserPrincipalAuth(profile_name=PROFILE)
+    )
+    if resolved_auth_mode == "user_principal":
+        auth_config = getattr(auth, "config", None)
+        if isinstance(auth_config, Mapping):
+            validate_oci_auth_config(
+                config=auth_config,
+                auth_mode="user_principal",
+                profile=PROFILE,
+            )
+
     return client_class(
         base_url=BASE_URL,
-        api_key=KEY1,
+        api_key="unused",
         project=PROJECT_ID,
+        http_client=httpx.Client(auth=auth),
     )
 
 
@@ -131,7 +166,7 @@ def get_control_plane_client(
 
     return client_class(
         base_url=CP_BASE_URL,
-        # here we are using OCI auth instead of API key, 
+        # here we are using OCI auth instead of API key,
         # so we can set api_key to any non-empty value or None
         api_key="unused",
         http_client=httpx.Client(
