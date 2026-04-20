@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Last modified: 2026-04-09
+Last modified: 2026-04-20
 License: MIT
 
 Description:
@@ -16,6 +16,7 @@ from collections.abc import AsyncIterator
 from typing import Any, Literal
 
 from fastapi import FastAPI, HTTPException, Request
+from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import Response, StreamingResponse
 from pydantic import BaseModel, Field
 
@@ -24,6 +25,18 @@ from demos.demo6.backend import Demo6RagAgent, GraphRunConfig
 app = FastAPI(title="Demo6 RAG Backend", version="0.1.0")
 agent = Demo6RagAgent()
 AGENT_CARD_PATH = "/.well-known/agent.json"
+ALLOWED_CORS_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=ALLOWED_CORS_ORIGINS,
+    allow_credentials=False,
+    allow_methods=["POST", "OPTIONS"],
+    allow_headers=["*"],
+)
 
 
 def build_agent_card(base_url: str) -> dict[str, Any]:

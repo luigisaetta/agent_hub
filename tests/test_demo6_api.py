@@ -65,3 +65,20 @@ def test_chat_endpoint_rejects_missing_user_request():
 
     assert response.status_code == 400
     assert response.json()["detail"] == "user_request is required"
+
+
+def test_chat_endpoint_allows_cors_preflight_for_web_ui_origin():
+    """OPTIONS /chat should answer preflight checks from local Next.js UI."""
+    client = TestClient(api.app)
+    response = client.options(
+        "/chat",
+        headers={
+            "Origin": "http://localhost:3000",
+            "Access-Control-Request-Method": "POST",
+        },
+    )
+
+    assert response.status_code == 200
+    assert response.headers.get("access-control-allow-origin") == (
+        "http://localhost:3000"
+    )
