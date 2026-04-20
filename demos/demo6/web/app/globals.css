@@ -1,0 +1,364 @@
+:root {
+  --bg-0: #0d1b2a;
+  --bg-1: #13293d;
+  --bg-2: #1b3a4b;
+  --surface: #f7f8fa;
+  --surface-soft: #e9eef3;
+  --text-main: #102433;
+  --text-subtle: #496174;
+  --accent: #ff7a18;
+  --accent-2: #00a6a6;
+  --danger: #b42318;
+  --ring: rgba(255, 122, 24, 0.35);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  min-height: 100%;
+}
+
+body {
+  font-family: "Avenir Next", "Trebuchet MS", "Gill Sans", sans-serif;
+  color: var(--text-main);
+  background:
+    radial-gradient(circle at 8% 5%, rgba(255, 122, 24, 0.2), transparent 35%),
+    radial-gradient(circle at 92% 96%, rgba(0, 166, 166, 0.2), transparent 32%),
+    linear-gradient(145deg, var(--bg-0), var(--bg-1) 42%, var(--bg-2));
+}
+
+.chat-layout {
+  width: min(1280px, 94vw);
+  margin: 1.2rem auto;
+  height: calc(100vh - 2.4rem);
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) minmax(0, 1fr);
+  gap: 1.25rem;
+}
+
+.sidebar,
+.chat-pane {
+  background: var(--surface);
+  border-radius: 20px;
+  box-shadow:
+    0 16px 32px rgba(5, 10, 20, 0.24),
+    0 1px 2px rgba(5, 10, 20, 0.08);
+}
+
+.sidebar {
+  padding: 1.25rem;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: 1rem;
+  overflow: hidden;
+}
+
+.eyebrow {
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: 0.76rem;
+  color: var(--text-subtle);
+}
+
+h1 {
+  margin: 0.35rem 0 0.5rem;
+  font-size: clamp(1.45rem, 2.1vw, 2rem);
+  line-height: 1.15;
+}
+
+.sidebar-text {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.92rem;
+  line-height: 1.4;
+}
+
+.sidebar-section {
+  display: grid;
+  gap: 0.52rem;
+}
+
+.section-title,
+label {
+  margin: 0;
+  display: block;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-subtle);
+}
+
+input,
+textarea {
+  width: 100%;
+  border: 1px solid #c5d1dc;
+  border-radius: 12px;
+  background: #fff;
+  color: var(--text-main);
+  font: 500 0.92rem/1.35 "Avenir Next", "Trebuchet MS", "Gill Sans", sans-serif;
+}
+
+input {
+  padding: 0.6rem 0.7rem;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 84px;
+  padding: 0.82rem 0.95rem;
+  line-height: 1.45;
+}
+
+input:focus,
+textarea:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 4px var(--ring);
+}
+
+.field-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.doc-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.55rem;
+  max-height: 100%;
+  overflow-y: auto;
+  padding-right: 0.2rem;
+}
+
+.doc-list li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 0.62rem;
+  align-items: start;
+  border: 1px solid #d3dde7;
+  background: #fff;
+  border-radius: 10px;
+  padding: 0.55rem 0.62rem;
+}
+
+.doc-index {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 166, 166, 0.15);
+  color: #055a5a;
+  font: 700 0.78rem/1 "Menlo", "Consolas", monospace;
+}
+
+.doc-main {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 600;
+}
+
+.doc-sub {
+  margin: 0.12rem 0 0;
+  font-size: 0.82rem;
+  color: #3d5669;
+}
+
+.empty-state {
+  margin: 0;
+  color: var(--text-subtle);
+  font-size: 0.88rem;
+}
+
+.sidebar-actions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+button {
+  border: 0;
+  border-radius: 12px;
+  padding: 0.7rem 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font: 700 0.9rem/1 "Avenir Next", "Trebuchet MS", "Gill Sans", sans-serif;
+  color: #fff;
+  background: linear-gradient(125deg, var(--accent), #ff5f37);
+  cursor: pointer;
+  transition: transform 0.15s ease, filter 0.2s ease;
+}
+
+button:hover:enabled {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.chat-pane {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  overflow: hidden;
+}
+
+.messages-scroll {
+  padding: 1.05rem;
+  overflow-y: auto;
+  display: grid;
+  gap: 0.72rem;
+  align-content: start;
+}
+
+.empty-chat {
+  min-height: 100%;
+  display: grid;
+  place-items: center;
+  color: var(--text-subtle);
+  text-align: center;
+  padding: 1rem;
+}
+
+.bubble-row {
+  display: flex;
+}
+
+.bubble-row.from-user {
+  justify-content: flex-end;
+}
+
+.bubble-row.from-ai {
+  justify-content: flex-start;
+}
+
+.bubble {
+  max-width: min(800px, 85%);
+  border-radius: 16px;
+  padding: 0.72rem 0.85rem;
+  border: 1px solid #d3dde7;
+  background: #fff;
+  line-height: 1.46;
+}
+
+.from-user .bubble {
+  border-color: rgba(255, 122, 24, 0.35);
+  background: linear-gradient(160deg, rgba(255, 122, 24, 0.16), rgba(255, 122, 24, 0.05));
+}
+
+.bubble p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.composer {
+  border-top: 1px solid #d6e0ea;
+  background: #f4f7fa;
+  padding: 0.9rem;
+  display: grid;
+  gap: 0.55rem;
+}
+
+.composer-actions {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 0.7rem;
+  align-items: center;
+}
+
+.error-box {
+  margin: 0;
+  color: var(--danger);
+  font-size: 0.88rem;
+  word-break: break-word;
+}
+
+.markdown-output > :first-child {
+  margin-top: 0;
+}
+
+.markdown-output > :last-child {
+  margin-bottom: 0;
+}
+
+.markdown-output p,
+.markdown-output ul,
+.markdown-output ol,
+.markdown-output blockquote,
+.markdown-output pre,
+.markdown-output table {
+  margin: 0.45rem 0;
+}
+
+.markdown-output ul,
+.markdown-output ol {
+  padding-left: 1.2rem;
+}
+
+.markdown-output code {
+  font-family: "Menlo", "Consolas", monospace;
+  font-size: 0.86rem;
+  background: #edf2f7;
+  padding: 0.1rem 0.25rem;
+  border-radius: 6px;
+}
+
+.markdown-output pre {
+  overflow-x: auto;
+  padding: 0.66rem 0.76rem;
+  border-radius: 10px;
+  background: #0f172a;
+  color: #f7f8fa;
+}
+
+.markdown-output pre code {
+  background: transparent;
+  color: inherit;
+  padding: 0;
+}
+
+.reveal-up {
+  animation: revealUp 400ms ease-out both;
+}
+
+.delay-1 {
+  animation-delay: 90ms;
+}
+
+@keyframes revealUp {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 980px) {
+  .chat-layout {
+    height: auto;
+    grid-template-columns: 1fr;
+    margin: 1rem auto;
+  }
+
+  .sidebar,
+  .chat-pane {
+    min-height: 420px;
+  }
+
+  .bubble {
+    max-width: 92%;
+  }
+}

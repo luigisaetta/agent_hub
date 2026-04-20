@@ -1,8 +1,11 @@
-# Demo6: LangGraph-style RAG Backend with SSE + Streamlit UI
+# Demo6: LangGraph-style RAG Backend with SSE + Streamlit/Next.js UI
 
 This demo provides:
 - backend API with SSE streaming (`POST /chat`)
 - Streamlit chat UI that consumes the SSE stream in real time
+- Next.js chat UI (`demos/demo6/web`) with ChatGPT-style conversation layout,
+  sidebar aligned to `oci_agents_workshop` style, and independent scroll area
+  for user/assistant messages
 
 Implemented goals:
 - backend/frontend separation,
@@ -52,6 +55,19 @@ From repository root (in a second terminal):
 ```bash
 streamlit run demos/demo6/app.py
 ```
+
+## Run Next.js UI
+
+From repository root (in a second terminal):
+
+```bash
+cd demos/demo6/web
+npm install
+npm run dev
+```
+
+Default frontend URL:
+- `http://localhost:3000`
 
 ## Endpoint
 
