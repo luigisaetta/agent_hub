@@ -209,33 +209,8 @@ button:disabled {
 
 .chat-pane {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   overflow: hidden;
-}
-
-.prestream-banner {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0.9rem;
-  border-bottom: 1px solid #d6e0ea;
-  background: #fff5eb;
-  color: #7a3f00;
-}
-
-.prestream-banner p {
-  margin: 0;
-  font-size: 0.86rem;
-}
-
-.spinner {
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 999px;
-  border: 2px solid rgba(122, 63, 0, 0.25);
-  border-top-color: #7a3f00;
-  animation: spin 0.8s linear infinite;
 }
 
 .messages-scroll {
@@ -368,15 +343,6 @@ button:disabled {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
   }
 }
 
