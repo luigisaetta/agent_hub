@@ -98,6 +98,7 @@ export default function HomePage() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [references, setReferences] = useState<ReferenceItem[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWaitingForFirstToken, setIsWaitingForFirstToken] = useState(false);
   const [error, setError] = useState("");
 
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
@@ -125,17 +126,18 @@ export default function HomePage() {
     const parsedTopK = Number.parseInt(topK, 10);
     const parsedTopN = Number.parseInt(topN, 10);
     if (!Number.isInteger(parsedTopK) || parsedTopK < 1) {
-      setError("top_k deve essere un intero positivo.");
+      setError("top_k must be a positive integer.");
       return;
     }
     if (!Number.isInteger(parsedTopN) || parsedTopN < 1) {
-      setError("top_n deve essere un intero positivo.");
+      setError("top_n must be a positive integer.");
       return;
     }
 
     setError("");
     setReferences([]);
     setIsLoading(true);
+    setIsWaitingForFirstToken(true);
 
     const userMessage: ChatMessage = {
       id: `u_${Date.now()}`,
@@ -181,7 +183,7 @@ export default function HomePage() {
       }
 
       if (!response.body) {
-        throw new Error("La risposta streaming non contiene body.");
+        throw new Error("Streaming response body is not available.");
       }
 
       const reader = response.body.getReader();
@@ -215,6 +217,7 @@ export default function HomePage() {
             const delta =
               typeof envelope.data?.delta === "string" ? envelope.data.delta : "";
             if (delta) {
+              setIsWaitingForFirstToken(false);
               finalText += delta;
               setMessages((previous) =>
                 previous.map((message) => {
@@ -248,6 +251,7 @@ export default function HomePage() {
           if (evt.type === "response.output_text.completed") {
             const completedText = String(envelope.data?.text ?? "").trim();
             if (completedText) {
+              setIsWaitingForFirstToken(false);
               finalText = completedText;
               setMessages((previous) =>
                 previous.map((message) => {
@@ -262,6 +266,7 @@ export default function HomePage() {
           }
 
           if (evt.type === "response.completed") {
+            setIsWaitingForFirstToken(false);
             const outputText = String(envelope.data?.output_text ?? "").trim();
             const finalRefs = normalizeReferences(
               envelope.data?.final_state?.reranked_chunks
@@ -270,7 +275,7 @@ export default function HomePage() {
               setReferences(finalRefs);
             }
 
-            const finalContent = outputText || finalText || "Nessuna risposta testuale.";
+            const finalContent = outputText || finalText || "No text answer was produced.";
             setMessages((previous) =>
               previous.map((message) => {
                 if (message.id !== assistantMessageId) {
@@ -283,7 +288,8 @@ export default function HomePage() {
           }
 
           if (evt.type === "response.error") {
-            const errorMessage = String(envelope.data?.message ?? "Errore backend.");
+            setIsWaitingForFirstToken(false);
+            const errorMessage = String(envelope.data?.message ?? "Backend error.");
             throw new Error(errorMessage);
           }
         }
@@ -292,7 +298,7 @@ export default function HomePage() {
       const message =
         submitError instanceof Error
           ? submitError.message
-          : "Errore inatteso durante la chiamata al backend.";
+          : "Unexpected error while calling the backend.";
       setError(message);
       setMessages((previous) =>
         previous.map((item) => {
@@ -301,11 +307,12 @@ export default function HomePage() {
           }
           return {
             ...item,
-            content: `Errore: ${message}`
+            content: `Error: ${message}`
           };
         })
       );
     } finally {
+      setIsWaitingForFirstToken(false);
       setIsLoading(false);
     }
   }
@@ -316,6 +323,7 @@ export default function HomePage() {
     }
     setMessages([]);
     setReferences([]);
+    setIsWaitingForFirstToken(false);
     setError("");
   }
 
@@ -326,8 +334,8 @@ export default function HomePage() {
           <p className="eyebrow">OCI Enterprise AI</p>
           <h1>Demo6 RAG Chat</h1>
           <p className="sidebar-text">
-            Interfaccia streaming per demo6: sidebar configurazione + conversazione
-            user/assistant in stile chatbot.
+            Streaming interface for demo6 with runtime settings and chatbot-style
+            user/assistant conversation.
           </p>
         </div>
 
@@ -392,7 +400,7 @@ export default function HomePage() {
         <div className="sidebar-section">
           <p className="section-title">References</p>
           {references.length === 0 ? (
-            <p className="empty-state">Nessun riferimento ancora.</p>
+            <p className="empty-state">No references yet.</p>
           ) : (
             <ul className="doc-list">
               {references.map((ref, index) => (
@@ -416,10 +424,16 @@ export default function HomePage() {
       </aside>
 
       <section className="chat-pane reveal-up delay-1">
+        {isLoading && isWaitingForFirstToken ? (
+          <div className="prestream-banner">
+            <span className="spinner" aria-hidden="true" />
+            <p>Processing graph steps, waiting for response streaming...</p>
+          </div>
+        ) : null}
         <div className="messages-scroll" ref={chatScrollRef}>
           {messages.length === 0 ? (
             <div className="empty-chat">
-              <p>Inizia la conversazione scrivendo una domanda su demo6.</p>
+              <p>Start the conversation by asking a question about demo6.</p>
             </div>
           ) : (
             messages.map((message) => (
@@ -447,7 +461,7 @@ export default function HomePage() {
           <textarea
             value={prompt}
             onChange={(e) => setPrompt(e.target.value)}
-            placeholder="Scrivi il tuo messaggio..."
+            placeholder="Write your message..."
             rows={3}
             disabled={isLoading}
             required
@@ -455,7 +469,7 @@ export default function HomePage() {
           <div className="composer-actions">
             {error ? <p className="error-box">{error}</p> : <span />}
             <button type="submit" disabled={isLoading || !prompt.trim() || !chatUrl.trim()}>
-              {isLoading ? "Streaming..." : "Invia"}
+              {isLoading ? "Streaming..." : "Send"}
             </button>
           </div>
         </form>
