@@ -17,6 +17,13 @@ type ReferenceItem = {
   pages: Array<number | string>;
 };
 
+type GraphNodeName =
+  | "QueryRewriter"
+  | "SemanticSearcher"
+  | "Reranker"
+  | "AnswerGenerator";
+type StepStatus = "pending" | "running" | "completed";
+
 type Demo6Envelope = {
   id?: string;
   type?: string;
@@ -34,6 +41,27 @@ type Demo6Envelope = {
 };
 
 const DEFAULT_CHAT_URL = "http://127.0.0.1:8080/chat";
+const GRAPH_STEPS: Array<{ node: GraphNodeName; label: string }> = [
+  { node: "QueryRewriter", label: "Query Rewriter" },
+  { node: "SemanticSearcher", label: "Semantic Searcher" },
+  { node: "Reranker", label: "Reranker" },
+  { node: "AnswerGenerator", label: "Answer Generator" }
+];
+const INITIAL_GRAPH_STATUS: Record<GraphNodeName, StepStatus> = {
+  QueryRewriter: "pending",
+  SemanticSearcher: "pending",
+  Reranker: "pending",
+  AnswerGenerator: "pending"
+};
+
+function isGraphNodeName(value: string): value is GraphNodeName {
+  return (
+    value === "QueryRewriter" ||
+    value === "SemanticSearcher" ||
+    value === "Reranker" ||
+    value === "AnswerGenerator"
+  );
+}
 
 function normalizeReferences(raw: unknown): ReferenceItem[] {
   if (!Array.isArray(raw)) {
@@ -97,7 +125,10 @@ export default function HomePage() {
   const [prompt, setPrompt] = useState("");
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [references, setReferences] = useState<ReferenceItem[]>([]);
+  const [graphStatus, setGraphStatus] =
+    useState<Record<GraphNodeName, StepStatus>>(INITIAL_GRAPH_STATUS);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWaitingForFirstToken, setIsWaitingForFirstToken] = useState(false);
   const [error, setError] = useState("");
 
   const chatScrollRef = useRef<HTMLDivElement | null>(null);
@@ -135,7 +166,9 @@ export default function HomePage() {
 
     setError("");
     setReferences([]);
+    setGraphStatus(INITIAL_GRAPH_STATUS);
     setIsLoading(true);
+    setIsWaitingForFirstToken(true);
 
     const userMessage: ChatMessage = {
       id: `u_${Date.now()}`,
@@ -215,6 +248,7 @@ export default function HomePage() {
             const delta =
               typeof envelope.data?.delta === "string" ? envelope.data.delta : "";
             if (delta) {
+              setIsWaitingForFirstToken(false);
               finalText += delta;
               setMessages((previous) =>
                 previous.map((message) => {
@@ -245,9 +279,36 @@ export default function HomePage() {
             continue;
           }
 
+          if (
+            evt.type === "graph.node.started" &&
+            typeof envelope.node === "string" &&
+            isGraphNodeName(envelope.node)
+          ) {
+            const nodeName: GraphNodeName = envelope.node;
+            setGraphStatus((previous) => ({
+              ...previous,
+              [nodeName]: "running"
+            }));
+            continue;
+          }
+
+          if (
+            evt.type === "graph.node.completed" &&
+            typeof envelope.node === "string" &&
+            isGraphNodeName(envelope.node)
+          ) {
+            const nodeName: GraphNodeName = envelope.node;
+            setGraphStatus((previous) => ({
+              ...previous,
+              [nodeName]: "completed"
+            }));
+            continue;
+          }
+
           if (evt.type === "response.output_text.completed") {
             const completedText = String(envelope.data?.text ?? "").trim();
             if (completedText) {
+              setIsWaitingForFirstToken(false);
               finalText = completedText;
               setMessages((previous) =>
                 previous.map((message) => {
@@ -262,6 +323,7 @@ export default function HomePage() {
           }
 
           if (evt.type === "response.completed") {
+            setIsWaitingForFirstToken(false);
             const outputText = String(envelope.data?.output_text ?? "").trim();
             const finalRefs = normalizeReferences(
               envelope.data?.final_state?.reranked_chunks
@@ -283,6 +345,7 @@ export default function HomePage() {
           }
 
           if (evt.type === "response.error") {
+            setIsWaitingForFirstToken(false);
             const errorMessage = String(envelope.data?.message ?? "Errore backend.");
             throw new Error(errorMessage);
           }
@@ -306,6 +369,7 @@ export default function HomePage() {
         })
       );
     } finally {
+      setIsWaitingForFirstToken(false);
       setIsLoading(false);
     }
   }
@@ -316,6 +380,8 @@ export default function HomePage() {
     }
     setMessages([]);
     setReferences([]);
+    setGraphStatus(INITIAL_GRAPH_STATUS);
+    setIsWaitingForFirstToken(false);
     setError("");
   }
 
@@ -390,6 +456,18 @@ export default function HomePage() {
         </div>
 
         <div className="sidebar-section">
+          <p className="section-title">Graph Journey</p>
+          <ul className="graph-step-list">
+            {GRAPH_STEPS.map((step) => (
+              <li key={step.node}>
+                <span className={`step-dot ${graphStatus[step.node]}`} />
+                <p className="step-label">{step.label}</p>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div className="sidebar-section">
           <p className="section-title">References</p>
           {references.length === 0 ? (
             <p className="empty-state">Nessun riferimento ancora.</p>
@@ -416,6 +494,12 @@ export default function HomePage() {
       </aside>
 
       <section className="chat-pane reveal-up delay-1">
+        {isLoading && isWaitingForFirstToken ? (
+          <div className="prestream-banner">
+            <span className="spinner" aria-hidden="true" />
+            <p>Esecuzione grafo in corso, attendo lo streaming della risposta...</p>
+          </div>
+        ) : null}
         <div className="messages-scroll" ref={chatScrollRef}>
           {messages.length === 0 ? (
             <div className="empty-chat">
