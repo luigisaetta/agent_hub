@@ -138,53 +138,6 @@ textarea:focus {
   padding-right: 0.2rem;
 }
 
-.graph-step-list {
-  margin: 0;
-  padding: 0;
-  list-style: none;
-  display: grid;
-  gap: 0.5rem;
-}
-
-.graph-step-list li {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  gap: 0.55rem;
-  align-items: center;
-  border: 1px solid #d3dde7;
-  background: #fff;
-  border-radius: 10px;
-  padding: 0.52rem 0.62rem;
-}
-
-.step-dot {
-  width: 0.72rem;
-  height: 0.72rem;
-  border-radius: 999px;
-  display: inline-block;
-}
-
-.step-dot.pending {
-  background: #8da0b0;
-}
-
-.step-dot.running {
-  background: #ff7a18;
-  box-shadow: 0 0 0 0 rgba(255, 122, 24, 0.45);
-  animation: pulse 1.1s ease-out infinite;
-}
-
-.step-dot.completed {
-  background: #00a6a6;
-}
-
-.step-label {
-  margin: 0;
-  font-size: 0.84rem;
-  color: #234155;
-  font-weight: 600;
-}
-
 .doc-list li {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -256,33 +209,8 @@ button:disabled {
 
 .chat-pane {
   display: grid;
-  grid-template-rows: auto minmax(0, 1fr) auto;
+  grid-template-rows: minmax(0, 1fr) auto;
   overflow: hidden;
-}
-
-.prestream-banner {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.65rem 0.9rem;
-  border-bottom: 1px solid #d6e0ea;
-  background: #fff5eb;
-  color: #7a3f00;
-}
-
-.prestream-banner p {
-  margin: 0;
-  font-size: 0.86rem;
-}
-
-.spinner {
-  width: 0.9rem;
-  height: 0.9rem;
-  border-radius: 999px;
-  border: 2px solid rgba(122, 63, 0, 0.25);
-  border-top-color: #7a3f00;
-  animation: spin 0.8s linear infinite;
 }
 
 .messages-scroll {
@@ -415,27 +343,6 @@ button:disabled {
   to {
     opacity: 1;
     transform: translateY(0);
-  }
-}
-
-@keyframes spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
-
-@keyframes pulse {
-  0% {
-    box-shadow: 0 0 0 0 rgba(255, 122, 24, 0.45);
-  }
-  70% {
-    box-shadow: 0 0 0 8px rgba(255, 122, 24, 0);
-  }
-  100% {
-    box-shadow: 0 0 0 0 rgba(255, 122, 24, 0);
   }
 }
 
