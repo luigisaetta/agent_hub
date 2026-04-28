@@ -57,6 +57,7 @@ CLI defaults are used.
 When an operation asks for a compartment, you can enter either the compartment
 OCID or its name. Names are resolved through `oci iam compartment list`; if
 multiple compartments have the same name, the menu asks which one to use.
+Resolved compartment names are cached for the current menu session.
 
 ## Run
 
@@ -79,6 +80,12 @@ export AGENT_HUB_MENU_WIDTH=120
 
 OCI commands and JSON results are printed without Rich hard-wrapping so long
 OCIDs remain copy-friendly.
+
+The hosted application list operation renders a compact table first, then asks
+whether to print the raw JSON response for copy/paste or troubleshooting.
+After the list, you can optionally select one hosted application by number and
+show its details as a table; the details flow also asks whether to print the
+raw JSON response.
 
 ## Internal Layout
 

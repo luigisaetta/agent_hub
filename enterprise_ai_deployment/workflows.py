@@ -31,7 +31,11 @@ from enterprise_ai_deployment.rendering import (
     copyable_text,
     print_box,
     prompt,
+    show_hosted_application_details,
+    show_hosted_applications,
 )
+
+_COMPARTMENT_CACHE: dict[tuple[str | None, str | None, str], str] = {}
 
 
 def run_oci_command(command: list[str]) -> int:
@@ -60,6 +64,106 @@ def run_oci_command(command: list[str]) -> int:
     return result.returncode
 
 
+def run_hosted_applications_list(command: list[str]) -> int:
+    """Run hosted application listing and optionally inspect one result."""
+    rich_console = console()
+    rich_console.print()
+    print_box("OCI Command")
+    rich_console.print(copyable_text(" ".join(command), style="cyan"), soft_wrap=True)
+    rich_console.print()
+    result = subprocess.run(
+        command,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            rich_console.print(copyable_text(result.stdout.strip()), soft_wrap=True)
+        else:
+            items = _extract_items(payload)
+            show_hosted_applications(items)
+            if confirm("Show raw JSON response?", default=False):
+                rich_console.print()
+                print_box("Raw JSON")
+                rich_console.print(
+                    copyable_text(_pretty_json(result.stdout)), soft_wrap=True
+                )
+            selected_id = _select_hosted_application_id(items)
+            if selected_id:
+                run_hosted_application_details(
+                    build_get_hosted_application_command_from_list(command, selected_id)
+                )
+    if result.stderr:
+        rich_console.print(
+            copyable_text(result.stderr.strip(), style="yellow"),
+            soft_wrap=True,
+        )
+    rich_console.print()
+    style = "green" if result.returncode == 0 else "red"
+    rich_console.print(f"Exit code: {result.returncode}", style=style)
+    return result.returncode
+
+
+def run_hosted_application_details(command: list[str]) -> int:
+    """Run hosted application get and print table plus optional raw JSON."""
+    rich_console = console()
+    rich_console.print()
+    print_box("OCI Command")
+    rich_console.print(copyable_text(" ".join(command), style="cyan"), soft_wrap=True)
+    rich_console.print()
+    result = subprocess.run(
+        command,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.stdout:
+        try:
+            payload = json.loads(result.stdout)
+        except json.JSONDecodeError:
+            rich_console.print(copyable_text(result.stdout.strip()), soft_wrap=True)
+        else:
+            data = payload.get("data")
+            if isinstance(data, dict):
+                show_hosted_application_details(data)
+            else:
+                rich_console.print(
+                    copyable_text(_pretty_json(result.stdout)), soft_wrap=True
+                )
+            if confirm("Show raw JSON response?", default=False):
+                rich_console.print()
+                print_box("Raw JSON")
+                rich_console.print(
+                    copyable_text(_pretty_json(result.stdout)), soft_wrap=True
+                )
+    if result.stderr:
+        rich_console.print(
+            copyable_text(result.stderr.strip(), style="yellow"),
+            soft_wrap=True,
+        )
+    rich_console.print()
+    style = "green" if result.returncode == 0 else "red"
+    rich_console.print(f"Exit code: {result.returncode}", style=style)
+    return result.returncode
+
+
+def build_get_hosted_application_command_from_list(
+    list_command: list[str], hosted_application_id: str
+) -> list[str]:
+    """Build a get command using global options from a list command."""
+    generative_ai_index = list_command.index("generative-ai")
+    return [
+        *list_command[: generative_ai_index + 1],
+        "hosted-application",
+        "get",
+        "--hosted-application-id",
+        hosted_application_id,
+    ]
+
+
 def _pretty_json(text: str) -> str:
     """Pretty-print JSON output when possible."""
     try:
@@ -80,6 +184,25 @@ def _extract_items(payload: dict[str, object]) -> list[dict[str, object]]:
     return []
 
 
+def _select_hosted_application_id(items: list[dict[str, object]]) -> str | None:
+    """Optionally select one hosted application from the latest list."""
+    selectable_items = [item for item in items if item.get("id")]
+    if not selectable_items:
+        return None
+    if not confirm("Get details for one hosted application?", default=False):
+        return None
+
+    rich_console = console()
+    while True:
+        selection = prompt(
+            f"Select hosted application number [1-{len(selectable_items)}]",
+            required=True,
+        )
+        if selection.isdigit() and 1 <= int(selection) <= len(selectable_items):
+            return str(selectable_items[int(selection) - 1]["id"])
+        rich_console.print("Invalid selection.", style="red")
+
+
 def _compartment_label(compartment: dict[str, object]) -> str:
     """Return a compact display label for one compartment."""
     name = str(compartment.get("name") or "<unnamed>")
@@ -94,6 +217,15 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
     value = name_or_ocid.strip()
     if value.startswith(COMPARTMENT_OCID_PREFIX):
         return value
+
+    cache_key = (config.profile, config.region, value)
+    cached_id = _COMPARTMENT_CACHE.get(cache_key)
+    if cached_id:
+        console().print(
+            f"Using cached compartment OCID for {value}: {cached_id}",
+            style="dim",
+        )
+        return cached_id
 
     command = build_list_compartments_by_name_command(config, value)
     rich_console = console()
@@ -129,7 +261,9 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
     if not matches:
         raise RuntimeError(f"No compartment found with name: {value}")
     if len(matches) == 1:
-        return str(matches[0]["id"])
+        compartment_id = str(matches[0]["id"])
+        _COMPARTMENT_CACHE[cache_key] = compartment_id
+        return compartment_id
 
     rich_console.print()
     rich_console.print("Multiple compartments matched this name:", style="bold yellow")
@@ -138,14 +272,21 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
     while True:
         selection = prompt("Select compartment", required=True)
         if selection.isdigit() and 1 <= int(selection) <= len(matches):
-            return str(matches[int(selection) - 1]["id"])
+            compartment_id = str(matches[int(selection) - 1]["id"])
+            _COMPARTMENT_CACHE[cache_key] = compartment_id
+            return compartment_id
         rich_console.print("Invalid selection.", style="red")
+
+
+def clear_compartment_cache() -> None:
+    """Clear cached compartment name resolutions."""
+    _COMPARTMENT_CACHE.clear()
 
 
 def handle_get_hosted_application(config: OciCliConfig) -> None:
     """Handle hosted application details lookup."""
     app_id = prompt("Hosted application OCID", required=True)
-    run_oci_command(build_get_hosted_application_command(config, app_id))
+    run_hosted_application_details(build_get_hosted_application_command(config, app_id))
 
 
 def handle_get_hosted_deployment(config: OciCliConfig) -> None:
@@ -167,7 +308,7 @@ def handle_list_hosted_applications(config: OciCliConfig) -> None:
         output=config.output,
     )
     compartment_id = resolve_compartment_id(effective_config, compartment_name_or_ocid)
-    run_oci_command(
+    run_hosted_applications_list(
         build_list_hosted_applications_command(effective_config, compartment_id)
     )
 

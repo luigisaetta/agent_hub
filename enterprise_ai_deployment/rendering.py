@@ -152,3 +152,82 @@ def show_config(config: OciCliConfig) -> None:
             border_style="blue",
         )
     )
+
+
+def show_hosted_applications(items: list[dict[str, object]]) -> None:
+    """Render a compact hosted applications table."""
+    rich_console = console()
+    if not items:
+        rich_console.print("No hosted applications found.", style="yellow")
+        return
+
+    table = Table(
+        title="Hosted Applications",
+        border_style="blue",
+        show_lines=False,
+    )
+    table.add_column("Name", style="bold")
+    table.add_column("State", style="green")
+    table.add_column("Created", style="dim")
+    table.add_column("Description")
+    table.add_column("OCID", style="cyan")
+
+    for item in items:
+        table.add_row(
+            _string_value(item, "display-name", "name"),
+            _string_value(item, "lifecycle-state", "lifecycleState"),
+            _string_value(item, "time-created", "timeCreated"),
+            _short_text(_string_value(item, "description")),
+            _short_ocid(_string_value(item, "id")),
+        )
+
+    rich_console.print(table)
+
+
+def show_hosted_application_details(item: dict[str, object]) -> None:
+    """Render hosted application details in a compact table."""
+    table = Table(
+        title="Hosted Application Details",
+        border_style="blue",
+        show_header=False,
+    )
+    table.add_column("Field", style="bold")
+    table.add_column("Value")
+
+    rows = [
+        ("Name", _string_value(item, "display-name", "name")),
+        ("State", _string_value(item, "lifecycle-state", "lifecycleState")),
+        ("Created", _string_value(item, "time-created", "timeCreated")),
+        ("Updated", _string_value(item, "time-updated", "timeUpdated")),
+        ("Description", _string_value(item, "description")),
+        ("Compartment", _string_value(item, "compartment-id", "compartmentId")),
+        ("OCID", _string_value(item, "id")),
+    ]
+    for label, value in rows:
+        if value:
+            table.add_row(label, copyable_text(value))
+
+    console().print(table)
+
+
+def _string_value(item: dict[str, object], *keys: str) -> str:
+    """Return the first non-empty string value from a JSON object."""
+    for key in keys:
+        value = item.get(key)
+        if value is not None:
+            return str(value)
+    return ""
+
+
+def _short_ocid(value: str) -> str:
+    """Return an OCID preview suitable for compact tables."""
+    if len(value) <= 36:
+        return value
+    return f"{value[:24]}...{value[-12:]}"
+
+
+def _short_text(value: str, max_length: int = 48) -> str:
+    """Return a compact text preview suitable for terminal tables."""
+    if len(value) <= max_length:
+        return value
+    return f"{value[: max_length - 3]}..."
