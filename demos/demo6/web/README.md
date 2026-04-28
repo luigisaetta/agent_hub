@@ -16,7 +16,13 @@ La UI è disponibile su `http://localhost:3000`.
 
 ## Configurazione endpoint
 
-Puoi impostare l'endpoint backend via variabile ambiente:
+Puoi impostare l'endpoint backend copiando il template versionato:
+
+```bash
+cp demos/demo6/web/.env.local.example demos/demo6/web/.env.local
+```
+
+Il file locale contiene questa variabile:
 
 ```bash
 NEXT_PUBLIC_DEMO6_CHAT_URL=http://127.0.0.1:8080/chat

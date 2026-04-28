@@ -6,7 +6,9 @@ This project uses a shared configuration at repository root and imports it from 
 
 - `config.py`: non-secret runtime settings (region, base URLs, default model id).
 - `config_private.py`: loads secret/runtime identifiers from the active `.env` profile.
-- `.env.prod-chicago`, `.env.prod-frankfurt`: secret profiles (gitignored).
+- `.env.prod-chicago`, `.env.prod-frankfurt`: local secret profiles (gitignored).
+- `*.env.sample`, `*.env.example`, `.env*.sample`, `.env*.example`: versioned templates
+  to copy into local secret/config files.
 - `set_env.sh`: selects active secret profile.
 - `show_current_env.sh`: shows currently active secret profile.
 
@@ -103,7 +105,8 @@ not passed explicitly.
 ## Security notes
 
 - Never commit real secrets in tracked files.
-- Keep secret values only in `.env.*` files (already gitignored).
+- Keep secret values only in local `.env*` files that are ignored by git.
+- Do not put real secrets in versioned `.sample` or `.example` templates.
 - Rotate keys if they were accidentally exposed.
 
 ## Running scripts correctly

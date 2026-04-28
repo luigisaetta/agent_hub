@@ -159,6 +159,9 @@ Secrets are loaded from environment profile files:
 - `.env.prod-chicago`
 - `.env.prod-frankfurt`
 
+Real `.env*` files are local-only and ignored by git. Template files ending in
+`.sample` or `.example` are versioned so they can be copied and filled locally.
+
 This repository supports only production profiles (`prod-*`).
 When you run `source ./set_env.sh <profile>`, the script exports:
 - `AGENT_HUB_REGION`

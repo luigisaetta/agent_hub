@@ -7,6 +7,8 @@ This repository is organized as a practical script collection around OCI Generat
 Core idea:
 - keep shared logic in `common/`
 - keep runnable scenarios in `examples/`
+- keep full demo applications in `demos/`
+- keep reusable/local agent implementations in `agents/`
 - keep connector operations in `connectors/`
 - keep regression/unit coverage in `tests/`
 
@@ -20,6 +22,12 @@ Core idea:
 
 - `examples/`
 - End-to-end runnable examples for Responses API, Conversations, tools, vector stores, and utility scripts for list/delete tasks.
+
+- `demos/`
+- Full application-style demos, usually with Streamlit, FastAPI, Docker, or web UI pieces around one workflow.
+
+- `agents/`
+- Local agent implementations and clients, including FastAPI/SSE services, CLI clients, JWT variants, and hosted-agent UI clients.
 
 - `connectors/`
 - Scripts for lifecycle management of Object Storage connectors: create, list, stats, sync, update, delete, logs.
@@ -37,6 +45,10 @@ Core idea:
 3. The selected `.env` file is loaded with `override=True`, then required secrets are validated (`PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, etc.). Langfuse keys are optional and can be empty when Langfuse integrations are not used.
 4. `common.clients.get_inference_client()` and `common.clients.get_control_plane_client()` provide the two OpenAI-compatible clients used by examples.
 5. Scripts execute API calls and reuse common output/retrieval helpers for consistency.
+
+Real `.env*` files are local-only and ignored by git. Versioned `.sample` and
+`.example` files document expected variables and should be copied to local
+`.env*` files before inserting secrets.
 
 ## Secret management by environment
 
@@ -59,6 +71,8 @@ This model guarantees that the same script can run unchanged across environments
 agent_hub/
 ├── common/        # shared helpers used by examples/connectors
 ├── examples/      # runnable API usage samples and utility scripts
+├── demos/         # application-style demos
+├── agents/        # local/hosted agent examples and clients
 ├── connectors/    # connector lifecycle scripts
 ├── tests/         # regression and unit tests
 ├── docs/          # project documentation
@@ -132,11 +146,35 @@ agent_hub/
 │       ├── backend.py
 │       ├── README.md
 │       └── requirements.txt
+├── demos/demo6/
+│   ├── api.py
+│   ├── app.py
+│   ├── backend.py
+│   ├── Dockerfile
+│   ├── docker-compose.yml
+│   ├── README.md
+│   ├── README_DOCKER.md
+│   └── web/
+├── agents/
+│   ├── hello_world/
+│   │   ├── api.py
+│   │   ├── client.py
+│   │   ├── client_jwt.py
+│   │   ├── Dockerfile
+│   │   ├── docker-compose.yml
+│   │   └── README.md
+│   ├── deep_agents01/
+│   │   ├── api.py
+│   │   ├── client.py
+│   │   └── README.md
+│   └── streamlit_client/
+│       ├── app.py
+│       └── README.md
 ├── examples/
 │   ├── __init__.py
 │   ├── example01.py
 │   ...
-│   └── example21.py
+│   └── example24.py
 ├── tests/
 │   ├── conftest.py
 │   └── test_*.py
