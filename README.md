@@ -4,7 +4,7 @@
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Linting: pylint](https://img.shields.io/badge/linting-pylint-yellowgreen.svg)](https://github.com/pylint-dev/pylint)
 [![Tests: pytest](https://img.shields.io/badge/tests-pytest-blue.svg)](https://docs.pytest.org/)
-[![Codex Ready](https://img.shields.io/badge/Codex-Ready-0A66C2)](./Agents.md)
+[![Codex Ready](https://img.shields.io/badge/Codex-Ready-0A66C2)](./AGENTS.md)
 
 This repository contains practical Python examples that call Oracle Cloud Infrastructure (OCI) Generative AI endpoints through the OpenAI-compatible API.
 

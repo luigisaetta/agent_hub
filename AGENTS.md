@@ -5,7 +5,7 @@ License: MIT
 Description: Operational rules and quality standards for AI agents contributing to agent_hub.
 ---
 
-# Agents.md
+# AGENTS.md
 
 ## Purpose
 This file defines the roles of AI agents in the `agent_hub` project, their operational responsibilities, and the minimum quality rules for contributing consistently.

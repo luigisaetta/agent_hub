@@ -23,6 +23,10 @@ dist/
 *.egg-info/
 .eggs/
 
+# JavaScript/frontend dependencies and build artifacts
+node_modules/
+.next/
+
 # Test/coverage artifacts
 .pytest_cache/
 .coverage
@@ -36,6 +40,7 @@ htmlcov/
 .DS_Store
 .vscode/
 .idea/
+outputs/
 pdf_rag/
 .pylint.d/
 

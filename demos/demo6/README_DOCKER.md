@@ -6,6 +6,7 @@ This guide packages and runs only the backend API (`demos.demo6.api`) with Docke
 
 - `demos/demo6/Dockerfile`
 - `demos/demo6/docker-compose.yml`
+- `demos/demo6/build_image.sh`
 - `demos/demo6/.env.compose.example`
 
 ## Prerequisites
