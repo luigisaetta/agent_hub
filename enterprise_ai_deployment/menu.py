@@ -13,20 +13,17 @@ from __future__ import annotations
 import json
 import os
 import subprocess
-import sys
 from dataclasses import dataclass
 from pathlib import Path
 
-MENU_WIDTH = 72
+from rich.console import Console, Group
+from rich.panel import Panel
+from rich.table import Table
+from rich.text import Text
+
+DEFAULT_MENU_WIDTH = 96
 DEFAULT_WAIT_STATE = "SUCCEEDED"
 COMPARTMENT_OCID_PREFIX = "ocid1.compartment."
-ANSI_RESET = "\033[0m"
-ANSI_BOLD = "\033[1m"
-ANSI_DIM = "\033[2m"
-ANSI_CYAN = "\033[36m"
-ANSI_GREEN = "\033[32m"
-ANSI_YELLOW = "\033[33m"
-ANSI_BLUE = "\033[34m"
 
 
 @dataclass(frozen=True)
@@ -80,35 +77,36 @@ def _env(name: str) -> str | None:
     return value or None
 
 
-def _supports_color() -> bool:
-    """Return whether ANSI colors should be emitted."""
+def _console() -> Console:
+    """Build a Rich console honoring local color preferences."""
     forced = (_env("AGENT_HUB_MENU_COLOR") or "").lower()
-    if forced in {"1", "true", "yes", "always"}:
-        return True
-    if os.getenv("NO_COLOR") is not None:
-        return False
-    if (_env("TERM") or "").lower() == "dumb":
-        return False
-    return sys.stdout.isatty()
+    force_terminal = forced in {"1", "true", "yes", "always"} or None
+    return Console(
+        force_terminal=force_terminal,
+        no_color=os.getenv("NO_COLOR") is not None,
+        highlight=False,
+        width=_menu_width(),
+    )
 
 
-def _style(text: str, *codes: str) -> str:
-    """Style text with ANSI codes when supported by the current terminal."""
-    if not codes or not _supports_color():
-        return text
-    return f"{''.join(codes)}{text}{ANSI_RESET}"
+def _menu_width() -> int:
+    """Return the configured Rich console width."""
+    value = _env("AGENT_HUB_MENU_WIDTH")
+    if value and value.isdigit():
+        return max(DEFAULT_MENU_WIDTH, int(value))
+    return DEFAULT_MENU_WIDTH
 
 
-def _rule(char: str = "-") -> str:
-    """Return a styled horizontal rule."""
-    return _style(char * MENU_WIDTH, ANSI_DIM, ANSI_BLUE)
-
-
-def _status_value(value: str | None, missing_label: str) -> str:
-    """Format a config value for menu display."""
+def _status_text(value: str | None, missing_label: str) -> Text:
+    """Format a config value for Rich display."""
     if value:
-        return _style(value, ANSI_GREEN)
-    return _style(missing_label, ANSI_YELLOW)
+        return Text(value, style="green")
+    return Text(missing_label, style="yellow")
+
+
+def _copyable_text(text: str, style: str | None = None) -> Text:
+    """Return text that Rich should not hard-wrap or truncate."""
+    return Text(text, style=style, no_wrap=True, overflow="ignore")
 
 
 def load_config_from_env() -> OciCliConfig:
@@ -281,10 +279,11 @@ def build_create_hosted_deployment_command(
 
 def run_oci_command(command: list[str]) -> int:
     """Run one OCI CLI command and print a readable result."""
-    print("")
+    console = _console()
+    console.print()
     print_box("OCI Command")
-    print(_style(" ".join(command), ANSI_CYAN))
-    print("")
+    console.print(_copyable_text(" ".join(command), style="cyan"), soft_wrap=True)
+    console.print()
     result = subprocess.run(
         command,
         check=False,
@@ -292,11 +291,14 @@ def run_oci_command(command: list[str]) -> int:
         text=True,
     )
     if result.stdout:
-        print(_pretty_json(result.stdout))
+        console.print(_copyable_text(_pretty_json(result.stdout)), soft_wrap=True)
     if result.stderr:
-        print(result.stderr.strip())
-    print("")
-    print(f"Exit code: {result.returncode}")
+        console.print(
+            _copyable_text(result.stderr.strip(), style="yellow"), soft_wrap=True
+        )
+    console.print()
+    style = "green" if result.returncode == 0 else "red"
+    console.print(f"Exit code: {result.returncode}", style=style)
     return result.returncode
 
 
@@ -336,9 +338,10 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
         return value
 
     command = build_list_compartments_by_name_command(config, value)
-    print("")
+    console = _console()
+    console.print()
     print_box("Resolve Compartment")
-    print(_style(" ".join(command), ANSI_CYAN))
+    console.print(_copyable_text(" ".join(command), style="cyan"), soft_wrap=True)
     result = subprocess.run(
         command,
         check=False,
@@ -347,7 +350,10 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
     )
     if result.returncode != 0:
         if result.stderr:
-            print(result.stderr.strip())
+            console.print(
+                _copyable_text(result.stderr.strip(), style="yellow"),
+                soft_wrap=True,
+            )
         raise RuntimeError(f"Unable to resolve compartment name: {value}")
 
     try:
@@ -367,38 +373,28 @@ def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
     if len(matches) == 1:
         return str(matches[0]["id"])
 
-    print("")
-    print("Multiple compartments matched this name:")
+    console.print()
+    console.print("Multiple compartments matched this name:", style="bold yellow")
     for index, compartment in enumerate(matches, start=1):
-        print(f" {index}. {_compartment_label(compartment)}")
+        console.print(f" {index}. {_compartment_label(compartment)}")
     while True:
         selection = prompt("Select compartment", required=True)
         if selection.isdigit() and 1 <= int(selection) <= len(matches):
             return str(matches[int(selection) - 1]["id"])
-        print("Invalid selection.")
+        console.print("Invalid selection.", style="red")
 
 
 def print_box(title: str) -> None:
-    """Print a compact ASCII title box."""
-    safe_title = f" {title.strip()} "
-    side = max(0, MENU_WIDTH - len(safe_title) - 2)
-    left = side // 2
-    right = side - left
-    border = "+" + "-" * left
-    tail = "-" * right + "+"
-    print(
-        _style(border, ANSI_BLUE)
-        + _style(safe_title, ANSI_BOLD, ANSI_CYAN)
-        + _style(tail, ANSI_BLUE)
-    )
+    """Print a compact Rich title rule."""
+    _console().rule(f"[bold cyan]{title.strip()}[/bold cyan]", style="blue")
 
 
 def read_input(label: str) -> str:
     """Read one input line and exit cleanly on EOF."""
     try:
-        return input(label)
+        return _console().input(label)
     except EOFError as exc:
-        print("")
+        _console().print()
         raise SystemExit(0) from exc
 
 
@@ -406,14 +402,14 @@ def prompt(label: str, default: str | None = None, required: bool = False) -> st
     """Prompt for a value, optionally with a default."""
     suffix = f" [{default}]" if default else ""
     while True:
-        value = read_input(_style(f"{label}{suffix}: ", ANSI_BOLD)).strip()
+        value = read_input(f"[bold]{label}{suffix}:[/bold] ").strip()
         if value:
             return value
         if default is not None:
             return default
         if not required:
             return ""
-        print("Required value.")
+        _console().print("Required value.", style="red")
 
 
 def confirm(label: str, default: bool = False) -> bool:
@@ -432,8 +428,8 @@ def pause() -> None:
 
 def show_menu(config: OciCliConfig) -> None:
     """Print the main menu."""
-    print("")
-    print_box("OCI Enterprise AI Deployment Menu")
+    console = _console()
+    console.print()
     entries = [
         ("1", "List hosted applications by region and compartment"),
         ("2", "Get hosted application details"),
@@ -443,21 +439,29 @@ def show_menu(config: OciCliConfig) -> None:
         ("6", "Show detected CLI configuration"),
         ("0", "Exit"),
     ]
+    menu_table = Table.grid(padding=(0, 1))
+    menu_table.add_column(justify="right", style="bold green", no_wrap=True)
+    menu_table.add_column(style="white")
     for key, label in entries:
-        print(f" {_style(f'[{key}]', ANSI_BOLD, ANSI_GREEN)} {label}")
-    print(_rule())
-    print(
-        f" {_style('Profile:', ANSI_BOLD)}     "
-        f"{_status_value(config.profile, '<default OCI CLI>')}"
+        menu_table.add_row(f"[{key}]", label)
+
+    config_table = Table.grid(padding=(0, 1))
+    config_table.add_column(style="bold", no_wrap=True)
+    config_table.add_column()
+    config_table.add_row("Profile", _status_text(config.profile, "<default OCI CLI>"))
+    config_table.add_row("Region", _status_text(config.region, "<default OCI CLI>"))
+    config_table.add_row(
+        "Compartment", _status_text(config.compartment_id, "<not set>")
     )
-    print(
-        f" {_style('Region:', ANSI_BOLD)}      "
-        f"{_status_value(config.region, '<default OCI CLI>')}"
+
+    console.print(
+        Panel(
+            Group(menu_table, Text(""), config_table),
+            title="[bold cyan]OCI Enterprise AI Deployment Menu[/bold cyan]",
+            border_style="blue",
+            padding=(1, 2),
+        )
     )
-    print(
-        f" {_style('Compartment:', ANSI_BOLD)} {_status_value(config.compartment_id, '<not set>')}"
-    )
-    print(_rule())
 
 
 def handle_get_hosted_application(config: OciCliConfig) -> None:
@@ -498,8 +502,11 @@ def handle_create_hosted_application(config: OciCliConfig) -> None:
     )
     compartment_id = resolve_compartment_id(config, compartment_name_or_ocid)
     description = prompt("Description", required=False)
-    print("")
-    print("Optional JSON files: leave empty to skip them for now.")
+    _console().print()
+    _console().print(
+        "Optional JSON files: leave empty to skip them for now.",
+        style="dim",
+    )
     scaling_config = prompt("Scaling config JSON path", required=False)
     inbound_auth_config = prompt("Inbound auth config JSON path", required=False)
     networking_config = prompt("Networking config JSON path", required=False)
@@ -525,7 +532,7 @@ def handle_create_hosted_application(config: OciCliConfig) -> None:
     if confirm("Confirm hosted application creation?", default=False):
         run_oci_command(command)
     else:
-        print("Operation cancelled.")
+        _console().print("Operation cancelled.", style="yellow")
 
 
 def handle_create_hosted_deployment(config: OciCliConfig) -> None:
@@ -540,8 +547,11 @@ def handle_create_hosted_deployment(config: OciCliConfig) -> None:
         if compartment_name_or_ocid
         else None
     )
-    print("")
-    print("Use a full active-artifact JSON file or the guided Docker image path.")
+    _console().print()
+    _console().print(
+        "Use a full active-artifact JSON file or the guided Docker image path.",
+        style="dim",
+    )
     active_artifact_json = prompt("Active artifact JSON path", required=False)
     container_uri = None
     artifact_tag = None
@@ -564,27 +574,31 @@ def handle_create_hosted_deployment(config: OciCliConfig) -> None:
     if confirm("Confirm deployment creation?", default=False):
         run_oci_command(command)
     else:
-        print("Operation cancelled.")
+        _console().print("Operation cancelled.", style="yellow")
 
 
 def show_config(config: OciCliConfig) -> None:
     """Print detected configuration."""
-    print_box("Configuration")
-    print(
-        f"{_style('OCI_CLI_PROFILE / OCI_PROFILE:', ANSI_BOLD)}       "
-        f"{_status_value(config.profile, '<default>')}"
+    table = Table(show_header=False, box=None, padding=(0, 1))
+    table.add_column(style="bold")
+    table.add_column()
+    table.add_row(
+        "OCI_CLI_PROFILE / OCI_PROFILE", _status_text(config.profile, "<default>")
     )
-    print(
-        f"{_style('OCI_CLI_REGION / OCI_REGION:', ANSI_BOLD)}         "
-        f"{_status_value(config.region, '<default>')}"
+    table.add_row(
+        "OCI_CLI_REGION / OCI_REGION", _status_text(config.region, "<default>")
     )
-    print(
-        f"{_style('OCI_COMPARTMENT_ID / COMPARTMENT_ID:', ANSI_BOLD)} "
-        f"{_status_value(config.compartment_id, '<empty>')}"
+    table.add_row(
+        "OCI_COMPARTMENT_ID / COMPARTMENT_ID",
+        _status_text(config.compartment_id, "<empty>"),
     )
-    print(
-        f"{_style('OCI_CLI_OUTPUT:', ANSI_BOLD)}                      "
-        f"{_style(config.output, ANSI_GREEN)}"
+    table.add_row("OCI_CLI_OUTPUT", Text(config.output, style="green"))
+    _console().print(
+        Panel(
+            table,
+            title="[bold cyan]Configuration[/bold cyan]",
+            border_style="blue",
+        )
     )
 
 
@@ -600,9 +614,9 @@ def main() -> None:
     }
     while True:
         show_menu(config)
-        choice = read_input(_style("Selection: ", ANSI_BOLD, ANSI_CYAN)).strip()
+        choice = read_input("[bold cyan]Selection:[/bold cyan] ").strip()
         if choice == "0":
-            print(_style("Bye.", ANSI_CYAN))
+            _console().print("Bye.", style="cyan")
             return
         if choice == "6":
             show_config(config)
@@ -610,13 +624,13 @@ def main() -> None:
             continue
         handler = handlers.get(choice)
         if handler is None:
-            print("Invalid selection.")
+            _console().print("Invalid selection.", style="red")
             pause()
             continue
         try:
             handler(config)
         except RuntimeError as exc:
-            print(_style(f"Error: {exc}", ANSI_YELLOW))
+            _console().print(f"Error: {exc}", style="yellow")
         pause()
 
 

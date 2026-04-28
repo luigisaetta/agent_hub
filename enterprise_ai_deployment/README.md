@@ -66,9 +66,19 @@ From the repository root:
 python -m enterprise_ai_deployment.menu
 ```
 
-The menu uses ANSI colors when the terminal supports them. Set `NO_COLOR=1` to
-force plain text, or `AGENT_HUB_MENU_COLOR=1` to force colors in compatible
-terminal sessions.
+The menu uses Rich for panels, tables, colors, command rendering, and JSON
+output. Set `NO_COLOR=1` to disable colors, or `AGENT_HUB_MENU_COLOR=1` to
+force colors in compatible terminal sessions.
+
+The default menu/output width is 96 columns. To make OCIDs easier to copy from
+the rendered output, you can increase it:
+
+```bash
+export AGENT_HUB_MENU_WIDTH=120
+```
+
+OCI commands and JSON results are printed without Rich hard-wrapping so long
+OCIDs remain copy-friendly.
 
 ## Hosted Application Creation
 

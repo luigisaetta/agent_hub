@@ -12,12 +12,10 @@ import subprocess
 
 from enterprise_ai_deployment import menu
 from enterprise_ai_deployment.menu import (
-    ANSI_GREEN,
     HostedApplicationCreateRequest,
     HostedApplicationJsonOptions,
     HostedDeploymentCreateRequest,
     OciCliConfig,
-    _style,
     build_create_hosted_application_command,
     build_create_hosted_deployment_command,
     build_get_hosted_application_command,
@@ -268,16 +266,3 @@ def test_create_hosted_deployment_command_accepts_active_artifact_json() -> None
 def test_normalize_file_uri_keeps_existing_file_uri() -> None:
     """Existing file URIs are preserved."""
     assert normalize_file_uri("file://payload.json") == "file://payload.json"
-
-
-def test_style_can_be_forced_and_disabled(monkeypatch) -> None:
-    """Menu styling can be forced, while NO_COLOR keeps plain text."""
-    monkeypatch.setenv("AGENT_HUB_MENU_COLOR", "1")
-    monkeypatch.delenv("NO_COLOR", raising=False)
-
-    assert _style("OK", ANSI_GREEN) == "\033[32mOK\033[0m"
-
-    monkeypatch.delenv("AGENT_HUB_MENU_COLOR", raising=False)
-    monkeypatch.setenv("NO_COLOR", "1")
-
-    assert _style("OK", ANSI_GREEN) == "OK"
