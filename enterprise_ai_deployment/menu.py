@@ -13,11 +13,19 @@ from __future__ import annotations
 import json
 import os
 import subprocess
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
 MENU_WIDTH = 72
 DEFAULT_WAIT_STATE = "SUCCEEDED"
+ANSI_RESET = "\033[0m"
+ANSI_BOLD = "\033[1m"
+ANSI_DIM = "\033[2m"
+ANSI_CYAN = "\033[36m"
+ANSI_GREEN = "\033[32m"
+ANSI_YELLOW = "\033[33m"
+ANSI_BLUE = "\033[34m"
 
 
 @dataclass(frozen=True)
@@ -69,6 +77,37 @@ def _env(name: str) -> str | None:
     """Return a stripped environment value or None."""
     value = os.getenv(name, "").strip()
     return value or None
+
+
+def _supports_color() -> bool:
+    """Return whether ANSI colors should be emitted."""
+    forced = (_env("AGENT_HUB_MENU_COLOR") or "").lower()
+    if forced in {"1", "true", "yes", "always"}:
+        return True
+    if os.getenv("NO_COLOR") is not None:
+        return False
+    if (_env("TERM") or "").lower() == "dumb":
+        return False
+    return sys.stdout.isatty()
+
+
+def _style(text: str, *codes: str) -> str:
+    """Style text with ANSI codes when supported by the current terminal."""
+    if not codes or not _supports_color():
+        return text
+    return f"{''.join(codes)}{text}{ANSI_RESET}"
+
+
+def _rule(char: str = "-") -> str:
+    """Return a styled horizontal rule."""
+    return _style(char * MENU_WIDTH, ANSI_DIM, ANSI_BLUE)
+
+
+def _status_value(value: str | None, missing_label: str) -> str:
+    """Format a config value for menu display."""
+    if value:
+        return _style(value, ANSI_GREEN)
+    return _style(missing_label, ANSI_YELLOW)
 
 
 def load_config_from_env() -> OciCliConfig:
@@ -125,6 +164,20 @@ def build_get_hosted_deployment_command(
         "get",
         "--hosted-deployment-id",
         hosted_deployment_id,
+    ]
+
+
+def build_list_hosted_applications_command(
+    config: OciCliConfig, compartment_id: str
+) -> list[str]:
+    """Build command for hosted application listing."""
+    return [
+        *build_base_command(config),
+        "hosted-application-collection",
+        "list-hosted-applications",
+        "--compartment-id",
+        compartment_id,
+        "--all",
     ]
 
 
@@ -199,7 +252,7 @@ def run_oci_command(command: list[str]) -> int:
     """Run one OCI CLI command and print a readable result."""
     print("")
     print_box("OCI Command")
-    print(" ".join(command))
+    print(_style(" ".join(command), ANSI_CYAN))
     print("")
     result = subprocess.run(
         command,
@@ -230,7 +283,13 @@ def print_box(title: str) -> None:
     side = max(0, MENU_WIDTH - len(safe_title) - 2)
     left = side // 2
     right = side - left
-    print("+" + "-" * left + safe_title + "-" * right + "+")
+    border = "+" + "-" * left
+    tail = "-" * right + "+"
+    print(
+        _style(border, ANSI_BLUE)
+        + _style(safe_title, ANSI_BOLD, ANSI_CYAN)
+        + _style(tail, ANSI_BLUE)
+    )
 
 
 def read_input(label: str) -> str:
@@ -246,7 +305,7 @@ def prompt(label: str, default: str | None = None, required: bool = False) -> st
     """Prompt for a value, optionally with a default."""
     suffix = f" [{default}]" if default else ""
     while True:
-        value = read_input(f"{label}{suffix}: ").strip()
+        value = read_input(_style(f"{label}{suffix}: ", ANSI_BOLD)).strip()
         if value:
             return value
         if default is not None:
@@ -274,17 +333,30 @@ def show_menu(config: OciCliConfig) -> None:
     """Print the main menu."""
     print("")
     print_box("OCI Enterprise AI Deployment Menu")
-    print(" 1. Get hosted application details")
-    print(" 2. Get hosted deployment details")
-    print(" 3. Create a hosted application")
-    print(" 4. Create a hosted deployment in a hosted application")
-    print(" 5. Show detected CLI configuration")
-    print(" 0. Exit")
-    print("-" * MENU_WIDTH)
-    print(f" Profile:     {config.profile or '<default OCI CLI>'}")
-    print(f" Region:      {config.region or '<default OCI CLI>'}")
-    print(f" Compartment: {config.compartment_id or '<not set>'}")
-    print("-" * MENU_WIDTH)
+    entries = [
+        ("1", "List hosted applications by region and compartment"),
+        ("2", "Get hosted application details"),
+        ("3", "Get hosted deployment details"),
+        ("4", "Create a hosted application"),
+        ("5", "Create a hosted deployment in a hosted application"),
+        ("6", "Show detected CLI configuration"),
+        ("0", "Exit"),
+    ]
+    for key, label in entries:
+        print(f" {_style(f'[{key}]', ANSI_BOLD, ANSI_GREEN)} {label}")
+    print(_rule())
+    print(
+        f" {_style('Profile:', ANSI_BOLD)}     "
+        f"{_status_value(config.profile, '<default OCI CLI>')}"
+    )
+    print(
+        f" {_style('Region:', ANSI_BOLD)}      "
+        f"{_status_value(config.region, '<default OCI CLI>')}"
+    )
+    print(
+        f" {_style('Compartment:', ANSI_BOLD)} {_status_value(config.compartment_id, '<not set>')}"
+    )
+    print(_rule())
 
 
 def handle_get_hosted_application(config: OciCliConfig) -> None:
@@ -297,6 +369,23 @@ def handle_get_hosted_deployment(config: OciCliConfig) -> None:
     """Handle menu option 2."""
     deployment_id = prompt("Hosted deployment OCID", required=True)
     run_oci_command(build_get_hosted_deployment_command(config, deployment_id))
+
+
+def handle_list_hosted_applications(config: OciCliConfig) -> None:
+    """Handle menu option 1."""
+    region = prompt("Region", default=config.region, required=True)
+    compartment_id = prompt(
+        "Compartment OCID", default=config.compartment_id, required=True
+    )
+    effective_config = OciCliConfig(
+        profile=config.profile,
+        region=region,
+        compartment_id=config.compartment_id,
+        output=config.output,
+    )
+    run_oci_command(
+        build_list_hosted_applications_command(effective_config, compartment_id)
+    )
 
 
 def handle_create_hosted_application(config: OciCliConfig) -> None:
@@ -371,28 +460,41 @@ def handle_create_hosted_deployment(config: OciCliConfig) -> None:
 def show_config(config: OciCliConfig) -> None:
     """Print detected configuration."""
     print_box("Configuration")
-    print(f"OCI_CLI_PROFILE / OCI_PROFILE:       {config.profile or '<default>'}")
-    print(f"OCI_CLI_REGION / OCI_REGION:         {config.region or '<default>'}")
-    print(f"OCI_COMPARTMENT_ID / COMPARTMENT_ID: {config.compartment_id or '<empty>'}")
-    print(f"OCI_CLI_OUTPUT:                      {config.output}")
+    print(
+        f"{_style('OCI_CLI_PROFILE / OCI_PROFILE:', ANSI_BOLD)}       "
+        f"{_status_value(config.profile, '<default>')}"
+    )
+    print(
+        f"{_style('OCI_CLI_REGION / OCI_REGION:', ANSI_BOLD)}         "
+        f"{_status_value(config.region, '<default>')}"
+    )
+    print(
+        f"{_style('OCI_COMPARTMENT_ID / COMPARTMENT_ID:', ANSI_BOLD)} "
+        f"{_status_value(config.compartment_id, '<empty>')}"
+    )
+    print(
+        f"{_style('OCI_CLI_OUTPUT:', ANSI_BOLD)}                      "
+        f"{_style(config.output, ANSI_GREEN)}"
+    )
 
 
 def main() -> None:
     """Run the interactive menu."""
     config = load_config_from_env()
     handlers = {
-        "1": handle_get_hosted_application,
-        "2": handle_get_hosted_deployment,
-        "3": handle_create_hosted_application,
-        "4": handle_create_hosted_deployment,
+        "1": handle_list_hosted_applications,
+        "2": handle_get_hosted_application,
+        "3": handle_get_hosted_deployment,
+        "4": handle_create_hosted_application,
+        "5": handle_create_hosted_deployment,
     }
     while True:
         show_menu(config)
-        choice = read_input("Selection: ").strip()
+        choice = read_input(_style("Selection: ", ANSI_BOLD, ANSI_CYAN)).strip()
         if choice == "0":
-            print("Bye.")
+            print(_style("Bye.", ANSI_CYAN))
             return
-        if choice == "5":
+        if choice == "6":
             show_config(config)
             pause()
             continue

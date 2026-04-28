@@ -7,12 +7,14 @@ Available operations:
 
 - get hosted application details;
 - get hosted deployment details;
+- list hosted applications by region and compartment;
 - create a hosted application;
 - create a hosted deployment inside a hosted application.
 
 This first version calls the OCI CLI directly:
 
 - `oci generative-ai hosted-application get`
+- `oci generative-ai hosted-application-collection list-hosted-applications`
 - `oci generative-ai hosted-application create`
 - `oci generative-ai hosted-deployment get`
 - `oci generative-ai hosted-deployment create`
@@ -59,6 +61,10 @@ From the repository root:
 ```bash
 python -m enterprise_ai_deployment.menu
 ```
+
+The menu uses ANSI colors when the terminal supports them. Set `NO_COLOR=1` to
+force plain text, or `AGENT_HUB_MENU_COLOR=1` to force colors in compatible
+terminal sessions.
 
 ## Hosted Application Creation
 
