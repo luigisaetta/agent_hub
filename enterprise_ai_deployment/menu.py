@@ -19,6 +19,7 @@ from pathlib import Path
 
 MENU_WIDTH = 72
 DEFAULT_WAIT_STATE = "SUCCEEDED"
+COMPARTMENT_OCID_PREFIX = "ocid1.compartment."
 ANSI_RESET = "\033[0m"
 ANSI_BOLD = "\033[1m"
 ANSI_DIM = "\033[2m"
@@ -133,6 +134,17 @@ def build_base_command(config: OciCliConfig) -> list[str]:
     return command
 
 
+def build_iam_base_command(config: OciCliConfig) -> list[str]:
+    """Build the common OCI IAM CLI command prefix."""
+    command = ["oci"]
+    if config.profile:
+        command.extend(["--profile", config.profile])
+    if config.region:
+        command.extend(["--region", config.region])
+    command.extend(["--output", "json", "iam"])
+    return command
+
+
 def normalize_file_uri(path_or_uri: str) -> str:
     """Return an OCI CLI file URI for a local JSON path."""
     value = path_or_uri.strip()
@@ -177,6 +189,25 @@ def build_list_hosted_applications_command(
         "list-hosted-applications",
         "--compartment-id",
         compartment_id,
+        "--all",
+    ]
+
+
+def build_list_compartments_by_name_command(
+    config: OciCliConfig, compartment_name: str
+) -> list[str]:
+    """Build command for resolving a compartment name to OCID."""
+    return [
+        *build_iam_base_command(config),
+        "compartment",
+        "list",
+        "--name",
+        compartment_name,
+        "--compartment-id-in-subtree",
+        "true",
+        "--access-level",
+        "ANY",
+        "--include-root",
         "--all",
     ]
 
@@ -277,6 +308,76 @@ def _pretty_json(text: str) -> str:
         return text.strip()
 
 
+def _extract_items(payload: dict[str, object]) -> list[dict[str, object]]:
+    """Extract OCI CLI list items from common response shapes."""
+    data = payload.get("data")
+    if isinstance(data, list):
+        return [item for item in data if isinstance(item, dict)]
+    if isinstance(data, dict):
+        items = data.get("items")
+        if isinstance(items, list):
+            return [item for item in items if isinstance(item, dict)]
+    return []
+
+
+def _compartment_label(compartment: dict[str, object]) -> str:
+    """Return a compact display label for one compartment."""
+    name = str(compartment.get("name") or "<unnamed>")
+    compartment_id = str(compartment.get("id") or "<missing id>")
+    lifecycle_state = compartment.get("lifecycle-state")
+    state_suffix = f", {lifecycle_state}" if lifecycle_state else ""
+    return f"{name} ({compartment_id}{state_suffix})"
+
+
+def resolve_compartment_id(config: OciCliConfig, name_or_ocid: str) -> str:
+    """Resolve a compartment OCID from either an OCID or a display name."""
+    value = name_or_ocid.strip()
+    if value.startswith(COMPARTMENT_OCID_PREFIX):
+        return value
+
+    command = build_list_compartments_by_name_command(config, value)
+    print("")
+    print_box("Resolve Compartment")
+    print(_style(" ".join(command), ANSI_CYAN))
+    result = subprocess.run(
+        command,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    if result.returncode != 0:
+        if result.stderr:
+            print(result.stderr.strip())
+        raise RuntimeError(f"Unable to resolve compartment name: {value}")
+
+    try:
+        payload = json.loads(result.stdout or "{}")
+    except json.JSONDecodeError as exc:
+        raise RuntimeError(
+            "OCI CLI returned invalid JSON while resolving compartment."
+        ) from exc
+
+    matches = [
+        item
+        for item in _extract_items(payload)
+        if str(item.get("name") or "") == value and item.get("id")
+    ]
+    if not matches:
+        raise RuntimeError(f"No compartment found with name: {value}")
+    if len(matches) == 1:
+        return str(matches[0]["id"])
+
+    print("")
+    print("Multiple compartments matched this name:")
+    for index, compartment in enumerate(matches, start=1):
+        print(f" {index}. {_compartment_label(compartment)}")
+    while True:
+        selection = prompt("Select compartment", required=True)
+        if selection.isdigit() and 1 <= int(selection) <= len(matches):
+            return str(matches[int(selection) - 1]["id"])
+        print("Invalid selection.")
+
+
 def print_box(title: str) -> None:
     """Print a compact ASCII title box."""
     safe_title = f" {title.strip()} "
@@ -374,8 +475,8 @@ def handle_get_hosted_deployment(config: OciCliConfig) -> None:
 def handle_list_hosted_applications(config: OciCliConfig) -> None:
     """Handle menu option 1."""
     region = prompt("Region", default=config.region, required=True)
-    compartment_id = prompt(
-        "Compartment OCID", default=config.compartment_id, required=True
+    compartment_name_or_ocid = prompt(
+        "Compartment name or OCID", default=config.compartment_id, required=True
     )
     effective_config = OciCliConfig(
         profile=config.profile,
@@ -383,17 +484,19 @@ def handle_list_hosted_applications(config: OciCliConfig) -> None:
         compartment_id=config.compartment_id,
         output=config.output,
     )
+    compartment_id = resolve_compartment_id(effective_config, compartment_name_or_ocid)
     run_oci_command(
         build_list_hosted_applications_command(effective_config, compartment_id)
     )
 
 
 def handle_create_hosted_application(config: OciCliConfig) -> None:
-    """Handle menu option 3."""
+    """Handle menu option 4."""
     display_name = prompt("Display name", required=True)
-    compartment_id = prompt(
-        "Compartment OCID", default=config.compartment_id, required=True
+    compartment_name_or_ocid = prompt(
+        "Compartment name or OCID", default=config.compartment_id, required=True
     )
+    compartment_id = resolve_compartment_id(config, compartment_name_or_ocid)
     description = prompt("Description", required=False)
     print("")
     print("Optional JSON files: leave empty to skip them for now.")
@@ -426,10 +529,17 @@ def handle_create_hosted_application(config: OciCliConfig) -> None:
 
 
 def handle_create_hosted_deployment(config: OciCliConfig) -> None:
-    """Handle menu option 4."""
+    """Handle menu option 5."""
     app_id = prompt("Hosted application OCID", required=True)
     display_name = prompt("Deployment display name", required=False)
-    compartment_id = prompt("Compartment OCID", default=config.compartment_id)
+    compartment_name_or_ocid = prompt(
+        "Compartment name or OCID", default=config.compartment_id
+    )
+    compartment_id = (
+        resolve_compartment_id(config, compartment_name_or_ocid)
+        if compartment_name_or_ocid
+        else None
+    )
     print("")
     print("Use a full active-artifact JSON file or the guided Docker image path.")
     active_artifact_json = prompt("Active artifact JSON path", required=False)
@@ -444,7 +554,7 @@ def handle_create_hosted_deployment(config: OciCliConfig) -> None:
         HostedDeploymentCreateRequest(
             hosted_application_id=app_id,
             display_name=display_name or None,
-            compartment_id=compartment_id or None,
+            compartment_id=compartment_id,
             container_uri=container_uri,
             artifact_tag=artifact_tag or None,
             active_artifact_json=active_artifact_json or None,
@@ -503,7 +613,10 @@ def main() -> None:
             print("Invalid selection.")
             pause()
             continue
-        handler(config)
+        try:
+            handler(config)
+        except RuntimeError as exc:
+            print(_style(f"Error: {exc}", ANSI_YELLOW))
         pause()
 
 

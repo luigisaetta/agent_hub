@@ -7,6 +7,10 @@ Description:
     Tests for OCI Enterprise AI deployment menu command builders.
 """
 
+import json
+import subprocess
+
+from enterprise_ai_deployment import menu
 from enterprise_ai_deployment.menu import (
     ANSI_GREEN,
     HostedApplicationCreateRequest,
@@ -18,8 +22,10 @@ from enterprise_ai_deployment.menu import (
     build_create_hosted_deployment_command,
     build_get_hosted_application_command,
     build_get_hosted_deployment_command,
+    build_list_compartments_by_name_command,
     build_list_hosted_applications_command,
     normalize_file_uri,
+    resolve_compartment_id,
 )
 
 
@@ -85,6 +91,91 @@ def test_build_list_hosted_applications_command_uses_compartment() -> None:
         "ocid1.compartment",
         "--all",
     ]
+
+
+def test_build_list_compartments_by_name_command_searches_subtree() -> None:
+    """Compartment name resolution searches the tenancy subtree."""
+    command = build_list_compartments_by_name_command(
+        OciCliConfig(profile="PROD", region="us-chicago-1"),
+        "agent-demo",
+    )
+
+    assert command == [
+        "oci",
+        "--profile",
+        "PROD",
+        "--region",
+        "us-chicago-1",
+        "--output",
+        "json",
+        "iam",
+        "compartment",
+        "list",
+        "--name",
+        "agent-demo",
+        "--compartment-id-in-subtree",
+        "true",
+        "--access-level",
+        "ANY",
+        "--include-root",
+        "--all",
+    ]
+
+
+def test_resolve_compartment_id_keeps_ocid() -> None:
+    """Existing compartment OCIDs do not trigger an OCI CLI lookup."""
+    assert resolve_compartment_id(OciCliConfig(), "ocid1.compartment.oc1..abc") == (
+        "ocid1.compartment.oc1..abc"
+    )
+
+
+def test_resolve_compartment_id_from_unique_name(monkeypatch) -> None:
+    """A unique compartment name is resolved from OCI CLI JSON output."""
+
+    def fake_run(command, **_kwargs):
+        assert "compartment" in command
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps(
+                {
+                    "data": [
+                        {
+                            "name": "agent-demo",
+                            "id": "ocid1.compartment.oc1..resolved",
+                        }
+                    ]
+                }
+            ),
+            stderr="",
+        )
+
+    monkeypatch.setattr(menu.subprocess, "run", fake_run)
+
+    assert resolve_compartment_id(OciCliConfig(), "agent-demo") == (
+        "ocid1.compartment.oc1..resolved"
+    )
+
+
+def test_resolve_compartment_id_raises_when_name_is_missing(monkeypatch) -> None:
+    """An unknown compartment name produces a clear error."""
+
+    def fake_run(command, **_kwargs):
+        return subprocess.CompletedProcess(
+            command,
+            0,
+            stdout=json.dumps({"data": []}),
+            stderr="",
+        )
+
+    monkeypatch.setattr(menu.subprocess, "run", fake_run)
+
+    try:
+        resolve_compartment_id(OciCliConfig(), "missing")
+    except RuntimeError as exc:
+        assert "No compartment found" in str(exc)
+    else:
+        raise AssertionError("Expected RuntimeError")
 
 
 def test_create_hosted_application_command_adds_optional_json_files() -> None:

@@ -54,6 +54,10 @@ Supported aliases:
 If profile or region are not configured through environment variables, the OCI
 CLI defaults are used.
 
+When an operation asks for a compartment, you can enter either the compartment
+OCID or its name. Names are resolved through `oci iam compartment list`; if
+multiple compartments have the same name, the menu asks which one to use.
+
 ## Run
 
 From the repository root:
@@ -71,7 +75,7 @@ terminal sessions.
 The menu asks for:
 
 - display name;
-- compartment OCID;
+- compartment name or OCID;
 - optional description.
 
 It also lets you pass optional JSON files for OCI CLI complex parameters:
