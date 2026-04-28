@@ -2,8 +2,13 @@
 .env
 .env.*
 *.env
+!*.env.sample
+!*.env.example
+!**/*.env.sample
+!**/*.env.example
+!**/.env*.sample
+!**/.env*.example
 agents/hello_world/.env.client_jwt.local
-examples/example24.env.sample
 examples/.env-jwt
 my_notes.md
 
