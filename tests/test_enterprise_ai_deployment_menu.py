@@ -10,12 +10,11 @@ Description:
 import json
 import subprocess
 
-from enterprise_ai_deployment import menu
-from enterprise_ai_deployment.menu import (
+from enterprise_ai_deployment import workflows
+from enterprise_ai_deployment.cli_commands import (
     HostedApplicationCreateRequest,
     HostedApplicationJsonOptions,
     HostedDeploymentCreateRequest,
-    OciCliConfig,
     build_create_hosted_application_command,
     build_create_hosted_deployment_command,
     build_get_hosted_application_command,
@@ -23,6 +22,9 @@ from enterprise_ai_deployment.menu import (
     build_list_compartments_by_name_command,
     build_list_hosted_applications_command,
     normalize_file_uri,
+)
+from enterprise_ai_deployment.config import OciCliConfig
+from enterprise_ai_deployment.workflows import (
     resolve_compartment_id,
 )
 
@@ -148,7 +150,7 @@ def test_resolve_compartment_id_from_unique_name(monkeypatch) -> None:
             stderr="",
         )
 
-    monkeypatch.setattr(menu.subprocess, "run", fake_run)
+    monkeypatch.setattr(workflows.subprocess, "run", fake_run)
 
     assert resolve_compartment_id(OciCliConfig(), "agent-demo") == (
         "ocid1.compartment.oc1..resolved"
@@ -166,7 +168,7 @@ def test_resolve_compartment_id_raises_when_name_is_missing(monkeypatch) -> None
             stderr="",
         )
 
-    monkeypatch.setattr(menu.subprocess, "run", fake_run)
+    monkeypatch.setattr(workflows.subprocess, "run", fake_run)
 
     try:
         resolve_compartment_id(OciCliConfig(), "missing")

@@ -80,6 +80,14 @@ export AGENT_HUB_MENU_WIDTH=120
 OCI commands and JSON results are printed without Rich hard-wrapping so long
 OCIDs remain copy-friendly.
 
+## Internal Layout
+
+- `menu.py`: small entry point and menu routing.
+- `config.py`: environment defaults and shared OCI CLI config.
+- `cli_commands.py`: pure OCI CLI command builders.
+- `rendering.py`: Rich rendering and terminal input helpers.
+- `workflows.py`: interactive operations and compartment name resolution.
+
 ## Hosted Application Creation
 
 The menu asks for:
