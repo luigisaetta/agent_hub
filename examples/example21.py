@@ -9,6 +9,7 @@ Description:
 """
 
 import base64
+from pathlib import Path
 
 
 from common import get_inference_client, print_example_summary, print_runtime_config
@@ -18,7 +19,7 @@ TEMPERATURE = 0.0
 
 print_runtime_config()
 print("")
-print_example_summary("Generate an image and save it as result.png.")
+print_example_summary("Generate an image and save it as outputs/result.png.")
 print("")
 
 client = get_inference_client()
@@ -44,5 +45,8 @@ image_data = [
 if image_data:
     image_base64 = image_data[0]
 
-    with open("result.png", "wb") as f:
+    output_path = Path("outputs") / "result.png"
+    output_path.parent.mkdir(exist_ok=True)
+
+    with output_path.open("wb") as f:
         f.write(base64.b64decode(image_base64))
