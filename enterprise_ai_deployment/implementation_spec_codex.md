@@ -47,7 +47,7 @@ Version 1 must not implement:
 - automatic creation of secrets in OCI Vault
 - automatic rollback based on application health checks
 - clear-text storage of secrets
-- automatic inference of missing OAuth2 configuration
+- automatic inference of missing IDCS auth configuration
 
 IAM policies and working OCI permissions are external prerequisites. They must be prepared by OCI admins before using the tool.
 
@@ -193,10 +193,11 @@ hosted_application:
     mode: public
 
   security:
-    auth_type: oauth2
+    auth_type: IDCS_AUTH_CONFIG
     issuer_url: https://issuer.example.com
     audience: my-agent-api
-    jwks_url: https://issuer.example.com/.well-known/jwks.json
+    scopes:
+      - my-agent-api/.default
 
   environment:
     variables:
@@ -311,7 +312,8 @@ Implement `validation.py` and, if useful, `schemas/oci_ai_deploy.schema.json`.
 Acceptance criteria:
 
 - `validate` checks required fields
-- `validate` checks consistency between `auth_type: oauth2` and required OAuth2 fields
+- `validate` accepts only `auth_type: IDCS_AUTH_CONFIG` or `auth_type: NO_AUTH`
+- `validate` checks consistency between `auth_type: IDCS_AUTH_CONFIG` and required auth fields
 - `validate` checks Dockerfile presence
 - `validate` checks minimal compartment OCID syntax
 - `validate` checks that region and region key are set
@@ -553,7 +555,7 @@ Before using the tool in production, verify:
 - JSON format required by `create-hosted-deployment-single-docker-artifact`
 - correct location of environment variables between Hosted Application and Hosted Deployment
 - correct location of scaling between Hosted Application and Hosted Deployment
-- correct location of OAuth2 between Hosted Application and Hosted Deployment
+- correct location of IDCS auth between Hosted Application and Hosted Deployment
 - actual endpoint model returned by OCI
 - actual behavior of `wait_for_state`
 - actual work-request output

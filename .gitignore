@@ -48,6 +48,7 @@ htmlcov/
 outputs/
 pdf_rag/
 .pylint.d/
+enterprise_ai_deployment/generated/*.json
 
 # internal docs
 demos/demo6/readme_hosted_deployment.md

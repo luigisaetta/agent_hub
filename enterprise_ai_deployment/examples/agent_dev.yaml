@@ -1,0 +1,55 @@
+# First editable deployment template for OCI Enterprise AI.
+# Replace placeholder OCIDs, names, and image settings before running without --dry-run.
+
+application:
+  name: my-agent-app-dev
+  compartment_id: ocid1.compartment.oc1..example
+  region: eu-frankfurt-1
+  region_key: fra
+
+container:
+  context: ../../demos/demo6
+  dockerfile: Dockerfile
+  image_name: my-agent
+  repository: ai-agents
+  tag_strategy: git_sha
+  ocir_namespace: auto
+
+hosted_application:
+  display_name: my-agent-app-dev
+  description: Agent application deployed through OCI Enterprise AI CLI
+  create_if_missing: true
+  update_if_exists: false
+
+  scaling:
+    min_instances: 1
+    max_instances: 4
+    metric: cpu
+
+  networking:
+    mode: public
+
+  security:
+    auth_type: IDCS_AUTH_CONFIG
+    issuer_url: https://idcs.example.identity.oraclecloud.com:443
+    audience: my-agent-api
+    scopes:
+      - my-agent-api/.default
+
+  environment:
+    variables:
+      LOG_LEVEL: INFO
+      OCI_REGION: eu-frankfurt-1
+      AGENT_MODE: development
+      MCP_SERVER_PORT: "8080"
+
+    secrets:
+      API_KEY:
+        source: local_env
+        env_name: MY_AGENT_API_KEY
+
+hosted_deployment:
+  display_name: my-agent-deployment-dev
+  create_new_version: true
+  activate: true
+  wait_for_state: SUCCEEDED

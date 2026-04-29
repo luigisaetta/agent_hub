@@ -158,3 +158,74 @@ Before working on shared resources, always verify the active profile:
 ```bash
 ./show_current_env.sh
 ```
+
+## Declarative Deployment CLI
+
+The first non-interactive deployment script is available from the repository
+root:
+
+```bash
+python oci_ai_deploy.py --help
+```
+
+The initial template is:
+
+```text
+enterprise_ai_deployment/examples/agent_dev.yaml
+```
+
+Set the real OCI values in the YAML before running against a real tenancy. For
+local secret references, use a private `.env` file based on:
+
+```text
+enterprise_ai_deployment/examples/agent_dev.env.sample
+```
+
+First checks:
+
+```bash
+python oci_ai_deploy.py \
+  --config enterprise_ai_deployment/examples/agent_dev.yaml \
+  --env-file enterprise_ai_deployment/examples/agent_dev.env.sample \
+  validate
+
+python oci_ai_deploy.py \
+  --config enterprise_ai_deployment/examples/agent_dev.yaml \
+  --env-file enterprise_ai_deployment/examples/agent_dev.env.sample \
+  render
+```
+
+The `render` command generates JSON artifacts for:
+
+- Hosted Application creation;
+- Hosted Deployment creation;
+- scaling config;
+- inbound auth config;
+- networking config;
+- environment variables;
+- Docker active artifact.
+
+The generated complex-parameter JSON follows the templates produced by OCI CLI
+3.80.0 with `--generate-param-json-input`.
+
+The current executable operation is Hosted Application creation:
+
+```bash
+python oci_ai_deploy.py \
+  --config enterprise_ai_deployment/examples/agent_dev.yaml \
+  --env-file enterprise_ai_deployment/examples/agent_dev.env.sample \
+  --dry-run \
+  create-application
+```
+
+Remove `--dry-run` only after checking the generated command and confirming
+that the selected OCI profile, compartment, region, and IAM policies are
+correct. Hosted Deployment execution is intentionally left for the next task;
+its JSON artifact is generated now so the OCI CLI shape can be reviewed first.
+
+```bash
+python oci_ai_deploy.py \
+  --config enterprise_ai_deployment/examples/agent_dev.yaml \
+  --env-file enterprise_ai_deployment/examples/agent_dev.env.sample \
+  create-application
+```

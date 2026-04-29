@@ -68,7 +68,7 @@ The following table clarifies the expected mapping. Items marked as `TBD` must b
 | Container image URI | No | Yes | The deployment must point to the Docker image published to OCIR |
 | Container tag | No | Yes | Must be immutable, for example git SHA, timestamp, or build id |
 | Docker artifact | No | Yes | Especially for single Docker artifact mode |
-| OAuth2 | Probably yes | TBD | Check against the actual OCI CLI model |
+| IDCS auth | Yes | No | Rendered as `inbound-auth-config` for Hosted Application |
 | Environment variables | TBD | TBD | Check where OCI requires them to be configured |
 | Secrets | TBD | TBD | Check whether they are supported directly or referenced through environment and Vault |
 | Scaling | TBD | TBD | Check whether it belongs to the application or the deployment |
@@ -300,10 +300,11 @@ hosted_application:
     mode: public
 
   security:
-    auth_type: oauth2
+    auth_type: IDCS_AUTH_CONFIG
     issuer_url: https://issuer.example.com
     audience: my-agent-api
-    jwks_url: https://issuer.example.com/.well-known/jwks.json
+    scopes:
+      - my-agent-api/.default
 
   environment:
     variables:
@@ -421,7 +422,7 @@ Examples of behavior to define:
 
 - if only the image changes, create a new Hosted Deployment
 - if environment variables change, check whether to update the Hosted Application or create a new Hosted Deployment, `TBD`
-- if OAuth2 changes, require an explicit choice or a force mode
+- if IDCS auth changes, require an explicit choice or a force mode
 - if networking changes, require an explicit choice or a force mode
 - if the compartment changes, do not update automatically
 
@@ -437,7 +438,7 @@ update_policy:
     activate_new_deployment: true
 ```
 
-## 10. Secrets and OAuth2
+## 10. Secrets and IDCS Auth
 
 ### 10.1 Environment Variables
 
@@ -498,9 +499,9 @@ Recommended checks:
 - mask sensitive values in output
 - fail if hardcoded secrets are detected in the YAML
 
-### 10.3 OAuth2
+### 10.3 IDCS Auth
 
-OAuth2 configuration is one of the most sensitive parts of the deployment.
+IDCS auth configuration is one of the most sensitive parts of the deployment.
 
 In the YAML file, it should be declared in a dedicated section.
 
@@ -508,19 +509,21 @@ Example:
 
 ```yaml
 security:
-  auth_type: oauth2
+  auth_type: IDCS_AUTH_CONFIG
   issuer_url: https://issuer.example.com
   audience: my-agent-api
-  jwks_url: https://issuer.example.com/.well-known/jwks.json
+  scopes:
+    - my-agent-api/.default
 ```
 
-The script must validate that required fields are present when `auth_type` is `oauth2`.
+The script must validate that `auth_type` is either `IDCS_AUTH_CONFIG` or
+`NO_AUTH`, and that required fields are present when `auth_type` is
+`IDCS_AUTH_CONFIG`.
 
 Typical fields to validate:
 
 - issuer URL
 - audience
-- JWKS URL
 - optional client id
 - optional scopes
 - related OCI policies
@@ -681,9 +684,10 @@ The Docker push can succeed, but deployment can fail if the service cannot read 
 
 This part must be checked carefully in OCI policies.
 
-### 15.4 OAuth2 Configuration
+### 15.4 IDCS Auth Configuration
 
-OAuth2 requires consistency across issuer, audience, JWKS, and access policies.
+IDCS auth requires consistency across domain URL, audience, scope, and access
+policies.
 
 This configuration must be validated before deployment.
 
