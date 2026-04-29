@@ -1,274 +1,274 @@
-# Design per deploy automatizzato di componenti AI su OCI Enterprise AI
+# Design for Automated Deployment of AI Components on OCI Enterprise AI
 
-Autore: L. Saetta
-Versione: 1.1
-Data ultima modifica: 29-04-2026
+Author: L. Saetta
+Version: 1.1
+Last modified: 2026-04-29
 
-Nota: in questa specifica i punti ancora da definire sono marcati come: `TBD`.
+Note: in this specification, points that still need to be defined are marked as: `TBD`.
 
-## 1. Obiettivo
+## 1. Goal
 
-L'obiettivo è costruire un meccanismo automatizzato per fare il deploy di componenti AI containerizzati su OCI Enterprise AI, per esempio:
+The goal is to build an automated mechanism for deploying containerized AI components on OCI Enterprise AI, for example:
 
-• Agent
-• MCP Server
-• API service
+- agents
+- MCP servers
+- API services
 
-Il deploy deve essere eseguibile da script, partendo da una immagine Docker locale del componente da distribuire e arrivando alla creazione delle risorse OCI necessarie.
+The deployment must be scriptable, starting from a local Docker image of the component to be distributed and ending with the creation of the required OCI resources.
 
-Il percorso completo prevede:
+The complete path includes:
 
-• pubblicazione della immagine Docker su OCIR
-• creazione o aggiornamento della Hosted Application
-• creazione della Hosted Deployment
-• configurazione di sicurezza, variabili ambiente, parametri runtime e riferimenti alla container image
+- publishing the Docker image to OCIR
+- creating or updating the Hosted Application
+- creating the Hosted Deployment
+- configuring security, environment variables, runtime parameters, and references to the container image
 
-## 2. Concetto di base
+## 2. Core Concept
 
-La OCI CLI consente di interagire con le risorse Generative AI, incluse Hosted Applications e Hosted Deployments, se la versione della CLI è sufficientemente recente.
+The OCI CLI can interact with Generative AI resources, including Hosted Applications and Hosted Deployments, when the CLI version is recent enough.
 
-Il deploy di un componente richiede due passaggi principali:
+Deploying a component requires two main steps:
 
-• creazione e configurazione della Hosted Application
-• creazione e configurazione della Hosted Deployment
+- creating and configuring the Hosted Application
+- creating and configuring the Hosted Deployment
 
-Poiché questi passaggi richiedono molti parametri, non conviene passare tutto a mano da linea di comando. La soluzione più pulita è introdurre un file dichiarativo di configurazione, letto da uno script.
+Because these steps require many parameters, passing everything manually from the command line is not convenient. The cleanest solution is to introduce a declarative configuration file read by a script.
 
-Il file descrive cosa deployare e come configurarlo. Lo script si occupa di tradurre questa configurazione nei comandi OCI CLI corretti.
+The file describes what to deploy and how to configure it. The script translates this configuration into the correct OCI CLI commands.
 
-Il pattern raccomandato è:
+The recommended pattern is:
 
 ```text
-YAML -> Python -> JSON generati -> OCI CLI -> OCI Enterprise AI
+YAML -> Python -> generated JSON -> OCI CLI -> OCI Enterprise AI
 ```
 
-In sintesi:
+In short:
 
-• YAML come sorgente umana
-• JSON come formato tecnico generato
-• OCI CLI come motore operativo
-• Python come orchestratore del processo
+- YAML as the human-readable source
+- JSON as the generated technical format
+- OCI CLI as the operational engine
+- Python as the process orchestrator
 
-## 3. Risorse OCI coinvolte
+## 3. OCI Resources Involved
 
-Il design ruota principalmente intorno a due risorse OCI Enterprise AI:
+The design mainly revolves around two OCI Enterprise AI resources:
 
-• Hosted Application
-• Hosted Deployment
+- Hosted Application
+- Hosted Deployment
 
-La distinzione tra le due risorse è importante perché alcune configurazioni appartengono logicamente alla applicazione, mentre altre appartengono al singolo deployment.
+The distinction between the two resources is important because some configuration belongs logically to the application, while other configuration belongs to the individual deployment.
 
-La tabella seguente chiarisce il mapping previsto. I punti marcati come `TBD` devono essere verificati contro il modello effettivo richiesto dalla OCI CLI e dalle API disponibili.
+The following table clarifies the expected mapping. Items marked as `TBD` must be checked against the actual model required by the OCI CLI and the available APIs.
 
-| Configurazione | Hosted Application | Hosted Deployment | Note |
+| Configuration | Hosted Application | Hosted Deployment | Notes |
 |---|---:|---:|---|
-| Nome logico applicazione | Sì | No | Identifica la applicazione AI gestita |
-| Display name applicazione | Sì | No | Nome leggibile della Hosted Application |
-| Compartment | Sì | Sì | Da verificare se entrambi i comandi richiedono esplicitamente il compartment |
-| Container image URI | No | Sì | Il deployment deve puntare alla immagine Docker pubblicata su OCIR |
-| Container tag | No | Sì | Deve essere immutabile, per esempio git sha, timestamp o build id |
-| Artifact Docker | No | Sì | In particolare per la modalità single docker artifact |
-| OAuth2 | Probabilmente sì | TBD | Da verificare in base al modello OCI CLI effettivo |
-| Variabili ambiente | TBD | TBD | Da verificare dove OCI richiede di configurarle |
-| Secrets | TBD | TBD | Da verificare se sono supportati direttamente o referenziati tramite ambiente e Vault |
-| Scaling | TBD | TBD | Da verificare se appartiene alla applicazione o al deployment |
-| Networking | Probabilmente sì | TBD | Da verificare in base al modello di esposizione del servizio |
-| Endpoint | TBD | TBD | Può essere prodotto dalla Hosted Application, dal Deployment o da entrambi, a seconda del modello OCI |
-| Stato di attivazione | No | Sì | Il deployment può essere creato e poi attivato |
-| Work request e diagnostica | Sì | Sì | Entrambe le operazioni possono generare informazioni diagnostiche |
+| Logical application name | Yes | No | Identifies the managed AI application |
+| Application display name | Yes | No | Human-readable Hosted Application name |
+| Compartment | Yes | Yes | Check whether both commands explicitly require the compartment |
+| Container image URI | No | Yes | The deployment must point to the Docker image published to OCIR |
+| Container tag | No | Yes | Must be immutable, for example git SHA, timestamp, or build id |
+| Docker artifact | No | Yes | Especially for single Docker artifact mode |
+| OAuth2 | Probably yes | TBD | Check against the actual OCI CLI model |
+| Environment variables | TBD | TBD | Check where OCI requires them to be configured |
+| Secrets | TBD | TBD | Check whether they are supported directly or referenced through environment and Vault |
+| Scaling | TBD | TBD | Check whether it belongs to the application or the deployment |
+| Networking | Probably yes | TBD | Check against the service exposure model |
+| Endpoint | TBD | TBD | It may be produced by the Hosted Application, the Deployment, or both, depending on the OCI model |
+| Activation state | No | Yes | The deployment can be created and then activated |
+| Work request and diagnostics | Yes | Yes | Both operations can generate diagnostic information |
 
-Questa tabella non sostituisce la documentazione OCI CLI. Serve come guida di design per decidere dove collocare i campi nel file YAML e quali parti validare nello script.
+This table does not replace the OCI CLI documentation. It is a design guide for deciding where fields should live in the YAML file and which parts the script should validate.
 
-## 4. Architettura proposta
+## 4. Proposed Architecture
 
-Il design proposto separa tre livelli.
+The proposed design separates three layers.
 
-### 4.1 File di configurazione
+### 4.1 Configuration File
 
-Un file YAML contiene tutti gli input necessari al deploy.
+A YAML file contains all inputs required for deployment.
 
-Esempio:
+Example:
 
 ```text
 oci_ai_deploy.yaml
 ```
 
-Il file è leggibile, versionabile e può essere usato sia localmente sia in CI/CD.
+The file is readable, versionable, and usable both locally and in CI/CD.
 
-### 4.2 Script di orchestrazione
+### 4.2 Orchestration Script
 
-Uno script Python legge il file YAML, valida i campi, genera eventuali JSON intermedi e chiama la OCI CLI.
+A Python script reads the YAML file, validates fields, generates any intermediate JSON files, and calls the OCI CLI.
 
-Esempio:
+Example:
 
 ```text
 oci_ai_deploy.py
 ```
 
-Il Python può chiamare la OCI CLI tramite `subprocess`, mantenendo il comportamento molto vicino ai comandi manuali già validati.
+Python can call the OCI CLI through `subprocess`, keeping behavior very close to the manual commands that have already been validated.
 
-### 4.3 OCI CLI e Docker
+### 4.3 OCI CLI and Docker
 
-La OCI CLI esegue tutte le operazioni su OCI:
+The OCI CLI performs all OCI operations:
 
-• creazione Hosted Application
-• creazione Hosted Deployment
-• attesa dello stato finale
-• recupero di OCID, endpoint, work request e diagnostica
+- Hosted Application creation
+- Hosted Deployment creation
+- final-state waiting
+- retrieval of OCIDs, endpoints, work requests, and diagnostics
 
-Docker è invece usato per:
+Docker is used for:
 
-• build della immagine locale
-• tag della immagine per OCIR
-• push della immagine su OCIR
+- building the local image
+- tagging the image for OCIR
+- pushing the image to OCIR
 
-## 5. Flusso end to end
+## 5. End-to-End Flow
 
-Il flusso completo dovrebbe essere ordinato così.
+The complete flow should be ordered as follows.
 
-### 5.1 Validazione iniziale
+### 5.1 Initial Validation
 
-Lo script controlla che siano disponibili:
+The script checks that the following are available:
 
-• Docker
-• OCI CLI
-• versione OCI CLI compatibile
-• configurazione OCI funzionante
-• login OCIR valido o comunque possibile
-• file YAML valido
-• compartment id presente
-• region e region key coerenti
-• nome applicazione presente
-• parametri di sicurezza presenti se richiesti
-• prerequisiti IAM soddisfatti dagli admin OCI
+- Docker
+- OCI CLI
+- compatible OCI CLI version
+- working OCI configuration
+- valid or possible OCIR login
+- valid YAML file
+- compartment id
+- consistent region and region key
+- application name
+- security parameters, when required
+- IAM prerequisites satisfied by OCI admins
 
-### 5.2 Dry run
+### 5.2 Dry Run
 
-Prima di eseguire operazioni che modificano risorse o pubblicano immagini, il tool deve supportare una modalità `dry-run`.
+Before running operations that modify resources or publish images, the tool must support a `dry-run` mode.
 
-La modalità `dry-run` deve essere attivabile tramite un parametro specifico da command line:
+The `dry-run` mode must be enabled through a dedicated command-line parameter:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy --dry-run
 ```
 
-In modalità `dry-run`, lo script non deve creare, aggiornare o cancellare risorse OCI e non deve fare push su OCIR.
+In `dry-run` mode, the script must not create, update, or delete OCI resources and must not push to OCIR.
 
-La modalità `dry-run` dovrebbe mostrare:
+The `dry-run` mode should show:
 
-• configurazione YAML risolta
-• image URI calcolata
-• tag immagine calcolato
-• Hosted Application prevista
-• Hosted Deployment previsto
-• JSON che verrebbero passati alla OCI CLI
-• comandi OCI CLI equivalenti che verrebbero eseguiti
-• eventuali risorse già esistenti, se la verifica è sicura e in sola lettura
-• eventuali errori di validazione
+- resolved YAML configuration
+- calculated image URI
+- calculated image tag
+- planned Hosted Application
+- planned Hosted Deployment
+- JSON payloads that would be passed to the OCI CLI
+- equivalent OCI CLI commands that would be executed
+- existing resources, if the check is safe and read-only
+- validation errors
 
-La modalità `dry-run` è particolarmente importante per CI/CD, code review e troubleshooting, perché consente di verificare il deploy prima di modificare risorse OCI.
+The `dry-run` mode is especially important for CI/CD, code review, and troubleshooting because it makes it possible to validate the deployment before modifying OCI resources.
 
-### 5.3 Build della immagine Docker
+### 5.3 Docker Image Build
 
-Lo script esegue la build della immagine Docker usando le informazioni del file YAML.
+The script builds the Docker image using information from the YAML file.
 
-Esempio logico:
+Logical example:
 
 ```bash
 docker build -f Dockerfile -t my-agent:abc1234 .
 ```
 
-### 5.4 Tag della immagine per OCIR
+### 5.4 Tagging the Image for OCIR
 
-Lo script costruisce il nome completo della immagine OCIR.
+The script builds the full OCIR image name.
 
-Esempio:
+Example:
 
 ```text
 fra.ocir.io/<namespace>/<repository>/<image-name>:<tag>
 ```
 
-Il tag dovrebbe essere univoco, per esempio:
+The tag should be unique, for example:
 
-• git sha
-• timestamp
-• numero versione applicativo
-• build id CI/CD
+- git SHA
+- timestamp
+- application version number
+- CI/CD build id
 
-È preferibile evitare `latest` per i deploy reali.
+Using `latest` for real deployments should be avoided.
 
-### 5.5 Push su OCIR
+### 5.5 Push to OCIR
 
-Lo script esegue il push della immagine.
+The script pushes the image.
 
-Esempio:
+Example:
 
 ```bash
 docker push fra.ocir.io/<namespace>/<repository>/<image-name>:<tag>
 ```
 
-### 5.6 Creazione o riuso della Hosted Application
+### 5.6 Hosted Application Creation or Reuse
 
-Lo script verifica se una Hosted Application con quel nome esiste già.
+The script checks whether a Hosted Application with that name already exists.
 
-Se esiste:
+If it exists:
 
-• recupera l'OCID
-• eventualmente aggiorna la configurazione, se previsto dal design
+- retrieve the OCID
+- optionally update the configuration, if the design allows it
 
-Se non esiste:
+If it does not exist:
 
-• crea una nuova Hosted Application
-• applica configurazioni di runtime, sicurezza, networking e variabili di ambiente, in base al modello effettivo della OCI CLI
+- create a new Hosted Application
+- apply runtime, security, networking, and environment-variable configuration according to the actual OCI CLI model
 
-### 5.7 Creazione della Hosted Deployment
+### 5.7 Hosted Deployment Creation
 
-Lo script crea una nuova Hosted Deployment associata alla Hosted Application.
+The script creates a new Hosted Deployment associated with the Hosted Application.
 
-La Hosted Deployment punta alla immagine Docker pubblicata su OCIR.
+The Hosted Deployment points to the Docker image published to OCIR.
 
-Dati principali:
+Main data:
 
-• hosted application id
-• compartment id
-• display name del deployment
-• container URI
-• container tag
-• configurazione artifact
-• eventuale flag di attivazione
-• eventuale configurazione di scaling, se prevista a questo livello
+- hosted application id
+- compartment id
+- deployment display name
+- container URI
+- container tag
+- artifact configuration
+- optional activation flag
+- optional scaling configuration, if expected at this level
 
-### 5.8 Attesa e diagnostica
+### 5.8 Waiting and Diagnostics
 
-Lo script aspetta lo stato finale.
+The script waits for the final state.
 
-Se il deploy riesce:
+If deployment succeeds:
 
-• stampa Hosted Application OCID
-• stampa Hosted Deployment OCID
-• stampa image URI
-• stampa eventuale endpoint
+- print the Hosted Application OCID
+- print the Hosted Deployment OCID
+- print the image URI
+- print the endpoint, if available
 
-Se il deploy fallisce:
+If deployment fails:
 
-• stampa errore OCI CLI
-• stampa work request, se disponibile
-• stampa suggerimenti diagnostici
+- print the OCI CLI error
+- print the work request, if available
+- print diagnostic suggestions
 
-## 6. File YAML di configurazione
+## 6. YAML Configuration File
 
-Il formato consigliato per il file principale è YAML.
+The recommended format for the main file is YAML.
 
-Motivi:
+Reasons:
 
-• è più leggibile di JSON
-• supporta bene configurazioni annidate
-• permette commenti
-• è comodo per molte variabili ambiente
-• è comodo per gestire più ambienti, per esempio dev, test e prod
-• può essere convertito facilmente in JSON dallo script
+- it is more readable than JSON
+- it supports nested configuration well
+- it allows comments
+- it is convenient for many environment variables
+- it is convenient for managing multiple environments, for example dev, test, and prod
+- it can be converted easily to JSON by the script
 
-Esempio di file `oci_ai_deploy.yaml`:
+Example `oci_ai_deploy.yaml` file:
 
 ```yaml
 application:
@@ -324,43 +324,43 @@ hosted_deployment:
   wait_for_state: SUCCEEDED
 ```
 
-## 7. Mapping YAML verso OCI CLI JSON
+## 7. Mapping YAML to OCI CLI JSON
 
-La OCI CLI lavora bene con JSON, quindi il file YAML non dovrebbe essere passato direttamente ai comandi OCI.
+The OCI CLI works well with JSON, so the YAML file should not be passed directly to OCI commands.
 
-Il pattern consigliato è:
+The recommended pattern is:
 
 ```text
 deploy.yaml
-  -> script Python
-  -> JSON generati per OCI CLI
+  -> Python script
+  -> generated JSON for OCI CLI
   -> oci generative-ai hosted-application create/update
   -> oci generative-ai hosted-deployment create/update
 ```
 
-Per configurazioni complesse, conviene usare JSON generati e `--from-json`.
+For complex configuration, generated JSON files and `--from-json` are preferred.
 
-Esempio:
+Example:
 
 ```bash
 oci generative-ai hosted-application create \
   --from-json file://generated/create-hosted-application.json
 ```
 
-Il mapping esatto tra YAML e JSON deve essere implementato nello script Python e validato contro i comandi OCI CLI reali.
+The exact mapping between YAML and JSON must be implemented in the Python script and validated against the real OCI CLI commands.
 
-File generati tipici:
+Typical generated files:
 
 ```text
 generated/create-hosted-application.json
 generated/create-hosted-deployment.json
 ```
 
-Il contenuto della directory `generated` non dovrebbe essere modificato a mano. Può essere rigenerato dallo script a partire dal YAML.
+The contents of the `generated` directory should not be edited manually. They can be regenerated by the script from the YAML.
 
-## 8. Comandi del tool
+## 8. Tool Commands
 
-Per uso locale:
+For local use:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml validate
@@ -372,14 +372,14 @@ python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy
 python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy --dry-run
 ```
 
-Per CI/CD:
+For CI/CD:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy --non-interactive
 python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy --non-interactive --dry-run
 ```
 
-Eventuale modalità menu per uso manuale:
+Possible menu mode for manual use:
 
 ```text
 1. Validate configuration
@@ -393,21 +393,21 @@ Eventuale modalità menu per uso manuale:
 9. Rollback
 ```
 
-Per automazione e pipeline è preferibile usare comandi non interattivi.
+For automation and pipelines, non-interactive commands are preferable.
 
-## 9. Idempotenza e update policy
+## 9. Idempotency and Update Policy
 
-Il tool dovrebbe essere rilanciabile senza creare risorse duplicate inutili.
+The tool should be runnable again without creating unnecessary duplicate resources.
 
-Comportamento consigliato:
+Recommended behavior:
 
-• se la Hosted Application esiste, riusarla
-• se non esiste e `create_if_missing` è true, crearla
-• ogni deploy crea una nuova Hosted Deployment con tag immagine univoco
-• non usare `latest` come tag principale
-• salvare e stampare sempre image URI, application id e deployment id
+- if the Hosted Application exists, reuse it
+- if it does not exist and `create_if_missing` is true, create it
+- every deployment creates a new Hosted Deployment with a unique image tag
+- do not use `latest` as the main tag
+- always save and print image URI, application id, and deployment id
 
-Esempio di naming:
+Naming example:
 
 ```text
 my-agent-app
@@ -415,17 +415,17 @@ my-agent-app-abc1234
 my-agent-app-20260428153000
 ```
 
-La strategia di update deve essere esplicita, perché alcune modifiche sono sicure mentre altre possono avere impatti importanti.
+The update strategy must be explicit because some changes are safe while others can have significant impact.
 
-Esempi di comportamento da definire:
+Examples of behavior to define:
 
-• se cambia solo la image, creare una nuova Hosted Deployment
-• se cambiano le variabili ambiente, verificare se aggiornare la Hosted Application o creare una nuova Hosted Deployment, `TBD`
-• se cambia OAuth2, richiedere una scelta esplicita o una modalità forzata
-• se cambia networking, richiedere una scelta esplicita o una modalità forzata
-• se cambia compartment, non aggiornare automaticamente
+- if only the image changes, create a new Hosted Deployment
+- if environment variables change, check whether to update the Hosted Application or create a new Hosted Deployment, `TBD`
+- if OAuth2 changes, require an explicit choice or a force mode
+- if networking changes, require an explicit choice or a force mode
+- if the compartment changes, do not update automatically
 
-Esempio possibile di configurazione futura:
+Possible future configuration example:
 
 ```yaml
 update_policy:
@@ -437,15 +437,15 @@ update_policy:
     activate_new_deployment: true
 ```
 
-## 10. Secrets e OAuth2
+## 10. Secrets and OAuth2
 
-### 10.1 Variabili ambiente
+### 10.1 Environment Variables
 
-Le variabili ambiente non devono essere passate una a una da linea di comando.
+Environment variables must not be passed one by one from the command line.
 
-Devono stare nel file YAML in forma dichiarativa.
+They must live in the YAML file in declarative form.
 
-Esempio:
+Example:
 
 ```yaml
 environment:
@@ -455,21 +455,21 @@ environment:
     AGENT_MODE: production
 ```
 
-Lo script trasforma questa sezione nel formato richiesto dalla OCI CLI per la Hosted Application o per il deployment, in base al modello esatto previsto dal comando.
+The script transforms this section into the format required by the OCI CLI for the Hosted Application or the deployment, according to the exact model expected by the command.
 
 ### 10.2 Secrets
 
-I secrets non dovrebbero essere scritti in chiaro nel file YAML.
+Secrets should not be written in clear text in the YAML file.
 
-Da evitare:
+Avoid:
 
 ```yaml
 API_KEY: my-secret-value
 ```
 
-Meglio usare riferimenti esterni.
+External references are better.
 
-Esempio con OCI Vault:
+Example with OCI Vault:
 
 ```yaml
 secrets:
@@ -478,7 +478,7 @@ secrets:
     secret_ocid: ocid1.vaultsecret.oc1..example
 ```
 
-Oppure, per sviluppo locale:
+Or, for local development:
 
 ```yaml
 secrets:
@@ -487,24 +487,24 @@ secrets:
     env_name: MY_API_KEY
 ```
 
-Per sviluppo locale è accettabile leggere secrets da variabili ambiente o da un file `.env` escluso dal versionamento. Per ambienti condivisi o CI/CD è preferibile usare OCI Vault o secret manager della pipeline.
+For local development, reading secrets from environment variables or from a `.env` file excluded from version control is acceptable. For shared environments or CI/CD, OCI Vault or the pipeline secret manager is preferable.
 
-In questo modo il file può essere versionato senza esporre credenziali.
+This allows the file to be versioned without exposing credentials.
 
-Controlli consigliati:
+Recommended checks:
 
-• verificare che `.env` sia escluso dal versionamento
-• non stampare mai secrets nei log
-• mascherare valori sensibili negli output
-• fallire se vengono rilevati secrets hardcoded nel YAML
+- verify that `.env` is excluded from version control
+- never print secrets in logs
+- mask sensitive values in output
+- fail if hardcoded secrets are detected in the YAML
 
 ### 10.3 OAuth2
 
-La configurazione OAuth2 è uno degli elementi più delicati del deploy.
+OAuth2 configuration is one of the most sensitive parts of the deployment.
 
-Nel file YAML dovrebbe essere dichiarata in una sezione dedicata.
+In the YAML file, it should be declared in a dedicated section.
 
-Esempio:
+Example:
 
 ```yaml
 security:
@@ -514,131 +514,131 @@ security:
   jwks_url: https://issuer.example.com/.well-known/jwks.json
 ```
 
-Lo script deve validare che i campi obbligatori siano presenti quando `auth_type` è `oauth2`.
+The script must validate that required fields are present when `auth_type` is `oauth2`.
 
-Campi tipici da validare:
+Typical fields to validate:
 
-• issuer URL
-• audience
-• JWKS URL
-• eventuale client id
-• eventuali scope
-• eventuali policy OCI correlate
+- issuer URL
+- audience
+- JWKS URL
+- optional client id
+- optional scopes
+- related OCI policies
 
-## 11. IAM e accesso OCIR
+## 11. IAM and OCIR Access
 
-Le policy IAM funzionanti sono un prerequisito del deploy.
+Working IAM policies are a deployment prerequisite.
 
-Questo prerequisito deve essere soddisfatto dagli admin OCI prima di usare il tool in ambienti reali.
+This prerequisite must be satisfied by OCI admins before the tool is used in real environments.
 
-Il tool può verificare alcuni sintomi, per esempio errori di autorizzazione o impossibilità di accedere a OCIR, ma non dovrebbe assumersi la responsabilità di creare o modificare policy IAM.
+The tool can detect some symptoms, for example authorization errors or inability to access OCIR, but it should not take responsibility for creating or modifying IAM policies.
 
-Servono policy adeguate per:
+Adequate policies are needed for:
 
-• push su OCIR
-• lettura della immagine da parte del servizio che esegue il deployment
-• gestione Hosted Applications
-• gestione Hosted Deployments
-• eventuale accesso a Vault
-• eventuale accesso a Logging
-• eventuale accesso a Networking
-• eventuale accesso a Object Storage, se richiesto dal componente
+- pushing to OCIR
+- allowing the service running the deployment to read the image
+- managing Hosted Applications
+- managing Hosted Deployments
+- optional access to Vault
+- optional access to Logging
+- optional access to Networking
+- optional access to Object Storage, if required by the component
 
-È importante distinguere tra:
+It is important to distinguish between:
 
-• permessi dell'identità che esegue il deploy
-• permessi del servizio o runtime che deve leggere la immagine ed eseguire il componente
+- permissions of the identity running the deployment
+- permissions of the service or runtime that must read the image and execute the component
 
-Uno scenario possibile è che il push Docker riesca, ma il deployment fallisca perché il servizio non riesce a leggere la immagine da OCIR. Questa parte deve essere verificata con attenzione dagli admin OCI.
+One possible scenario is that the Docker push succeeds, but deployment fails because the service cannot read the image from OCIR. This part must be checked carefully by OCI admins.
 
 ## 12. Rollback
 
-Il rollback dovrebbe basarsi su versioni immutabili della immagine Docker.
+Rollback should be based on immutable Docker image versions.
 
-Approccio consigliato:
+Recommended approach:
 
-• ogni build produce un tag univoco
-• ogni Hosted Deployment punta a un tag preciso
-• il tool può listare deployment precedenti
-• il rollback seleziona un deployment precedente oppure crea un nuovo deployment che punta a una immagine precedente
+- every build produces a unique tag
+- every Hosted Deployment points to a precise tag
+- the tool can list previous deployments
+- rollback selects a previous deployment or creates a new deployment that points to a previous image
 
-Esempio:
+Example:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml rollback --to-tag abc1234
 ```
 
-Il rollback non dovrebbe dipendere da `latest`.
+Rollback should not depend on `latest`.
 
-## 13. Validazione, render e dry run
+## 13. Validation, Render, and Dry Run
 
-La fase `validate` dovrebbe controllare almeno:
+The `validate` phase should check at least:
 
-• `oci` presente nel PATH
-• versione OCI CLI adeguata
-• `docker` presente nel PATH
-• autenticazione OCI funzionante
-• namespace OCIR recuperabile
-• compartment id valido sintatticamente
-• region valorizzata
-• region key valorizzata
-• Dockerfile presente
-• file YAML valido
-• security config coerente
-• secrets non hardcoded
-• tag immagine calcolabile
-• prerequisiti IAM dichiarati come soddisfatti per l'ambiente target
+- `oci` available in `PATH`
+- adequate OCI CLI version
+- `docker` available in `PATH`
+- working OCI authentication
+- retrievable OCIR namespace
+- syntactically valid compartment id
+- region set
+- region key set
+- Dockerfile present
+- valid YAML file
+- coherent security configuration
+- no hardcoded secrets
+- calculable image tag
+- IAM prerequisites declared as satisfied for the target environment
 
-Oltre a `validate`, può essere utile aggiungere un comando `render`:
+In addition to `validate`, adding a `render` command can be useful:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml render
 ```
 
-Il comando `render` genera i JSON intermedi senza chiamare OCI e senza fare build o push.
+The `render` command generates the intermediate JSON files without calling OCI and without building or pushing.
 
-La modalità `dry-run` invece simula l'intero deploy senza modificare risorse:
+The `dry-run` mode instead simulates the full deployment without modifying resources:
 
 ```bash
 python oci_ai_deploy.py --config oci_ai_deploy.yaml deploy --dry-run
 ```
 
-Differenza tra i comandi:
+Difference between commands:
 
-| Comando | Scopo | Modifica risorse? |
+| Command | Purpose | Modifies resources? |
 |---|---|---:|
-| `validate` | Controlla configurazione e prerequisiti | No |
-| `render` | Genera JSON intermedi | No |
-| `deploy --dry-run` | Simula il deploy completo e mostra cosa verrebbe fatto | No |
-| `deploy` | Esegue il deploy reale | Sì |
+| `validate` | Checks configuration and prerequisites | No |
+| `render` | Generates intermediate JSON | No |
+| `deploy --dry-run` | Simulates the full deployment and shows what would be done | No |
+| `deploy` | Runs the real deployment | Yes |
 
-## 14. Diagnostica e report finale
+## 14. Diagnostics and Final Report
 
-Lo script dovrebbe produrre output leggibile sia per uso umano sia per CI/CD.
+The script should produce readable output for both human use and CI/CD.
 
-In caso di successo, dovrebbe stampare:
+On success, it should print:
 
-• Hosted Application OCID
-• Hosted Deployment OCID
-• image URI
-• endpoint, se disponibile
-• work request id, se disponibile
-• stato finale
+- Hosted Application OCID
+- Hosted Deployment OCID
+- image URI
+- endpoint, if available
+- work request id, if available
+- final state
 
-In caso di errore, dovrebbe stampare:
+On error, it should print:
 
-• comando fallito
-• errore OCI CLI
-• eventuale work request id
-• suggerimenti diagnostici
+- failed command
+- OCI CLI error
+- optional work request id
+- diagnostic suggestions
 
-È utile produrre anche un file di report finale, per esempio:
+Producing a final report file is also useful, for example:
 
 ```text
 generated/deploy-report.json
 ```
 
-Contenuto suggerito:
+Suggested content:
 
 ```json
 {
@@ -655,55 +655,55 @@ Contenuto suggerito:
 }
 ```
 
-Questo report è utile per audit, rollback e troubleshooting.
+This report is useful for audit, rollback, and troubleshooting.
 
-## 15. Principali difficoltà previste
+## 15. Main Expected Challenges
 
-### 15.1 Versione della OCI CLI
+### 15.1 OCI CLI Version
 
-Se il comando seguente fallisce:
+If the following command fails:
 
 ```bash
 oci generative-ai hosted-application --help
 ```
 
-allora la CLI non contiene ancora i sottocomandi necessari oppure il PATH punta a una installazione vecchia.
+then the CLI does not yet include the required subcommands, or the `PATH` points to an old installation.
 
-### 15.2 Permessi IAM
+### 15.2 IAM Permissions
 
-Le policy IAM sono un prerequisito che deve essere soddisfatto dagli admin OCI.
+IAM policies are a prerequisite that must be satisfied by OCI admins.
 
-Il tool deve fallire in modo leggibile se i permessi non sono sufficienti, ma non deve nascondere il problema o tentare workaround non controllati.
+The tool must fail readably if permissions are insufficient, but it must not hide the problem or attempt uncontrolled workarounds.
 
-### 15.3 Accesso alla immagine OCIR
+### 15.3 OCIR Image Access
 
-Il push Docker può riuscire, ma il deployment può fallire se il servizio non riesce a leggere la immagine.
+The Docker push can succeed, but deployment can fail if the service cannot read the image.
 
-Questa parte va verificata con attenzione nelle policy OCI.
+This part must be checked carefully in OCI policies.
 
-### 15.4 Configurazione OAuth2
+### 15.4 OAuth2 Configuration
 
-OAuth2 richiede coerenza tra issuer, audience, JWKS e policy di accesso.
+OAuth2 requires consistency across issuer, audience, JWKS, and access policies.
 
-Questa configurazione va validata prima del deploy.
+This configuration must be validated before deployment.
 
-### 15.5 Readiness del container
+### 15.5 Container Readiness
 
-Il container deve essere pronto per un runtime gestito.
+The container must be ready for a managed runtime.
 
 Checklist:
 
-• ascolta sulla porta corretta
-• non dipende da file locali
-• legge configurazione da environment variables
-• scrive log su stdout e stderr
-• gestisce shutdown pulito
-• ha startup time ragionevole
-• espone eventuale health endpoint, se richiesto
+- listens on the correct port
+- does not depend on local files
+- reads configuration from environment variables
+- writes logs to stdout and stderr
+- handles clean shutdown
+- has reasonable startup time
+- exposes a health endpoint, if required
 
-### 15.6 Comando OCI CLI specifico per il deployment
+### 15.6 Specific OCI CLI Command for Deployment
 
-I comandi principali ipotizzati sono:
+The main assumed commands are:
 
 ```bash
 oci generative-ai hosted-application list
@@ -718,13 +718,13 @@ oci generative-ai hosted-deployment get
 oci generative-ai hosted-deployment update
 ```
 
-`TBD`: verificare quale comando è quello corretto per la modalità single docker artifact nella versione OCI CLI target.
+`TBD`: verify which command is correct for single Docker artifact mode in the target OCI CLI version.
 
-Questo è uno dei punti più importanti da validare durante la prima implementazione, perché il nome esatto del comando e il JSON richiesto dalla CLI possono essere specifici della versione installata.
+This is one of the most important points to validate during the first implementation because the exact command name and JSON required by the CLI can be specific to the installed version.
 
-## 16. Struttura del progetto
+## 16. Project Structure
 
-Struttura consigliata:
+Recommended structure:
 
 ```text
 oci-ai-deployer/
@@ -743,37 +743,37 @@ oci-ai-deployer/
   README.md
 ```
 
-Significato:
+Meaning:
 
-• `oci_ai_deploy.py` contiene la logica operativa
-• `oci_ai_deploy.yaml` contiene la configurazione del deploy
-• `schemas` contiene lo schema di validazione
-• `generated` contiene file temporanei generati dallo script
-• `examples` contiene esempi riusabili per diversi componenti
-• `README.md` documenta installazione, prerequisiti e uso del tool
+- `oci_ai_deploy.py` contains the operational logic
+- `oci_ai_deploy.yaml` contains the deployment configuration
+- `schemas` contains the validation schema
+- `generated` contains temporary files generated by the script
+- `examples` contains reusable examples for different components
+- `README.md` documents installation, prerequisites, and tool usage
 
-## 17. Ruolo dello script Python
+## 17. Role of the Python Script
 
-Lo script Python ha il compito di orchestrare il deploy.
+The Python script is responsible for orchestrating the deployment.
 
-Responsabilità principali:
+Main responsibilities:
 
-• leggere YAML
-• validare configurazione
-• calcolare tag immagine
-• recuperare namespace OCIR
-• costruire image URI
-• chiamare Docker per build, tag e push
-• generare JSON intermedi per OCI CLI
-• supportare modalità `dry-run`
-• chiamare OCI CLI
-• gestire errori
-• stampare output finale leggibile
-• produrre report finale
+- read YAML
+- validate configuration
+- calculate image tag
+- retrieve OCIR namespace
+- build image URI
+- call Docker for build, tag, and push
+- generate intermediate JSON files for OCI CLI
+- support `dry-run` mode
+- call OCI CLI
+- handle errors
+- print readable final output
+- produce final report
 
-Nella prima versione il Python può chiamare la OCI CLI.
+In the first version, Python can call the OCI CLI.
 
-Esempio concettuale:
+Conceptual example:
 
 ```python
 import subprocess
@@ -790,69 +790,69 @@ subprocess.run([
 ], check=True)
 ```
 
-Questo approccio è pratico perché consente di riusare gli stessi comandi già testati manualmente.
+This approach is practical because it allows reusing the same commands already tested manually.
 
 ## 18. Roadmap
 
-### Versione 1
+### Version 1
 
-Python più YAML più OCI CLI.
+Python plus YAML plus OCI CLI.
 
-Obiettivo:
+Goal:
 
-• automatizzare il flusso end to end
-• mantenere la logica semplice
-• usare comandi CLI già testabili manualmente
-• supportare validazione
-• supportare generazione JSON intermedi
-• supportare modalità `dry-run`
-• supportare modalità non interattiva per CI/CD
+- automate the end-to-end flow
+- keep the logic simple
+- use CLI commands that can already be tested manually
+- support validation
+- support intermediate JSON generation
+- support `dry-run` mode
+- support non-interactive mode for CI/CD
 
-### Versione 2
+### Version 2
 
-Aggiungere:
+Add:
 
-• schema JSON di validazione completo
-• gestione multi ambiente più evoluta
-• rollback
-• log strutturati
-• diagnostica work request avanzata
-• report finale completo
-• eventuale integrazione più stretta con Vault o secret manager di pipeline
+- complete JSON validation schema
+- more advanced multi-environment management
+- rollback
+- structured logs
+- advanced work-request diagnostics
+- complete final report
+- optional tighter integration with Vault or pipeline secret managers
 
-## 19. Decisione di design raccomandata
+## 19. Recommended Design Decision
 
-La soluzione raccomandata è:
+The recommended solution is:
 
-• YAML come formato dichiarativo principale
-• Python come orchestratore
-• OCI CLI come motore operativo nella prima versione
-• JSON generati come input tecnico per OCI CLI
-• tag immagine immutabili
-• secrets referenziati, non hardcoded
-• validazione obbligatoria prima del deploy
-• modalità `dry-run` tramite parametro command line dedicato
-• supporto a modalità non interattiva per CI/CD
-• policy IAM funzionanti come prerequisito gestito dagli admin OCI
+- YAML as the main declarative format
+- Python as the orchestrator
+- OCI CLI as the operational engine in the first version
+- generated JSON as technical input for OCI CLI
+- immutable image tags
+- referenced secrets, not hardcoded secrets
+- mandatory validation before deployment
+- `dry-run` mode through a dedicated command-line parameter
+- support for non-interactive mode for CI/CD
+- working IAM policies as a prerequisite managed by OCI admins
 
-## 20. Conclusione
+## 20. Implementation
 
-Il design è fattibile e appropriato.
+The practical implementation of the tool is guided by the separate document:
 
-Automatizzare Hosted Application e Hosted Deployment tramite un file di configurazione è il modo più ordinato per gestire componenti AI come agent e MCP server.
+`./implementation_spec_codex.md`
 
-Il vantaggio principale è che il deploy diventa:
+That document contains incremental tasks, acceptance criteria, non-goals, repository structure, and test commands for Codex-assisted development.
 
-• ripetibile
-• versionabile
-• controllabile
-• adatto a CI/CD
-• meno soggetto a errori manuali
+## 21. Conclusion
 
-La prima implementazione dovrebbe partire semplice:
+Automating Hosted Application and Hosted Deployment through a configuration file is the most orderly way to manage deployment of AI components such as agents and MCP servers.
 
-```text
-YAML -> Python -> JSON generati -> OCI CLI -> OCI Enterprise AI
-```
+The main advantage is that deployment becomes:
 
-La modalità `dry-run` rende il processo più sicuro, perché consente di vedere in anticipo cosa verrebbe eseguito prima di creare risorse, aggiornare configurazioni o pubblicare immagini.
+- repeatable
+- versionable
+- controllable
+- suitable for CI/CD
+- less prone to manual errors
+
+The `dry-run` mode makes the process safer because it shows in advance what would be executed before creating resources, updating configuration, or publishing images.
