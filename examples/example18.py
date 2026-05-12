@@ -1,6 +1,6 @@
 """
 Author: L. Saetta
-Last modified: 2026-03-16
+Last modified: 2026-05-12
 License: MIT
 
 Description:
@@ -19,6 +19,30 @@ from config import MODEL_ID
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 TEMPERATURE = 0.0
+
+
+def _get_header_case_insensitive(headers, header_name: str) -> str:
+    """Read one header value with case-insensitive matching."""
+    if headers is None:
+        return ""
+
+    value = headers.get(header_name)
+    if value:
+        return str(value)
+
+    header_name = header_name.lower()
+    for key, item_value in headers.items():
+        if str(key).lower() == header_name:
+            return str(item_value)
+    return ""
+
+
+def _extract_opc_request_id(raw_response) -> str:
+    """Extract the OCI request id from a raw OpenAI-compatible response."""
+    headers = getattr(raw_response, "headers", None)
+    return _get_header_case_insensitive(headers, "opc-request-id") or (
+        _get_header_case_insensitive(headers, "opc-requestid")
+    )
 
 
 def main() -> None:
@@ -52,7 +76,7 @@ def main() -> None:
 
     query = "What is an HNSW index?"
 
-    response = client.responses.create(
+    raw_response = client.responses.with_raw_response.create(
         model=MODEL_ID,
         temperature=TEMPERATURE,
         input=[
@@ -61,9 +85,11 @@ def main() -> None:
                 "role": role_instructions,
                 "content": (
                     "Answer using only information from the retrieved documents. "
-                    "You may summarize or synthesize information that is explicitly supported by the retrieved text. "
+                    "You may summarize or synthesize information that is "
+                    "explicitly supported by the retrieved text. "
                     "Do not use outside knowledge. "
-                    "If the retrieved documents do not contain enough information to answer, say exactly: "
+                    "If the retrieved documents do not contain enough "
+                    "information to answer, say exactly: "
                     "'I don't have sufficient information in the documents.'"
                 ),
             },
@@ -80,6 +106,8 @@ def main() -> None:
         tool_choice="required",
         include=["file_search_call.results"],
     )
+    response = raw_response.parse()
+    opc_request_id = _extract_opc_request_id(raw_response)
 
     text, refs = extract_text_and_refs(response)
 
@@ -97,12 +125,14 @@ def main() -> None:
     # debug information
     if "don't have sufficient information" in text:
         print("Debug info: ")
+        print(f"opc-request-id: {opc_request_id or '<not available>'}")
         for i, item in enumerate(response.output):
             print(f"\n--- item {i} ---")
             print("type:", getattr(item, "type", None))
-            try:
-                print(item.model_dump_json(indent=2))
-            except Exception:
+            model_dump_json = getattr(item, "model_dump_json", None)
+            if callable(model_dump_json):
+                print(model_dump_json(indent=2))
+            else:
                 print(item)
 
 
