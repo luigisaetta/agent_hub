@@ -16,6 +16,7 @@ from common import (
     extract_provider_name,
     extract_text_and_refs,
     get_inference_client,
+    get_sampling_kwargs,
 )
 from demos.demo4.prompts import STRICT_INSTRUCTIONS
 from config import MODEL_ID
@@ -23,6 +24,7 @@ from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 DEFAULT_MODEL = MODEL_ID
 DEFAULT_TEMPERATURE = 0.0
+DEFAULT_MAX_OUTPUT_TOKENS = 4096
 DEFAULT_MAX_RESULTS = 10
 DEFAULT_RERANKER = "auto"
 
@@ -203,7 +205,8 @@ def stream_rag(  # pylint: disable=too-many-arguments
         # so references can be reconstructed after completion.
         stream = client.responses.create(
             model=model_id,
-            temperature=DEFAULT_TEMPERATURE,
+            **get_sampling_kwargs(model_id, temperature=DEFAULT_TEMPERATURE),
+            max_output_tokens=DEFAULT_MAX_OUTPUT_TOKENS,
             input=_build_input_for_model(model_id=model_id, user_prompt=user_prompt),
             conversation=conversation_id,
             tools=[file_search_tool],
