@@ -40,6 +40,81 @@ def test_extract_text_and_refs_handles_empty_annotations(reload_module):
     assert refs == []
 
 
+def test_extract_text_and_refs_falls_back_to_file_search_results(reload_module):
+    """File-search results should provide references when text has no annotations."""
+    retrieval = reload_module("common.retrieval")
+    text_obj = SimpleNamespace(type="output_text", text="answer", annotations=[])
+    response = SimpleNamespace(
+        output=[
+            SimpleNamespace(
+                type="file_search_call",
+                results=[
+                    SimpleNamespace(
+                        file_id="file-1",
+                        filename="doc.pdf",
+                        attributes={"page_numbers": [2, 1]},
+                    ),
+                    SimpleNamespace(
+                        file_id="file-1",
+                        filename="doc.pdf",
+                        attributes={"page_numbers": [1, 2]},
+                    ),
+                    SimpleNamespace(
+                        file_id="file-2",
+                        filename="other.pdf",
+                        attributes={},
+                    ),
+                ],
+            ),
+            SimpleNamespace(type="message", content=[text_obj]),
+        ]
+    )
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "answer"
+    assert refs == [
+        {"n": 1, "filename": "doc.pdf", "pages": [1, 2]},
+        {"n": 2, "filename": "other.pdf", "pages": []},
+    ]
+
+
+def test_extract_text_and_refs_prefers_annotations_over_file_search_results(
+    reload_module,
+):
+    """Inline citations should remain the source of refs when present."""
+    retrieval = reload_module("common.retrieval")
+    text_obj = SimpleNamespace(
+        type="output_text",
+        text="answer",
+        annotations=[
+            _make_annotation(
+                index=0, file_id="file-1", filename="annotated.pdf", pages=[3]
+            )
+        ],
+    )
+    response = SimpleNamespace(
+        output=[
+            SimpleNamespace(
+                type="file_search_call",
+                results=[
+                    SimpleNamespace(
+                        file_id="file-2",
+                        filename="tool-result.pdf",
+                        attributes={"page_numbers": [9]},
+                    )
+                ],
+            ),
+            SimpleNamespace(type="message", content=[text_obj]),
+        ]
+    )
+
+    text, refs = retrieval.extract_text_and_refs(response)
+
+    assert text == "[1] answer"
+    assert refs == [{"n": 1, "filename": "annotated.pdf", "pages": [3]}]
+
+
 def test_extract_text_and_refs_reuses_ref_number_for_same_file(reload_module):
     """Multiple annotations from the same file should map to a single reference."""
     retrieval = reload_module("common.retrieval")
