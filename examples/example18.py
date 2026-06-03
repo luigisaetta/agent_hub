@@ -74,7 +74,9 @@ def main() -> None:
     #    "hiring, and which occupations appear most exposed."
     # )
 
-    query = "What is an HNSW index?"
+    # query = "What is an HNSW index?"
+    # query = "Qual è la terapia di elezione per la cura della TBC?"
+    query = "What personal income tax rates does Article 6 establish?"
 
     raw_response = client.responses.with_raw_response.create(
         model=MODEL_ID,
