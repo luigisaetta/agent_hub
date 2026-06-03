@@ -12,6 +12,7 @@ from common import (
     extract_provider_name,
     extract_text_and_refs,
     get_inference_client,
+    get_sampling_kwargs,
     print_example_summary,
     print_runtime_config,
 )
@@ -19,6 +20,7 @@ from config import MODEL_ID
 from config_private import PROJECT_ID, VECTOR_STORE_ID
 
 TEMPERATURE = 0.0
+MAX_OUTPUT_TOKENS = 4096
 
 
 def _get_header_case_insensitive(headers, header_name: str) -> str:
@@ -80,7 +82,8 @@ def main() -> None:
 
     raw_response = client.responses.with_raw_response.create(
         model=MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(MODEL_ID, temperature=TEMPERATURE),
+        max_output_tokens=MAX_OUTPUT_TOKENS,
         input=[
             {
                 # cannot use system if provider is google

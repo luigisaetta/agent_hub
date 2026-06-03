@@ -12,6 +12,11 @@ from __future__ import annotations
 import re
 
 _PROVIDER_PATTERN = re.compile(r"^[a-z]+$")
+_UNSUPPORTED_TEMPERATURE_MODELS = frozenset(
+    {
+        "openai.gpt-5.5",
+    }
+)
 
 
 def extract_provider_name(model_id: str) -> str:
@@ -36,3 +41,16 @@ def extract_provider_name(model_id: str) -> str:
         raise ValueError(msg)
 
     return provider
+
+
+def supports_temperature(model_id: str) -> bool:
+    """Return whether the model supports the Responses API temperature parameter."""
+    return model_id.strip().lower() not in _UNSUPPORTED_TEMPERATURE_MODELS
+
+
+def get_sampling_kwargs(model_id: str, *, temperature: float | None = None) -> dict:
+    """Build Responses API sampling kwargs supported by the selected model."""
+    kwargs = {}
+    if temperature is not None and supports_temperature(model_id):
+        kwargs["temperature"] = temperature
+    return kwargs

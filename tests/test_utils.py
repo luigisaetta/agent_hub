@@ -217,3 +217,30 @@ def test_extract_provider_name_rejects_invalid_or_empty_model_id(reload_module):
             raised = True
 
         assert raised is True
+
+
+def test_get_sampling_kwargs_includes_supported_temperature(reload_module):
+    """Temperature should be passed for models that support it."""
+    models = reload_module("common.models")
+
+    kwargs = models.get_sampling_kwargs("openai.gpt-5.4", temperature=0.0)
+
+    assert kwargs == {"temperature": 0.0}
+
+
+def test_get_sampling_kwargs_omits_unsupported_temperature(reload_module):
+    """Temperature should be omitted for models that reject the parameter."""
+    models = reload_module("common.models")
+
+    kwargs = models.get_sampling_kwargs(" OPENAI.GPT-5.5 ", temperature=0.0)
+
+    assert kwargs == {}
+
+
+def test_get_sampling_kwargs_omits_none_temperature(reload_module):
+    """No sampling parameter should be emitted when temperature is None."""
+    models = reload_module("common.models")
+
+    kwargs = models.get_sampling_kwargs("google.gemini-2.5-pro", temperature=None)
+
+    assert kwargs == {}
