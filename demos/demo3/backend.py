@@ -13,7 +13,7 @@ import logging
 import json
 from io import BytesIO
 
-from common import get_inference_client
+from common import get_inference_client, get_sampling_kwargs
 from config_private import PROJECT_ID
 from demos.demo3.llm_schema_models import ProceduraVendita
 
@@ -93,7 +93,9 @@ def _extract_usage(response) -> dict:
     }
 
 
-def _example_value_from_schema(node: dict, definitions: dict) -> object:
+def _example_value_from_schema(  # pylint: disable=too-many-return-statements
+    node: dict, definitions: dict
+) -> object:
     """Build an example value from a JSON-schema node."""
     ref = node.get("$ref")
     if ref:
@@ -169,7 +171,7 @@ def extract_text_from_pdf_bytes(
 
     response = client.responses.create(
         model=PDF_TEXT_MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(PDF_TEXT_MODEL_ID, temperature=TEMPERATURE),
         max_output_tokens=MAX_OUTPUT_TOKENS,
         input=[
             {
@@ -213,7 +215,7 @@ def extract_structured_data_from_text(extracted_text: str) -> tuple[dict, dict]:
 
     response = client.responses.parse(
         model=STRUCTURED_MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(STRUCTURED_MODEL_ID, temperature=TEMPERATURE),
         max_output_tokens=MAX_OUTPUT_TOKENS,
         input=[
             {

@@ -16,7 +16,7 @@ from typing import Any, Callable
 
 from langchain_core.runnables.base import Runnable
 
-from common import get_inference_client
+from common import get_inference_client, get_sampling_kwargs
 from config_private import PROJECT_ID
 from demos.demo6.prompts import ANSWER_SYSTEM_PROMPT
 
@@ -31,7 +31,7 @@ def default_response_stream(
     client = get_inference_client()
     return client.responses.create(
         model=model_id,
-        temperature=0.0,
+        **get_sampling_kwargs(model_id, temperature=0.0),
         input=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_prompt},

@@ -17,6 +17,10 @@ _UNSUPPORTED_TEMPERATURE_MODELS = frozenset(
         "openai.gpt-5.5",
     }
 )
+_UNSUPPORTED_TEMPERATURE_MODEL_PREFIXES = (
+    "openai.gpt-5.6",
+    "openai.gpt5.6",
+)
 
 
 def extract_provider_name(model_id: str) -> str:
@@ -45,7 +49,11 @@ def extract_provider_name(model_id: str) -> str:
 
 def supports_temperature(model_id: str) -> bool:
     """Return whether the model supports the Responses API temperature parameter."""
-    return model_id.strip().lower() not in _UNSUPPORTED_TEMPERATURE_MODELS
+    normalized_model_id = model_id.strip().lower()
+    return (
+        normalized_model_id not in _UNSUPPORTED_TEMPERATURE_MODELS
+        and not normalized_model_id.startswith(_UNSUPPORTED_TEMPERATURE_MODEL_PREFIXES)
+    )
 
 
 def get_sampling_kwargs(model_id: str, *, temperature: float | None = None) -> dict:

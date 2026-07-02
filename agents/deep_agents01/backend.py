@@ -27,6 +27,7 @@ from agents.deep_agents01.utility import (
     resolve_project_id,
     summarize_runtime_error,
 )
+from common import get_sampling_kwargs
 from config import BASE_URL
 
 MODEL_ID = resolve_model_id()
@@ -52,7 +53,7 @@ class DeepAgentsLocalBackend:
             model=MODEL_ID,
             openai_api_base=BASE_URL,
             openai_api_key=resolve_api_key(),
-            temperature=0.0,
+            **get_sampling_kwargs(MODEL_ID, temperature=0.0),
             # important: force to responses (not completions)
             use_responses_api=True,
             output_version="responses/v1",

@@ -10,7 +10,12 @@ Description:
 import json
 
 
-from common import get_inference_client, print_example_summary, print_runtime_config
+from common import (
+    get_inference_client,
+    get_sampling_kwargs,
+    print_example_summary,
+    print_runtime_config,
+)
 from config import MODEL_ID
 
 TEMPERATURE = 0.0
@@ -29,7 +34,7 @@ def main() -> None:
 
     response = client.responses.create(
         model=MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(MODEL_ID, temperature=TEMPERATURE),
         input=request,
         reasoning={"summary": "auto"},
         store=False,

@@ -340,6 +340,59 @@ def test_answer_generator_streams_model_output():
     assert completed["data"]["text"] == "Grounded answer."
 
 
+def test_answer_generator_omits_temperature_for_gpt56(monkeypatch, reload_module):
+    """AnswerGenerator should avoid temperature for models that reject it."""
+    module = reload_module("demos.demo6.nodes.answer_generator")
+    captured = {}
+
+    def create(**kwargs):
+        """Capture Responses API kwargs."""
+        captured.update(kwargs)
+        return iter(())
+
+    monkeypatch.setattr(
+        module,
+        "get_inference_client",
+        lambda: SimpleNamespace(responses=SimpleNamespace(create=create)),
+    )
+
+    module.default_response_stream(
+        model_id="openai.gpt-5.6-mini",
+        system_prompt="system",
+        user_prompt="user",
+    )
+
+    assert "temperature" not in captured
+    assert captured["model"] == "openai.gpt-5.6-mini"
+
+
+def test_query_rewriter_omits_temperature_for_gpt56(monkeypatch, reload_module):
+    """QueryRewriter should avoid temperature for models that reject it."""
+    module = reload_module("demos.demo6.nodes.query_rewriter")
+    captured = {}
+
+    def create(**kwargs):
+        """Capture Responses API kwargs."""
+        captured.update(kwargs)
+        return SimpleNamespace(output_text="rewritten")
+
+    monkeypatch.setattr(
+        module,
+        "get_inference_client",
+        lambda: SimpleNamespace(responses=SimpleNamespace(create=create)),
+    )
+
+    result = module.default_query_rewrite(
+        model_id="openai.gpt-5.6",
+        user_request="latest question",
+        history=[{"role": "user", "content": "previous"}],
+    )
+
+    assert result == "rewritten"
+    assert "temperature" not in captured
+    assert captured["model"] == "openai.gpt-5.6"
+
+
 def test_history_is_trimmed_to_last_20_messages():
     """History longer than 20 messages is trimmed before generation."""
     captured_prompts: list[str] = []

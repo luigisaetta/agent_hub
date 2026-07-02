@@ -15,7 +15,7 @@ from typing import Any, Callable
 
 from langchain_core.runnables.base import Runnable
 
-from common import get_inference_client
+from common import get_inference_client, get_sampling_kwargs
 from config_private import PROJECT_ID
 from demos.demo6.prompts import QUERY_REWRITER_SYSTEM_PROMPT
 
@@ -54,7 +54,7 @@ def default_query_rewrite(
 ) -> str:
     """Rewrite query via Responses API into a standalone query."""
     client = get_inference_client()
-    
+
     user_prompt = (
         "Conversation history:\n"
         f"{_history_block(history)}\n\n"
@@ -62,10 +62,10 @@ def default_query_rewrite(
         f"{user_request}\n\n"
         "Rewrite the latest user request as a standalone query."
     )
-    
+
     response = client.responses.create(
         model=model_id,
-        temperature=0.0,
+        **get_sampling_kwargs(model_id, temperature=0.0),
         input=[
             {"role": "system", "content": QUERY_REWRITER_SYSTEM_PROMPT},
             {"role": "user", "content": user_prompt},

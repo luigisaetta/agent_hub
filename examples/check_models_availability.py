@@ -12,7 +12,12 @@ from __future__ import annotations
 
 from openai import OpenAIError
 
-from common import get_inference_client, print_example_summary, print_runtime_config
+from common import (
+    get_inference_client,
+    get_sampling_kwargs,
+    print_example_summary,
+    print_runtime_config,
+)
 from config import REGION
 
 TEMPERATURE = 0.0
@@ -26,7 +31,7 @@ MODEL_CANDIDATES = (
     "openai.gpt-5.2",
     "openai.gpt-5.4",
     "openai.gpt-oss-120b",
-     "openai.gpt-oss-20b",
+    "openai.gpt-oss-20b",
     "xai.grok-4-fast-non-reasoning",
     "xai.grok-4-fast-reasoning",
     "xai.grok-4-1-fast-non-reasoning",
@@ -36,8 +41,10 @@ MODEL_CANDIDATES = (
     "cohere.command-a-03-2025",
     "meta.llama-4-maverick-17b-128e-instruct-fp8",
     "meta.llama-4-scout-17b-16e-instruct",
-    "ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaa2xxap7yax7h45frvzjponh526pdphmubjxsxtwybkvbnff6se56a",
-    "ocid1.generativeaiendpoint.oc1.us-chicago-1.amaaaaaa2xxap7ya4bvxqruf3d6f7g543zlfsogmk2axjeeva27otzilnnla"
+    "ocid1.generativeaiendpoint.oc1.us-chicago-1."
+    "amaaaaaa2xxap7yax7h45frvzjponh526pdphmubjxsxtwybkvbnff6se56a",
+    "ocid1.generativeaiendpoint.oc1.us-chicago-1."
+    "amaaaaaa2xxap7ya4bvxqruf3d6f7g543zlfsogmk2axjeeva27otzilnnla",
 )
 
 
@@ -46,7 +53,7 @@ def _check_model(*, client, model_id: str) -> tuple[bool, str]:
     try:
         response = client.responses.create(
             model=model_id,
-            temperature=TEMPERATURE,
+            **get_sampling_kwargs(model_id, temperature=TEMPERATURE),
             input=TEST_REQUEST,
             max_output_tokens=32,
             timeout=REQUEST_TIMEOUT_SECONDS,

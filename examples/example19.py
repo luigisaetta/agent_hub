@@ -14,6 +14,7 @@ from langfuse import get_client
 
 from common import (
     get_inference_client,
+    get_sampling_kwargs,
     print_example_summary,
     print_runtime_config,
 )
@@ -40,7 +41,7 @@ def main() -> None:
 
     response = client.responses.create(
         model=MODEL_ID,
-        temperature=0.0,
+        **get_sampling_kwargs(MODEL_ID, temperature=0.0),
         input=request,
     )
 

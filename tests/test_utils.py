@@ -232,9 +232,15 @@ def test_get_sampling_kwargs_omits_unsupported_temperature(reload_module):
     """Temperature should be omitted for models that reject the parameter."""
     models = reload_module("common.models")
 
-    kwargs = models.get_sampling_kwargs(" OPENAI.GPT-5.5 ", temperature=0.0)
+    for model_id in (
+        " OPENAI.GPT-5.5 ",
+        "openai.gpt-5.6",
+        "openai.gpt-5.6-mini",
+        " OPENAI.GPT5.6 ",
+    ):
+        kwargs = models.get_sampling_kwargs(model_id, temperature=0.0)
 
-    assert kwargs == {}
+        assert kwargs == {}
 
 
 def test_get_sampling_kwargs_omits_none_temperature(reload_module):

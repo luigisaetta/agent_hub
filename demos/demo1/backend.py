@@ -11,7 +11,7 @@ from __future__ import annotations
 
 from collections.abc import Iterator
 
-from common import get_inference_client
+from common import get_inference_client, get_sampling_kwargs
 from config import MODEL_ID
 
 DEFAULT_MODEL = MODEL_ID
@@ -45,7 +45,7 @@ def stream_response_text(
     """Yield streamed text chunks from a model response."""
     stream = client.responses.create(
         model=model_id,
-        temperature=DEFAULT_TEMPERATURE,
+        **get_sampling_kwargs(model_id, temperature=DEFAULT_TEMPERATURE),
         max_output_tokens=DEFAULT_MAX_OUTPUT_TOKENS,
         instructions=DEFAULT_ASSISTANT_INSTRUCTIONS,
         input=user_prompt,

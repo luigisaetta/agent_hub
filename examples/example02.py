@@ -11,6 +11,7 @@ Description:
 
 from common import (
     get_inference_client,
+    get_sampling_kwargs,
     print_example_summary,
     print_runtime_config,
     print_streamed_output,
@@ -38,7 +39,7 @@ def main() -> None:
 
     response = client.responses.create(
         model=MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(MODEL_ID, temperature=TEMPERATURE),
         max_output_tokens=MAX_OUTPUT_TOKENS,
         input=request,
         stream=True,

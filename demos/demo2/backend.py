@@ -21,7 +21,7 @@ from langfuse import get_client
 from langfuse import propagate_attributes
 from langfuse.openai import openai
 
-from common import get_inference_client
+from common import get_inference_client, get_sampling_kwargs
 from config import LANGFUSE_BASE_URL, MODEL_ID
 from config_private import LANGFUSE_PUBLIC_KEY, LANGFUSE_SECRET_KEY
 
@@ -57,7 +57,7 @@ def _request_params(
     """Build common request params for Responses API calls."""
     return {
         "model": model_id,
-        "temperature": DEFAULT_TEMPERATURE,
+        **get_sampling_kwargs(model_id, temperature=DEFAULT_TEMPERATURE),
         "max_output_tokens": DEFAULT_MAX_OUTPUT_TOKENS,
         "instructions": build_assistant_instructions(),
         "input": user_prompt,

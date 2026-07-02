@@ -22,22 +22,24 @@ def _make_client(captured):
     return SimpleNamespace(responses=SimpleNamespace(create=create))
 
 
-def test_stream_rag_omits_temperature_for_gpt55(reload_module):
+def test_stream_rag_omits_temperature_for_unsupported_models(reload_module):
     """Demo4 should avoid temperature for models that reject the parameter."""
     backend = reload_module("demos.demo4.backend")
-    captured = {}
-    client = _make_client(captured)
 
-    backend.stream_rag(
-        client,
-        model_id="openai.gpt-5.5",
-        user_prompt="Question?",
-        conversation_id="conv-1",
-    )
+    for model_id in ("openai.gpt-5.5", "openai.gpt-5.6", "openai.gpt-5.6-mini"):
+        captured = {}
+        client = _make_client(captured)
 
-    assert "temperature" not in captured
-    assert captured["max_output_tokens"] == backend.DEFAULT_MAX_OUTPUT_TOKENS
-    assert captured["stream"] is True
+        backend.stream_rag(
+            client,
+            model_id=model_id,
+            user_prompt="Question?",
+            conversation_id="conv-1",
+        )
+
+        assert "temperature" not in captured
+        assert captured["max_output_tokens"] == backend.DEFAULT_MAX_OUTPUT_TOKENS
+        assert captured["stream"] is True
 
 
 def test_stream_rag_keeps_temperature_for_supported_models(reload_module):

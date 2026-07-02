@@ -10,6 +10,7 @@ Description:
 
 from common import (
     get_inference_client,
+    get_sampling_kwargs,
     print_example_summary,
     print_runtime_config,
     print_streamed_output,
@@ -39,7 +40,7 @@ def main() -> None:
     # 2. first request
     response1 = client.responses.create(
         model=MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(MODEL_ID, temperature=TEMPERATURE),
         input=request,
         # link to the conversation
         conversation=conversation.id,
@@ -53,7 +54,7 @@ def main() -> None:
     request = "Tell me something about his work on Spin glasses."
     response2 = client.responses.create(
         model=MODEL_ID,
-        temperature=TEMPERATURE,
+        **get_sampling_kwargs(MODEL_ID, temperature=TEMPERATURE),
         input=request,
         conversation=conversation.id,
         stream=True,
