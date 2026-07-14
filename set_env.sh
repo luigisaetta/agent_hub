@@ -4,7 +4,7 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 usage() {
   echo "Usage: source ./set_env.sh <profile>"
-  echo "Available profiles: prod-chicago, prod-frankfurt"
+  echo "Available profiles: prod-chicago, prod-frankfurt, prod-london"
 }
 
 if [[ $# -ne 1 ]]; then
@@ -23,6 +23,10 @@ case "$profile" in
   prod-frankfurt)
     env_file=".env.prod-frankfurt"
     region="eu-frankfurt-1"
+    ;;
+  prod-london)
+    env_file=".env.prod-london"
+    region="uk-london-1"
     ;;
   *)
     echo "Unknown profile: $profile"

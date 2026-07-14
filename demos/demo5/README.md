@@ -14,7 +14,7 @@ area:
 - Existing project configuration (`config.py`, `config_private.py`)
 - `VECTOR_STORE_ID` configured in the active `.env` profile
 - Active production profile selected in the same shell
-  (`source ./set_env.sh prod-chicago` or `source ./set_env.sh prod-frankfurt`)
+  (`source ./set_env.sh prod-chicago`, `prod-frankfurt`, or `prod-london`)
 
 ## Install demo dependency
 

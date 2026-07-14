@@ -41,7 +41,8 @@ Core idea:
 2. `config_private.py` resolves which `.env` file to load using this precedence:
 - `AGENT_HUB_ENV_FILE` (explicit path exported in current shell)
 - `.env.active` symlink in repository root
-- region-based default profile (`.env.prod-chicago` or `.env.prod-frankfurt`)
+- region-based default profile (`.env.prod-chicago`, `.env.prod-frankfurt`, or
+  `.env.prod-london`)
 3. The selected `.env` file is loaded with `override=True`, then required secrets are validated (`PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, etc.). Langfuse keys are optional and can be empty when Langfuse integrations are not used.
 4. `common.clients.get_inference_client()` and `common.clients.get_control_plane_client()` provide the two OpenAI-compatible clients used by examples.
 5. Scripts execute API calls and reuse common output/retrieval helpers for consistency.
@@ -56,7 +57,8 @@ Secrets are never hardcoded in source files. They are imported at runtime from t
 
 Why this is important:
 - Security: credentials remain outside committed code and can be rotated per environment.
-- Isolation: each environment (for example Chicago vs Frankfurt) keeps its own keys, project, and resource IDs.
+- Isolation: each environment (for example Chicago, Frankfurt, or London) keeps
+  its own keys, project, and resource IDs.
 - Reproducibility: changing environment is explicit and traceable, not hidden in code edits.
 
 Operationally:

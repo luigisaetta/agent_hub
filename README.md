@@ -52,7 +52,7 @@ pip install -r requirements.txt
 ```
 
 2. Fill the `.env` file for your target production region (for example
-`.env.prod-chicago` or `.env.prod-frankfurt`) with valid values for:
+`.env.prod-chicago`, `.env.prod-frankfurt`, or `.env.prod-london`) with valid values for:
 `PROJECT_ID`, `KEY1`, `COMPARTMENT_ID`, `VECTOR_STORE_ID`
 (and Langfuse keys only if needed; otherwise they can be left unset/empty).
 
@@ -158,6 +158,7 @@ Configuration details are documented in [`docs/configurations.md`](docs/configur
 Secrets are loaded from environment profile files:
 - `.env.prod-chicago`
 - `.env.prod-frankfurt`
+- `.env.prod-london`
 
 Real `.env*` files are local-only and ignored by git. Template files ending in
 `.sample` or `.example` are versioned so they can be copied and filled locally.
@@ -200,6 +201,7 @@ source ./set_env.sh prod-chicago
 Profiles currently available:
 - `prod-chicago`
 - `prod-frankfurt`
+- `prod-london`
 
 Before running examples/demos/connectors, always select one of the profiles
 above in the same terminal session.

@@ -11,7 +11,7 @@ This demo builds a Streamlit chatbot that:
 - Existing project configuration (`config.py`, `config_private.py`)
 - Base project dependencies already installed
 - Active production profile selected in the same shell
-  (`source ./set_env.sh prod-chicago` or `source ./set_env.sh prod-frankfurt`)
+  (`source ./set_env.sh prod-chicago`, `prod-frankfurt`, or `prod-london`)
 
 ## Install demo dependency
 

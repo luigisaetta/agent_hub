@@ -17,7 +17,7 @@ Features:
 - Project configuration already available in this repository
 - Python 3.11+
 - Active production profile selected in the same shell
-  (`source ./set_env.sh prod-chicago` or `source ./set_env.sh prod-frankfurt`)
+  (`source ./set_env.sh prod-chicago`, `prod-frankfurt`, or `prod-london`)
 
 ## Install demo dependencies
 

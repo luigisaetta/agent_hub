@@ -6,7 +6,8 @@ This project uses a shared configuration at repository root and imports it from 
 
 - `config.py`: non-secret runtime settings (region, base URLs, default model id).
 - `config_private.py`: loads secret/runtime identifiers from the active `.env` profile.
-- `.env.prod-chicago`, `.env.prod-frankfurt`: local secret profiles (gitignored).
+- `.env.prod-chicago`, `.env.prod-frankfurt`, `.env.prod-london`: local secret
+  profiles (gitignored).
 - `*.env.sample`, `*.env.example`, `.env*.sample`, `.env*.example`: versioned templates
   to copy into local secret/config files.
 - `set_env.sh`: selects active secret profile.
@@ -49,6 +50,7 @@ source ./set_env.sh prod-chicago
 Supported profiles are production only:
 - `prod-chicago`
 - `prod-frankfurt`
+- `prod-london`
 
 ## Endpoint behavior
 

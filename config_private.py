@@ -24,6 +24,8 @@ def _default_profile_file() -> str:
         return ".env.prod-chicago"
     if REGION == "eu-frankfurt-1":
         return ".env.prod-frankfurt"
+    if REGION == "uk-london-1":
+        return ".env.prod-london"
 
     raise NotImplementedError(f"No default secret profile for REGION={REGION!r}")
 
